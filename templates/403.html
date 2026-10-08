@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+
+{# Django shows this page automatically when a view says "permission denied" #}
+{% block title %}No access · IT Projects{% endblock %}
+
+{% block content %}
+<div class="empty">
+  <div class="empty-header">403</div>
+  <p class="empty-title">You don't have permission to do this</p>
+  <p class="empty-subtitle text-secondary">{{ exception|default:"Ask an admin if you think you need access." }}</p>
+  <div class="empty-action">
+    <a href="{% url 'home' %}" class="btn btn-primary"><i class="ti ti-arrow-left me-2"></i>Back to home</a>
+  </div>
+</div>
+{% endblock %}

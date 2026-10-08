@@ -46,16 +46,16 @@
           </div>
         </div>
 
-        {# Main menu #}
+        {# Main menu. Each page fills in one nav_ block with "active" to underline its menu item. #}
         <div class="collapse navbar-collapse" id="main-menu">
           <ul class="navbar-nav">
-            <li class="nav-item">
+            <li class="nav-item {% block nav_home %}{% endblock %}">
               <a class="nav-link" href="{% url 'home' %}"><i class="ti ti-home me-2"></i>Home</a>
             </li>
-            {# These two pages come in later steps #}
-            <li class="nav-item">
-              <span class="nav-link disabled"><i class="ti ti-briefcase me-2"></i>Projects</span>
+            <li class="nav-item {% block nav_projects %}{% endblock %}">
+              <a class="nav-link" href="{% url 'project_list' %}"><i class="ti ti-briefcase me-2"></i>Projects</a>
             </li>
+            {# This page comes in a later step #}
             <li class="nav-item">
               <span class="nav-link disabled"><i class="ti ti-checklist me-2"></i>My tasks</span>
             </li>
@@ -85,5 +85,24 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.6.1/dist/js/tabler.min.js"></script>
+  <script>
+    // Stop a double click from saving a form twice:
+    // once a form is sent, its buttons switch off until the next page opens.
+    document.addEventListener("submit", function (event) {
+      var form = event.target;
+      if (event.defaultPrevented || form.method !== "post") return;
+      form.querySelectorAll("button[type=submit]").forEach(function (button) {
+        button.disabled = true;
+      });
+    });
+    // The Back button can show a page from the browser's memory: switch the buttons back on.
+    window.addEventListener("pageshow", function (event) {
+      if (event.persisted) {
+        document.querySelectorAll("button[type=submit]").forEach(function (button) {
+          button.disabled = false;
+        });
+      }
+    });
+  </script>
 </body>
 </html>

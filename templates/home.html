@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block title %}Home · IT Projects{% endblock %}
+{% block nav_home %}active{% endblock %}
 
 {% block content %}
 <div class="mb-4">
@@ -10,12 +11,13 @@
 {# Three summary cards #}
 <div class="row row-cards mb-4">
   <div class="col-sm-4">
-    <div class="card card-sm">
+    {# The whole card is a link to the project list #}
+    <a href="{% url 'project_list' %}" class="card card-sm card-link">
       <div class="card-body">
         <div class="subheader">Active projects</div>
         <div class="h1 mb-0">{{ active_projects }}</div>
       </div>
-    </div>
+    </a>
   </div>
   <div class="col-sm-4">
     <div class="card card-sm">
@@ -55,8 +57,8 @@
         {% for task in next_tasks %}
         <tr>
           <td>{{ task.title }}</td>
-          <td class="text-secondary">{{ task.project }}</td>
-          <td>{{ task.get_status_display }}</td>
+          <td><a href="{{ task.project.get_absolute_url }}" class="text-secondary">{{ task.project }}</a></td>
+          <td><span class="badge bg-{{ task.status_color }}-lt">{{ task.get_status_display }}</span></td>
           <td {% if task.is_overdue %}class="text-danger"{% endif %}>{{ task.due_date|date:"d M Y"|default:"No date" }}</td>
         </tr>
         {% endfor %}

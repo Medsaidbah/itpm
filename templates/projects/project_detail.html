@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}{{ project.name }} · IT Projects{% endblock %}
+{% block nav_projects %}active{% endblock %}
+
+{% block content %}
+<div class="mb-3">
+  <a href="{% url 'project_list' %}" class="text-secondary"><i class="ti ti-arrow-left me-1"></i>All projects</a>
+</div>
+
+{# Title, badges and buttons #}
+<div class="d-flex flex-wrap align-items-start gap-2 mb-4">
+  <div class="me-auto">
+    <h2 class="page-title mb-2">{{ project.name }}</h2>
+    <span class="badge bg-{{ project.status_color }}-lt">{{ project.get_status_display }}</span>
+    <span class="badge bg-{{ project.priority_color }}-lt">{{ project.get_priority_display }} priority</span>
+    {% if project.is_overdue %}<span class="badge bg-red-lt">Late</span>{% endif %}
+  </div>
+  {# The change history lives in the admin panel, so only staff see this button #}
+  {% if user.is_staff %}
+  <a href="{% url 'admin:projects_project_history' project.pk %}" class="btn"><i class="ti ti-history me-2"></i>History</a>
+  {% endif %}
+  {% if can_edit %}
+  <a href="{% url 'project_edit' project.pk %}" class="btn btn-primary"><i class="ti ti-pencil me-2"></i>Edit</a>
+  {% endif %}
+</div>
+
+<div class="row row-cards mb-4">
+  {# Details #}
+  <div class="col-md-8">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="datagrid">
+          <div class="datagrid-item">
+            <div class="datagrid-title">Manager</div>
+            <div class="datagrid-content">{{ project.manager }}</div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Start date</div>
+            <div class="datagrid-content">{{ project.start_date|date:"d M Y"|default:"Not set" }}</div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">End date</div>
+            <div class="datagrid-content {% if project.is_overdue %}text-danger{% endif %}">{{ project.end_date|date:"d M Y"|default:"Not set" }}</div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Overdue tasks</div>
+            <div class="datagrid-content {% if project.task_overdue %}text-danger{% endif %}">{{ project.task_overdue }}</div>
+          </div>
+        </div>
+        {% if project.description %}
+        <div class="datagrid-title mt-4">Description</div>
+        {# linebreaksbr keeps the line breaks people typed #}
+        <div>{{ project.description|linebreaksbr }}</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {# Progress #}
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="subheader">Progress</div>
+        <div class="h1 mb-2">{{ project.progress }}%</div>
+        <div class="progress progress-sm mb-2">
+          <div class="progress-bar" style="width: {{ project.progress }}%" role="progressbar"
+               aria-valuenow="{{ project.progress }}" aria-valuemin="0" aria-valuemax="100"
+               aria-label="{{ project.progress }}% done"></div>
+        </div>
+        <div class="text-secondary">{{ project.task_done }} of {{ project.task_total }} tasks done</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# Tasks, with subtasks under their main task #}
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Tasks</h3>
+  </div>
+  {% if tasks %}
+  <div class="table-responsive">
+    <table class="table card-table table-vcenter">
+      <thead>
+        <tr>
+          <th>Task</th>
+          <th>Status</th>
+          <th class="d-none d-sm-table-cell">Assigned to</th>
+          <th>Due date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for task in tasks %}
+          {% include "includes/task_row.html" %}
+          {% for subtask in task.subtasks.all %}
+            {% include "includes/task_row.html" with task=subtask is_subtask=True %}
+          {% endfor %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="card-body text-secondary">This project has no tasks yet.</div>
+  {% endif %}
+</div>
+{% endblock %}

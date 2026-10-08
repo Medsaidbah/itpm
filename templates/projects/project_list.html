@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Projects · IT Projects{% endblock %}
+{% block nav_projects %}active{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap align-items-center gap-2 mb-4">
+  <h2 class="page-title me-auto">Projects</h2>
+  {# Only admins and managers see this button #}
+  {% if user.can_manage %}
+  <a href="{% url 'project_create' %}" class="btn btn-primary"><i class="ti ti-plus me-2"></i>New project</a>
+  {% endif %}
+</div>
+
+{# Search and filter: a normal form that reloads this page with ?q=...&status=... in the address #}
+<form method="get" class="row g-2 mb-3">
+  <div class="col-sm-6 col-md-5">
+    <input type="search" name="q" value="{{ query }}" class="form-control"
+           placeholder="Search by name…" aria-label="Search by name">
+  </div>
+  <div class="col-sm-4 col-md-3">
+    {# Picking a status sends the form straight away #}
+    <select name="status" class="form-select" aria-label="Show" onchange="this.form.submit()">
+      <option value="active" {% if status == "active" %}selected{% endif %}>Active projects</option>
+      <option value="all" {% if status == "all" %}selected{% endif %}>All projects</option>
+      {% for value, label in status_choices %}
+      <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn"><i class="ti ti-search me-2"></i>Search</button>
+  </div>
+</form>
+
+<div class="card">
+  {% if projects %}
+  <div class="table-responsive">
+    <table class="table card-table table-vcenter">
+      {# d-none d-md-table-cell: this column is hidden on phones and shown on wider screens #}
+      <thead>
+        <tr>
+          <th>Project</th>
+          <th>Status</th>
+          <th class="d-none d-md-table-cell">Priority</th>
+          <th class="d-none d-md-table-cell">Manager</th>
+          <th class="d-none d-sm-table-cell">End date</th>
+          <th class="w-25">Progress</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for project in projects %}
+        <tr>
+          <td><a href="{{ project.get_absolute_url }}">{{ project.name }}</a></td>
+          <td><span class="badge bg-{{ project.status_color }}-lt">{{ project.get_status_display }}</span></td>
+          <td class="d-none d-md-table-cell"><span class="badge bg-{{ project.priority_color }}-lt">{{ project.get_priority_display }}</span></td>
+          <td class="d-none d-md-table-cell">{{ project.manager }}</td>
+          <td class="d-none d-sm-table-cell {% if project.is_overdue %}text-danger{% endif %}">{{ project.end_date|date:"d M Y"|default:"Not set" }}</td>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <div class="progress progress-sm flex-fill">
+                <div class="progress-bar" style="width: {{ project.progress }}%" role="progressbar"
+                     aria-valuenow="{{ project.progress }}" aria-valuemin="0" aria-valuemax="100"
+                     aria-label="{{ project.progress }}% done"></div>
+              </div>
+              <span class="text-secondary small">{{ project.progress }}%</span>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="card-body text-secondary">No projects found.</div>
+  {% endif %}
+</div>
+{% endblock %}

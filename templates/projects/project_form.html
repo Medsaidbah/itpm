@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{# The same page is used to create a project and to edit one #}
+{% block title %}{% if project %}Edit project{% else %}New project{% endif %} · IT Projects{% endblock %}
+{% block nav_projects %}active{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <h2 class="page-title mb-4">{% if project %}Edit project{% else %}New project{% endif %}</h2>
+
+    <form method="post" class="card">
+      {% csrf_token %}
+      <div class="card-body">
+        {# Errors that don't belong to one field #}
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger" role="alert">
+          {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+        </div>
+        {% endif %}
+
+        {% include "includes/form_field.html" with field=form.name %}
+        {% include "includes/form_field.html" with field=form.description %}
+        <div class="row">
+          <div class="col-md-4">{% include "includes/form_field.html" with field=form.status %}</div>
+          <div class="col-md-4">{% include "includes/form_field.html" with field=form.priority %}</div>
+          <div class="col-md-4">{% include "includes/form_field.html" with field=form.manager %}</div>
+        </div>
+        <div class="row">
+          <div class="col-md-6">{% include "includes/form_field.html" with field=form.start_date %}</div>
+          <div class="col-md-6">{% include "includes/form_field.html" with field=form.end_date %}</div>
+        </div>
+      </div>
+      <div class="card-footer d-flex justify-content-end gap-2">
+        <a href="{% if project %}{{ project.get_absolute_url }}{% else %}{% url 'project_list' %}{% endif %}" class="btn">Cancel</a>
+        <button type="submit" class="btn btn-primary">{% if project %}Save changes{% else %}Create project{% endif %}</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

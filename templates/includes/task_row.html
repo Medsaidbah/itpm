@@ -1,0 +1,13 @@
+{# One row of a task table. Subtasks are indented under their main task. #}
+<tr>
+  <td>
+    <div class="d-flex align-items-start">
+      {% if is_subtask %}<span class="text-secondary ms-3 me-2">↳</span>{% endif %}
+      {% if task.is_milestone %}<i class="ti ti-flag text-orange me-1 mt-1" title="Milestone"></i>{% endif %}
+      <span>{{ task.title }}</span>
+    </div>
+  </td>
+  <td><span class="badge bg-{{ task.status_color }}-lt">{{ task.get_status_display }}</span></td>
+  <td class="d-none d-sm-table-cell">{{ task.assignee|default:"Unassigned" }}</td>
+  <td {% if task.is_overdue %}class="text-danger"{% endif %}>{{ task.due_date|date:"d M Y"|default:"No date" }}</td>
+</tr>
