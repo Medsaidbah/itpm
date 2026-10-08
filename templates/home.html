@@ -56,7 +56,7 @@
       <tbody>
         {% for task in next_tasks %}
         <tr>
-          <td>{{ task.title }}</td>
+          <td><a href="{{ task.get_absolute_url }}">{{ task.title }}</a></td>
           <td><a href="{{ task.project.get_absolute_url }}" class="text-secondary">{{ task.project }}</a></td>
           <td><span class="badge bg-{{ task.status_color }}-lt">{{ task.get_status_display }}</span></td>
           <td {% if task.is_overdue %}class="text-danger"{% endif %}>{{ task.due_date|date:"d M Y"|default:"No date" }}</td>

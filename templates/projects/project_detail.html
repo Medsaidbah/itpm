@@ -78,6 +78,11 @@
 <div class="card">
   <div class="card-header">
     <h3 class="card-title">Tasks</h3>
+    {% if can_edit %}
+    <div class="card-actions">
+      <a href="{% url 'task_create' project.pk %}" class="btn btn-primary btn-sm"><i class="ti ti-plus me-1"></i>Add task</a>
+    </div>
+    {% endif %}
   </div>
   {% if tasks %}
   <div class="table-responsive">

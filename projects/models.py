@@ -166,6 +166,18 @@ class Task(models.Model):
     def __str__(self):
         return self.title
 
+    def get_absolute_url(self):
+        """The address of this task's page."""
+        return reverse("task_detail", args=[self.pk])
+
+    def can_edit(self, user):
+        """Who may create, edit and delete tasks: the people who can edit the project."""
+        return self.project.can_edit(user)
+
+    def can_update_status(self, user):
+        """Who may change the status: the same people, plus the person the task is assigned to."""
+        return self.can_edit(user) or (self.assignee_id is not None and self.assignee_id == user.pk)
+
     def clean(self):
         if self.start_date and self.due_date and self.due_date < self.start_date:
             raise ValidationError({"due_date": "The due date can't be before the start date."})
@@ -177,6 +189,10 @@ class Task(models.Model):
             if self.parent.project_id != self.project_id:
                 raise ValidationError(
                     {"parent": "A subtask must be in the same project as its main task."}
+                )
+            if self.pk and self.subtasks.exists():
+                raise ValidationError(
+                    {"parent": "This task has its own subtasks, so it can't become a subtask."}
                 )
 
     def save(self, *args, **kwargs):
@@ -195,6 +211,25 @@ class Task(models.Model):
             and self.status != self.Status.DONE
             and self.due_date < timezone.localdate()
         )
+
+    @property
+    def waiting_for(self):
+        """The tasks this one waits for that aren't done yet."""
+        return [task for task in self.depends_on.all() if task.status != self.Status.DONE]
+
+    def waits_for(self, other):
+        """True if this task waits for `other`, directly or through a chain of other tasks."""
+        seen = set()
+        to_check = [self]
+        while to_check:
+            task = to_check.pop()
+            for dependency in task.depends_on.all():
+                if dependency.pk == other.pk:
+                    return True
+                if dependency.pk not in seen:
+                    seen.add(dependency.pk)
+                    to_check.append(dependency)
+        return False
 
     @property
     def status_color(self):

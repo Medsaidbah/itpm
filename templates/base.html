@@ -91,9 +91,13 @@
     document.addEventListener("submit", function (event) {
       var form = event.target;
       if (event.defaultPrevented || form.method !== "post") return;
-      form.querySelectorAll("button[type=submit]").forEach(function (button) {
-        button.disabled = true;
-      });
+      // Wait a moment first: a button that is switched off immediately
+      // doesn't send its value (like status=done) with the form.
+      setTimeout(function () {
+        form.querySelectorAll("button[type=submit]").forEach(function (button) {
+          button.disabled = true;
+        });
+      }, 0);
     });
     // The Back button can show a page from the browser's memory: switch the buttons back on.
     window.addEventListener("pageshow", function (event) {

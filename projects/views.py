@@ -4,8 +4,9 @@ from django.core.exceptions import PermissionDenied
 from django.db.models import F, Prefetch
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
+from django.views.decorators.http import require_POST
 
-from .forms import ProjectForm
+from .forms import ProjectForm, TaskForm
 from .models import Project, Task
 
 
@@ -67,11 +68,17 @@ def project_detail(request, pk):
     project = get_object_or_404(
         Project.objects.with_task_counts().select_related("manager"), pk=pk
     )
-    # Main tasks only; each one brings its subtasks along (2 queries in total)
+    # Main tasks only; each one brings along its subtasks and the tasks it waits for
     tasks = (
         project.tasks.filter(parent__isnull=True)
         .select_related("assignee")
-        .prefetch_related(Prefetch("subtasks", queryset=Task.objects.select_related("assignee")))
+        .prefetch_related(
+            "depends_on",
+            Prefetch(
+                "subtasks",
+                queryset=Task.objects.select_related("assignee").prefetch_related("depends_on"),
+            ),
+        )
     )
     context = {
         "project": project,
@@ -115,3 +122,97 @@ def project_edit(request, pk):
         form = ProjectForm(instance=project)
 
     return render(request, "projects/project_form.html", {"form": form, "project": project})
+
+
+# ---------- Tasks ----------
+
+
+@login_required
+def task_detail(request, pk):
+    """One task: its details, status buttons, subtasks and dependencies."""
+    task = get_object_or_404(Task.objects.select_related("project", "parent", "assignee"), pk=pk)
+    context = {
+        "task": task,
+        "subtasks": task.subtasks.select_related("assignee").prefetch_related("depends_on"),
+        "depends_on": task.depends_on.select_related("assignee"),
+        "needed_by": task.blocking.select_related("assignee"),
+        "status_choices": Task.Status.choices,
+        "can_edit": task.can_edit(request.user),
+        "can_update_status": task.can_update_status(request.user),
+    }
+    return render(request, "projects/task_detail.html", context)
+
+
+@login_required
+def task_create(request, project_pk):
+    project = get_object_or_404(Project, pk=project_pk)
+    if not project.can_edit(request.user):
+        raise PermissionDenied("Only admins and managers can add tasks.")
+
+    if request.method == "POST":
+        form = TaskForm(request.POST, project=project)
+        if form.is_valid():
+            task = form.save()
+            messages.success(request, f'Task "{task.title}" created.')
+            return redirect(task)
+    else:
+        # "Add subtask" links end with ?parent=<number of the main task>
+        form = TaskForm(project=project, initial={"parent": request.GET.get("parent")})
+
+    return render(request, "projects/task_form.html", {"form": form, "project": project})
+
+
+@login_required
+def task_edit(request, pk):
+    task = get_object_or_404(Task.objects.select_related("project"), pk=pk)
+    if not task.can_edit(request.user):
+        raise PermissionDenied("Only admins and managers can edit tasks.")
+
+    if request.method == "POST":
+        form = TaskForm(request.POST, instance=task, project=task.project)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Changes saved.")
+            return redirect(task)
+    else:
+        form = TaskForm(instance=task, project=task.project)
+
+    context = {"form": form, "project": task.project, "task": task}
+    return render(request, "projects/task_form.html", context)
+
+
+@login_required
+@require_POST
+def task_status(request, pk):
+    """The status buttons on a task's page send their choice here."""
+    task = get_object_or_404(Task.objects.select_related("project"), pk=pk)
+    if not task.can_update_status(request.user):
+        raise PermissionDenied(
+            "Only the person assigned to this task, managers and admins can change its status."
+        )
+
+    new_status = request.POST.get("status")
+    if new_status not in Task.Status.values:
+        messages.error(request, "Unknown status.")
+    elif new_status != task.status:
+        task.status = new_status
+        task.save()
+        messages.success(request, f"Status changed to {task.get_status_display()}.")
+    return redirect(task)
+
+
+@login_required
+def task_delete(request, pk):
+    """Shows a confirmation page first; the task is only deleted when that page is sent."""
+    task = get_object_or_404(Task.objects.select_related("project"), pk=pk)
+    if not task.can_edit(request.user):
+        raise PermissionDenied("Only admins and managers can delete tasks.")
+
+    if request.method == "POST":
+        project = task.project
+        title = task.title
+        task.delete()  # its subtasks, comments and files are deleted with it
+        messages.success(request, f'Task "{title}" deleted.')
+        return redirect(project)
+
+    return render(request, "projects/task_confirm_delete.html", {"task": task})

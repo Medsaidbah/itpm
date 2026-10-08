@@ -4,7 +4,9 @@
     <div class="d-flex align-items-start">
       {% if is_subtask %}<span class="text-secondary ms-3 me-2">↳</span>{% endif %}
       {% if task.is_milestone %}<i class="ti ti-flag text-orange me-1 mt-1" title="Milestone"></i>{% endif %}
-      <span>{{ task.title }}</span>
+      <a href="{{ task.get_absolute_url }}">{{ task.title }}</a>
+      {# A lock means: this task waits for other tasks that aren't done yet #}
+      {% if task.waiting_for %}<i class="ti ti-lock text-secondary ms-2 mt-1" title="Waiting for other tasks"></i>{% endif %}
     </div>
   </td>
   <td><span class="badge bg-{{ task.status_color }}-lt">{{ task.get_status_display }}</span></td>

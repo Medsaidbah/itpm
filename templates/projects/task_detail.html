@@ -1,0 +1,186 @@
+{% extends "base.html" %}
+
+{% block title %}{{ task.title }} · IT Projects{% endblock %}
+{% block nav_projects %}active{% endblock %}
+
+{% block content %}
+{# Where this task sits: its project, and its main task for a subtask #}
+<div class="mb-3 text-secondary">
+  <a href="{{ task.project.get_absolute_url }}" class="text-secondary"><i class="ti ti-arrow-left me-1"></i>{{ task.project }}</a>
+  {% if task.parent %}
+  <span class="mx-1">/</span><a href="{{ task.parent.get_absolute_url }}" class="text-secondary">{{ task.parent }}</a>
+  {% endif %}
+</div>
+
+{# Title, badges and buttons #}
+<div class="d-flex flex-wrap align-items-start gap-2 mb-4">
+  <div class="me-auto">
+    <div class="page-pretitle">{% if task.is_milestone %}Milestone{% elif task.parent %}Subtask{% else %}Task{% endif %}</div>
+    <h2 class="page-title mb-2">
+      {% if task.is_milestone %}<i class="ti ti-flag text-orange me-2"></i>{% endif %}{{ task.title }}
+    </h2>
+    <span class="badge bg-{{ task.status_color }}-lt">{{ task.get_status_display }}</span>
+    <span class="badge bg-{{ task.priority_color }}-lt">{{ task.get_priority_display }} priority</span>
+    {% if task.is_overdue %}<span class="badge bg-red-lt">Late</span>{% endif %}
+  </div>
+  {% if user.is_staff %}
+  <a href="{% url 'admin:projects_task_history' task.pk %}" class="btn"><i class="ti ti-history me-2"></i>History</a>
+  {% endif %}
+  {% if can_edit %}
+  <a href="{% url 'task_delete' task.pk %}" class="btn btn-outline-danger"><i class="ti ti-trash me-2"></i>Delete</a>
+  <a href="{% url 'task_edit' task.pk %}" class="btn btn-primary"><i class="ti ti-pencil me-2"></i>Edit</a>
+  {% endif %}
+</div>
+
+{# A warning when tasks this one waits for aren't done yet #}
+{% with waiting=task.waiting_for %}
+{% if waiting %}
+<div class="alert alert-warning" role="alert">
+  <i class="ti ti-lock me-2"></i>This task waits for
+  {% for other in waiting %}<a href="{{ other.get_absolute_url }}">{{ other }}</a>{% if not forloop.last %}, {% endif %}{% endfor %},
+  which {{ waiting|length|pluralize:"isn't,aren't" }} done yet.
+</div>
+{% endif %}
+{% endwith %}
+
+<div class="row row-cards mb-4">
+  {# Details #}
+  <div class="col-md-8">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="datagrid">
+          <div class="datagrid-item">
+            <div class="datagrid-title">Assigned to</div>
+            <div class="datagrid-content">{{ task.assignee|default:"Unassigned" }}</div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Start date</div>
+            <div class="datagrid-content">{{ task.start_date|date:"d M Y"|default:"Not set" }}</div>
+          </div>
+          <div class="datagrid-item">
+            <div class="datagrid-title">Due date</div>
+            <div class="datagrid-content {% if task.is_overdue %}text-danger{% endif %}">{{ task.due_date|date:"d M Y"|default:"Not set" }}</div>
+          </div>
+          {% if task.completed_at %}
+          <div class="datagrid-item">
+            <div class="datagrid-title">Done on</div>
+            <div class="datagrid-content">{{ task.completed_at|date:"d M Y" }}</div>
+          </div>
+          {% endif %}
+        </div>
+        {% if task.description %}
+        <div class="datagrid-title mt-4">Description</div>
+        <div>{{ task.description|linebreaksbr }}</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {# Status buttons: one click changes the status #}
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="subheader mb-3">Status</div>
+        {% if can_update_status %}
+        <form method="post" action="{% url 'task_status' task.pk %}" class="btn-list">
+          {% csrf_token %}
+          {% for value, label in status_choices %}
+          {% if value == task.status %}
+          <button type="submit" class="btn btn-primary" disabled>{{ label }}</button>
+          {% else %}
+          <button type="submit" name="status" value="{{ value }}" class="btn">{{ label }}</button>
+          {% endif %}
+          {% endfor %}
+        </form>
+        {% else %}
+        <span class="badge bg-{{ task.status_color }}-lt">{{ task.get_status_display }}</span>
+        <div class="text-secondary small mt-2">Only the person assigned to this task, managers and admins can change its status.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{# Subtasks (main tasks only: a subtask can't have its own subtasks) #}
+{% if not task.parent %}
+<div class="card mb-4">
+  <div class="card-header">
+    <h3 class="card-title">Subtasks</h3>
+    {% if can_edit %}
+    <div class="card-actions">
+      <a href="{% url 'task_create' task.project_id %}?parent={{ task.pk }}" class="btn btn-sm"><i class="ti ti-plus me-1"></i>Add subtask</a>
+    </div>
+    {% endif %}
+  </div>
+  {% if subtasks %}
+  <div class="table-responsive">
+    <table class="table card-table table-vcenter">
+      <thead>
+        <tr>
+          <th>Subtask</th>
+          <th>Status</th>
+          <th class="d-none d-sm-table-cell">Assigned to</th>
+          <th>Due date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for subtask in subtasks %}
+          {% include "includes/task_row.html" with task=subtask %}
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="card-body text-secondary">No subtasks.</div>
+  {% endif %}
+</div>
+{% endif %}
+
+{# Dependencies, in both directions #}
+<div class="row row-cards">
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header">
+        <div>
+          <h3 class="card-title">Waits for</h3>
+          <div class="card-subtitle">Tasks that must be done before this one</div>
+        </div>
+      </div>
+      {% if depends_on %}
+      <div class="list-group list-group-flush">
+        {% for other in depends_on %}
+        <a href="{{ other.get_absolute_url }}" class="list-group-item list-group-item-action d-flex align-items-center gap-2">
+          <span class="me-auto">{{ other }}</span>
+          <span class="badge bg-{{ other.status_color }}-lt">{{ other.get_status_display }}</span>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="card-body text-secondary">Nothing. This task can start any time.</div>
+      {% endif %}
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card h-100">
+      <div class="card-header">
+        <div>
+          <h3 class="card-title">Needed by</h3>
+          <div class="card-subtitle">Tasks that wait for this one</div>
+        </div>
+      </div>
+      {% if needed_by %}
+      <div class="list-group list-group-flush">
+        {% for other in needed_by %}
+        <a href="{{ other.get_absolute_url }}" class="list-group-item list-group-item-action d-flex align-items-center gap-2">
+          <span class="me-auto">{{ other }}</span>
+          <span class="badge bg-{{ other.status_color }}-lt">{{ other.get_status_display }}</span>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="card-body text-secondary">No other task waits for this one.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

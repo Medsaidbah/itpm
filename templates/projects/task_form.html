@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{# The same page is used to create a task and to edit one #}
+{% block title %}{% if task %}Edit task{% else %}New task{% endif %} · IT Projects{% endblock %}
+{% block nav_projects %}active{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="page-pretitle">{{ project }}</div>
+    <h2 class="page-title mb-4">{% if task %}Edit task{% else %}New task{% endif %}</h2>
+
+    <form method="post" class="card">
+      {% csrf_token %}
+      <div class="card-body">
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger" role="alert">
+          {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+        </div>
+        {% endif %}
+
+        {% include "includes/form_field.html" with field=form.title %}
+        {% include "includes/form_field.html" with field=form.description %}
+        <div class="row">
+          <div class="col-md-4">{% include "includes/form_field.html" with field=form.status %}</div>
+          <div class="col-md-4">{% include "includes/form_field.html" with field=form.priority %}</div>
+          <div class="col-md-4">{% include "includes/form_field.html" with field=form.assignee %}</div>
+        </div>
+        <div class="row">
+          <div class="col-md-6">{% include "includes/form_field.html" with field=form.start_date %}</div>
+          <div class="col-md-6">{% include "includes/form_field.html" with field=form.due_date %}</div>
+        </div>
+        {% include "includes/form_field.html" with field=form.parent %}
+        {% include "includes/form_field.html" with field=form.is_milestone %}
+        {% include "includes/form_field.html" with field=form.depends_on %}
+      </div>
+      <div class="card-footer d-flex justify-content-end gap-2">
+        <a href="{% if task %}{{ task.get_absolute_url }}{% else %}{{ project.get_absolute_url }}{% endif %}" class="btn">Cancel</a>
+        <button type="submit" class="btn btn-primary">{% if task %}Save changes{% else %}Create task{% endif %}</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+
+{% block title %}Delete task · IT Projects{% endblock %}
+{% block nav_projects %}active{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-6">
+    <form method="post" class="card">
+      {% csrf_token %}
+      <div class="card-body">
+        <h2 class="h3 mb-3"><i class="ti ti-alert-triangle text-danger me-2"></i>Delete this task?</h2>
+        <p>You're about to delete <strong>{{ task.title }}</strong> from the project <strong>{{ task.project }}</strong>.</p>
+        {% with count=task.subtasks.count %}
+        {% if count %}
+        <p class="text-danger">Its {{ count }} subtask{{ count|pluralize }} will be deleted too.</p>
+        {% endif %}
+        {% endwith %}
+        <p class="text-secondary mb-0">Its comments and files go with it, and this can't be undone. To stop a task without losing it, you can mark it Done instead.</p>
+      </div>
+      <div class="card-footer d-flex justify-content-end gap-2">
+        <a href="{{ task.get_absolute_url }}" class="btn">Cancel</a>
+        <button type="submit" class="btn btn-danger">Delete task</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
