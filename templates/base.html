@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}IT Projects{% endblock %}</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.6.1/dist/css/tabler.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.49.0/dist/tabler-icons.min.css">
+</head>
+<body>
+  <div class="page">
+
+    {% if user.is_authenticated %}
+    {# Top bar: only shown to people who are logged in #}
+    <header class="navbar navbar-expand-md d-print-none">
+      <div class="container-xl">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-menu"
+                aria-controls="main-menu" aria-expanded="false" aria-label="Open menu">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <a href="{% url 'home' %}" class="navbar-brand pe-0 pe-md-3">IT Projects</a>
+
+        {# User menu on the right #}
+        <div class="navbar-nav flex-row order-md-last">
+          <div class="nav-item dropdown">
+            <a href="#" class="nav-link d-flex lh-1 p-0 px-2" data-bs-toggle="dropdown" aria-label="Open user menu">
+              <span class="avatar avatar-sm">{{ user.username|first|upper }}</span>
+              <div class="d-none d-xl-block ps-2">
+                <div>{{ user }}</div>
+                <div class="mt-1 small text-secondary">{{ user.get_role_display }}</div>
+              </div>
+            </a>
+            <div class="dropdown-menu dropdown-menu-end">
+              {% if user.is_staff %}
+              <a href="{% url 'admin:index' %}" class="dropdown-item"><i class="ti ti-settings me-2"></i>Admin panel</a>
+              <div class="dropdown-divider"></div>
+              {% endif %}
+              {# Since Django 5, logging out must be a small form (POST), not a plain link #}
+              <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button type="submit" class="dropdown-item"><i class="ti ti-logout me-2"></i>Log out</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        {# Main menu #}
+        <div class="collapse navbar-collapse" id="main-menu">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="{% url 'home' %}"><i class="ti ti-home me-2"></i>Home</a>
+            </li>
+            {# These two pages come in later steps #}
+            <li class="nav-item">
+              <span class="nav-link disabled"><i class="ti ti-briefcase me-2"></i>Projects</span>
+            </li>
+            <li class="nav-item">
+              <span class="nav-link disabled"><i class="ti ti-checklist me-2"></i>My tasks</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </header>
+    {% endif %}
+
+    <div class="page-wrapper">
+      <div class="page-body">
+        <div class="container-xl">
+
+          {# Short messages such as "Project saved" #}
+          {% for message in messages %}
+          <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+          </div>
+          {% endfor %}
+
+          {% block content %}{% endblock %}
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.6.1/dist/js/tabler.min.js"></script>
+</body>
+</html>

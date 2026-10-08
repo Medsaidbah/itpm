@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Home · IT Projects{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <h2 class="page-title">Hello, {{ user.first_name|default:user.username }}</h2>
+</div>
+
+{# Three summary cards #}
+<div class="row row-cards mb-4">
+  <div class="col-sm-4">
+    <div class="card card-sm">
+      <div class="card-body">
+        <div class="subheader">Active projects</div>
+        <div class="h1 mb-0">{{ active_projects }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-4">
+    <div class="card card-sm">
+      <div class="card-body">
+        <div class="subheader">My open tasks</div>
+        <div class="h1 mb-0">{{ open_tasks }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="col-sm-4">
+    <div class="card card-sm">
+      <div class="card-body">
+        <div class="subheader">My overdue tasks</div>
+        <div class="h1 mb-0 {% if overdue_tasks %}text-danger{% endif %}">{{ overdue_tasks }}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{# The next tasks assigned to the person who is logged in #}
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">My next tasks</h3>
+  </div>
+  {% if next_tasks %}
+  <div class="table-responsive">
+    <table class="table card-table table-vcenter">
+      <thead>
+        <tr>
+          <th>Task</th>
+          <th>Project</th>
+          <th>Status</th>
+          <th>Due date</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for task in next_tasks %}
+        <tr>
+          <td>{{ task.title }}</td>
+          <td class="text-secondary">{{ task.project }}</td>
+          <td>{{ task.get_status_display }}</td>
+          <td {% if task.is_overdue %}class="text-danger"{% endif %}>{{ task.due_date|date:"d M Y"|default:"No date" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="card-body text-secondary">You have no open tasks. Nice work!</div>
+  {% endif %}
+</div>
+{% endblock %}

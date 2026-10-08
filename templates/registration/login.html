@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Log in · IT Projects{% endblock %}
+
+{% block content %}
+<div class="container-tight py-4">
+  <div class="text-center mb-4">
+    <h1 class="h2 mb-1">IT Projects</h1>
+    <div class="text-secondary">IT department project management</div>
+  </div>
+
+  <div class="card card-md">
+    <div class="card-body">
+      <h2 class="h3 text-center mb-4">Log in to your account</h2>
+
+      {# Shown when the username or password is wrong #}
+      {% if form.non_field_errors %}
+      <div class="alert alert-danger" role="alert">
+        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+      </div>
+      {% endif %}
+
+      <form method="post" action="{% url 'login' %}">
+        {% csrf_token %}
+        {# Remembers which page to open after logging in #}
+        <input type="hidden" name="next" value="{{ next }}">
+
+        <div class="mb-3">
+          <label class="form-label" for="id_username">Username</label>
+          <input type="text" name="username" id="id_username" class="form-control"
+                 value="{{ form.username.value|default:'' }}" autocomplete="username" required autofocus>
+        </div>
+
+        <div class="mb-3">
+          <label class="form-label" for="id_password">Password</label>
+          <input type="password" name="password" id="id_password" class="form-control"
+                 autocomplete="current-password" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Log in</button>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}
