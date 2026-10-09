@@ -1,3 +1,4 @@
+{% load static %}
 <!doctype html>
 <html lang="en">
 <head>
@@ -5,8 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}IT Projects{% endblock %}</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.6.1/dist/css/tabler.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.49.0/dist/tabler-icons.min.css">
+  {# The design (Tabler) and its icons. The files are in static/vendor/, see the README.txt there. #}
+  <link rel="stylesheet" href="{% static 'vendor/tabler/tabler.min.css' %}">
+  <link rel="stylesheet" href="{% static 'vendor/tabler-icons/tabler-icons.min.css' %}">
   {# A page can add its own styles here #}
   {% block extra_head %}{% endblock %}
 </head>
@@ -93,7 +95,7 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.6.1/dist/js/tabler.min.js"></script>
+  <script src="{% static 'vendor/tabler/tabler.min.js' %}"></script>
   <script>
     // Stop a double click from saving a form twice:
     // once a form is sent, its buttons switch off until the next page opens.

@@ -3,3 +3,5 @@
 __pycache__/
 *.pyc
 media/
+# made by "collectstatic" on the server
+staticfiles/

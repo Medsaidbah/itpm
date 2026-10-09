@@ -1,10 +1,11 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Timeline · {{ project.name }} · IT Projects{% endblock %}
 {% block nav_projects %}active{% endblock %}
 
 {% block extra_head %}
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/frappe-gantt@1.2.2/dist/frappe-gantt.css">
+<link rel="stylesheet" href="{% static 'vendor/frappe-gantt/frappe-gantt.css' %}">
 <style>
   /* Bar colors by status: the same colors as the status badges */
   .gantt .bar-wrapper.status-todo .bar { fill: #e3e7ed; }
@@ -70,7 +71,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/frappe-gantt@1.2.2/dist/frappe-gantt.umd.js"></script>
+<script src="{% static 'vendor/frappe-gantt/frappe-gantt.umd.js' %}"></script>
 <script>
   (function () {
     var element = document.getElementById("gantt");

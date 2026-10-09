@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{# Shown by django-axes after too many wrong passwords (see settings.py) #}
+{% block title %}Login locked · IT Projects{% endblock %}
+
+{% block content %}
+<div class="empty">
+  <div class="empty-header"><i class="ti ti-lock"></i></div>
+  <p class="empty-title">Too many wrong passwords</p>
+  <p class="empty-subtitle text-secondary">
+    To protect the account{% if username %} "{{ username }}"{% endif %}, logging in is blocked for one hour
+    after {{ failure_limit }} wrong passwords in a row.<br>
+    Try again later, or ask an admin to unlock it now.
+  </p>
+  <div class="empty-action">
+    <a href="{% url 'login' %}" class="btn"><i class="ti ti-arrow-left me-2"></i>Back to the login page</a>
+  </div>
+</div>
+{% endblock %}

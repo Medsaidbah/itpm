@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Board · {{ project.name }} · IT Projects{% endblock %}
 {% block nav_projects %}active{% endblock %}
@@ -62,7 +63,7 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.7/Sortable.min.js"></script>
+<script src="{% static 'vendor/sortablejs/Sortable.min.js' %}"></script>
 <script>
   // Drag-and-drop on the board. When a card is dropped, the script tells the server
   // the card's new column (its status) and the new order of the cards in that column.
