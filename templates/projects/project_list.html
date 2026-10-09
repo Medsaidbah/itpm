@@ -6,6 +6,8 @@
 {% block content %}
 <div class="d-flex flex-wrap align-items-center gap-2 mb-4">
   <h2 class="page-title me-auto">Projects</h2>
+  {# The export keeps the current search and filter: request.GET.urlencode repeats them in the address #}
+  <a href="{% url 'projects_excel' %}?{{ request.GET.urlencode }}" class="btn"><i class="ti ti-file-spreadsheet me-2"></i>Export to Excel</a>
   {# Only admins and managers see this button #}
   {% if user.can_manage %}
   <a href="{% url 'project_create' %}" class="btn btn-primary"><i class="ti ti-plus me-2"></i>New project</a>

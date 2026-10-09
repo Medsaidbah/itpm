@@ -40,9 +40,9 @@ def home(request):
     return render(request, "home.html", context)
 
 
-@login_required
-def project_list(request):
-    """All projects, with a search box and a status filter."""
+def filter_projects(request):
+    """The search box and status filter of the project list.
+    The list page and its Excel export both use this, so they always show the same projects."""
     projects = Project.objects.with_task_counts().select_related("manager")
 
     # ?status=... in the address: "active" (the default), "all", or one status
@@ -59,7 +59,13 @@ def project_list(request):
     query = request.GET.get("q", "").strip()
     if query:
         projects = projects.filter(name__icontains=query)
+    return projects, status, query
 
+
+@login_required
+def project_list(request):
+    """All projects, with a search box and a status filter."""
+    projects, status, query = filter_projects(request)
     context = {
         "projects": projects,
         "status": status,

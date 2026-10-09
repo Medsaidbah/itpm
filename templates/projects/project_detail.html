@@ -18,6 +18,16 @@
   </div>
   <a href="{% url 'project_board' project.pk %}" class="btn"><i class="ti ti-layout-kanban me-2"></i>Board</a>
   <a href="{% url 'project_gantt' project.pk %}" class="btn"><i class="ti ti-timeline me-2"></i>Timeline</a>
+  {# A button that opens a small menu (Bootstrap's "dropdown") #}
+  <div class="dropdown">
+    <button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+      <i class="ti ti-file-analytics me-2"></i>Reports
+    </button>
+    <div class="dropdown-menu dropdown-menu-end">
+      <a class="dropdown-item" href="{% url 'project_report' project.pk %}"><i class="ti ti-printer me-2"></i>Status report to print</a>
+      <a class="dropdown-item" href="{% url 'project_tasks_excel' project.pk %}"><i class="ti ti-file-spreadsheet me-2"></i>Tasks to Excel</a>
+    </div>
+  </div>
   {# The change history lives in the admin panel, so only staff see this button #}
   {% if user.is_staff %}
   <a href="{% url 'admin:projects_project_history' project.pk %}" class="btn"><i class="ti ti-history me-2"></i>History</a>

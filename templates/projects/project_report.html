@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+
+{% block title %}Status report · {{ project.name }}{% endblock %}
+{% block nav_projects %}active{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* How the page looks on paper (or in a PDF) */
+  @page { size: A4; margin: 14mm; }
+  @media print {
+    body { background: #fff !important; }
+    .page-body { margin: 0 !important; }
+    .card { box-shadow: none !important; }
+    .report-block { break-inside: avoid; }        /* keep small boxes on one page */
+    tr { break-inside: avoid; }                    /* never cut a table row in two */
+    a { color: inherit !important; text-decoration: none !important; }
+    /* Print the colored badges and progress bar too (browsers skip backgrounds by default) */
+    .badge, .progress, .progress-bar { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+{# These buttons are only on screen, not on paper (d-print-none) #}
+<div class="d-flex flex-wrap align-items-center gap-2 mb-4 d-print-none">
+  <a href="{{ project.get_absolute_url }}" class="text-secondary me-auto"><i class="ti ti-arrow-left me-1"></i>{{ project }}</a>
+  <a href="{% url 'project_tasks_excel' project.pk %}" class="btn"><i class="ti ti-file-spreadsheet me-2"></i>Tasks to Excel</a>
+  <button type="button" class="btn btn-primary" onclick="window.print()"><i class="ti ti-printer me-2"></i>Print or save as PDF</button>
+</div>
+
+<div class="mb-4">
+  <div class="page-pretitle">Project status report · {{ generated_at|date:"d M Y" }}</div>
+  <h1 class="page-title h1 mb-2">{{ project.name }}</h1>
+  <span class="badge bg-{{ project.status_color }}-lt">{{ project.get_status_display }}</span>
+  <span class="badge bg-{{ project.priority_color }}-lt">{{ project.get_priority_display }} priority</span>
+  {% if project.is_overdue %}<span class="badge bg-red-lt">Late</span>{% endif %}
+</div>
+
+{# Key facts and progress #}
+<div class="card mb-4 report-block">
+  <div class="card-body">
+    <div class="datagrid">
+      <div class="datagrid-item">
+        <div class="datagrid-title">Manager</div>
+        <div class="datagrid-content">{{ project.manager }}</div>
+      </div>
+      <div class="datagrid-item">
+        <div class="datagrid-title">Dates</div>
+        <div class="datagrid-content">{{ project.start_date|date:"d M Y"|default:"Not set" }} → {{ project.end_date|date:"d M Y"|default:"Not set" }}</div>
+      </div>
+      <div class="datagrid-item">
+        <div class="datagrid-title">Progress</div>
+        <div class="datagrid-content">{{ project.progress }}% · {{ project.task_done }} of {{ project.task_total }} tasks done</div>
+      </div>
+      <div class="datagrid-item">
+        <div class="datagrid-title">Overdue tasks</div>
+        <div class="datagrid-content">{{ project.task_overdue }}</div>
+      </div>
+    </div>
+    <div class="progress progress-sm mt-3">
+      <div class="progress-bar" style="width: {{ project.progress }}%" role="progressbar"
+           aria-valuenow="{{ project.progress }}" aria-valuemin="0" aria-valuemax="100" aria-label="{{ project.progress }}% done"></div>
+    </div>
+    <div class="d-flex flex-wrap gap-2 mt-3">
+      {% for label, count, color in status_counts %}
+      <span class="badge bg-{{ color }}-lt">{{ label }}: {{ count }}</span>
+      {% endfor %}
+    </div>
+    {% if project.description %}
+    <div class="datagrid-title mt-4">Description</div>
+    <div>{{ project.description|linebreaksbr }}</div>
+    {% endif %}
+  </div>
+</div>
+
+{% if milestones %}
+<div class="card mb-4 report-block">
+  <div class="card-header"><h3 class="card-title"><i class="ti ti-flag text-orange me-2"></i>Milestones</h3></div>
+  <div class="table-responsive">
+    <table class="table card-table table-vcenter">
+      <thead><tr><th>Milestone</th><th>Due date</th><th>Status</th></tr></thead>
+      <tbody>
+        {% for task in milestones %}
+        <tr>
+          <td>{{ task.title }}</td>
+          <td class="text-nowrap {% if task.is_overdue %}text-danger{% endif %}">{{ task.due_date|date:"d M Y"|default:"No date" }}</td>
+          <td><span class="badge bg-{{ task.status_color }}-lt">{{ task.get_status_display }}</span></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% if overdue %}
+<div class="card mb-4 report-block">
+  <div class="card-header"><h3 class="card-title"><i class="ti ti-alert-triangle text-danger me-2"></i>Overdue tasks</h3></div>
+  <div class="table-responsive">
+    <table class="table card-table table-vcenter">
+      <thead><tr><th>Task</th><th>Assigned to</th><th>Due date</th><th class="text-end">Late by</th></tr></thead>
+      <tbody>
+        {% for task in overdue %}
+        <tr>
+          <td>{{ task.title }}</td>
+          <td>{{ task.assignee|default:"Unassigned" }}</td>
+          <td class="text-nowrap">{{ task.due_date|date:"d M Y" }}</td>
+          <td class="text-end text-nowrap text-danger">{{ task.days_late }} day{{ task.days_late|pluralize }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{# Every task. This table can run over several pages; its header repeats on each page. #}
+<div class="card mb-4">
+  <div class="card-header"><h3 class="card-title">All tasks</h3></div>
+  {% if tasks %}
+  <div class="table-responsive">
+    <table class="table card-table table-vcenter">
+      <thead><tr><th>Task</th><th>Status</th><th>Assigned to</th><th>Start</th><th>Due</th></tr></thead>
+      <tbody>
+        {% for task in tasks %}
+        <tr>
+          <td>{% if task.parent_id %}<span class="text-secondary ms-3 me-1">↳</span>{% endif %}{{ task.title }}</td>
+          <td><span class="badge bg-{{ task.status_color }}-lt">{{ task.get_status_display }}</span></td>
+          <td>{{ task.assignee|default:"Unassigned" }}</td>
+          <td class="text-nowrap">{{ task.start_date|date:"d M Y" }}</td>
+          <td class="text-nowrap {% if task.is_overdue %}text-danger{% endif %}">{{ task.due_date|date:"d M Y" }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="card-body text-secondary">This project has no tasks yet.</div>
+  {% endif %}
+</div>
+
+<div class="text-secondary small">
+  Report made on {{ generated_at|date:"d M Y, H:i" }} by {{ user }} · IT Projects
+</div>
+{% endblock %}
