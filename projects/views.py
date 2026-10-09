@@ -79,7 +79,7 @@ def project_list(request):
 
 @login_required
 def project_detail(request, pk):
-    """One project: its details, progress, tasks and recent activity."""
+    """One project: its details, progress, team, tasks and recent activity."""
     project = get_object_or_404(
         Project.objects.with_task_counts().select_related("manager"), pk=pk
     )
@@ -104,6 +104,7 @@ def project_detail(request, pk):
     context = {
         "project": project,
         "tasks": tasks,
+        "team": project.team(),
         "can_edit": project.can_edit(request.user),
         "recent_activity": recent_activity,
     }

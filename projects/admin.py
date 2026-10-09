@@ -1,7 +1,7 @@
 from django.contrib import admin
 from simple_history.admin import SimpleHistoryAdmin
 
-from .models import Attachment, Comment, Project, Task
+from .models import Attachment, Comment, Project, ProjectMember, Task
 
 
 class TaskInline(admin.TabularInline):
@@ -11,6 +11,19 @@ class TaskInline(admin.TabularInline):
     show_change_link = True
 
 
+class ProjectMemberInline(admin.TabularInline):
+    """The project's team, below the project in the admin panel. The manager is chosen above
+    (Manager field) and is always part of the team, so there's no need to add them here."""
+
+    model = ProjectMember
+    fk_name = "project"
+    extra = 0
+    fields = ["user", "added_at", "added_by"]
+    readonly_fields = ["added_at", "added_by"]
+    verbose_name = "team member"
+    verbose_name_plural = "Team (besides the manager)"
+
+
 @admin.register(Project)
 class ProjectAdmin(SimpleHistoryAdmin):
     list_display = [
@@ -18,11 +31,22 @@ class ProjectAdmin(SimpleHistoryAdmin):
     ]
     list_filter = ["status", "priority", "manager"]
     search_fields = ["name", "description"]
-    inlines = [TaskInline]
+    inlines = [ProjectMemberInline, TaskInline]
 
     @admin.display(description="Progress")
     def progress_display(self, obj):
         return f"{obj.progress}%"
+
+    def save_formset(self, request, form, formset, change):
+        # Remember who added each new team member
+        instances = formset.save(commit=False)
+        for obj in instances:
+            if isinstance(obj, ProjectMember) and obj.pk is None:
+                obj.added_by = request.user
+            obj.save()
+        for obj in formset.deleted_objects:
+            obj.delete()
+        formset.save_m2m()
 
 
 class CommentInline(admin.TabularInline):

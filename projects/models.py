@@ -65,6 +65,15 @@ class Project(models.Model):
         related_name="managed_projects",
         limit_choices_to={"role__in": ["admin", "manager"], "is_active": True},
     )
+    # The team: the people who work on the project, besides its manager.
+    # Each line of the team is a ProjectMember (below), which also remembers who added the person.
+    members = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        through="ProjectMember",
+        through_fields=("project", "user"),
+        related_name="member_projects",
+        blank=True,
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -88,6 +97,14 @@ class Project(models.Model):
         """Who may change this project: today, any admin or manager.
         This is the only place the rule is written, so it's easy to change later."""
         return user.can_manage
+
+    def team(self):
+        """Everyone in the team: the manager first, then the members by name."""
+        members = sorted(
+            (person for person in self.members.all() if person.pk != self.manager_id),
+            key=lambda person: str(person).lower(),
+        )
+        return [self.manager] + members
 
     def clean(self):
         if self.start_date and self.end_date and self.end_date < self.start_date:
@@ -122,6 +139,29 @@ class Project(models.Model):
     @property
     def priority_color(self):
         return PRIORITY_COLORS.get(self.priority, "secondary")
+
+
+class ProjectMember(models.Model):
+    """One person in a project's team. The project's manager is always part of the team
+    (through Project.manager), so the manager doesn't need a line here."""
+
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="memberships")
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="memberships")
+    added_at = models.DateTimeField(auto_now_add=True)
+    # Who added this person (empty for the teams that Step 16a filled in by itself)
+    added_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
+    )
+
+    # Remembers who added or removed whom, and when
+    history = HistoricalRecords()
+
+    class Meta:
+        # A person is in a team only once
+        constraints = [models.UniqueConstraint(fields=["project", "user"], name="unique_project_member")]
+
+    def __str__(self):
+        return f"{self.user} in {self.project}"
 
 
 class Task(models.Model):

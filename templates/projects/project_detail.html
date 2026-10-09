@@ -82,6 +82,26 @@
   </div>
 </div>
 
+{# The team: the manager and the members (Step 16a). Admins change it in the admin panel for now. #}
+<div class="card mb-4">
+  <div class="card-header">
+    <h3 class="card-title">Team <span class="badge bg-secondary-lt ms-1">{{ team|length }}</span></h3>
+  </div>
+  <div class="card-body">
+    <div class="d-flex flex-wrap gap-4">
+      {% for person in team %}
+      <div class="d-flex align-items-center gap-2">
+        <span class="avatar avatar-sm">{{ person.username|first|upper }}</span>
+        <div>
+          <div>{{ person }}</div>
+          <div class="small text-secondary">{% if person.pk == project.manager_id %}Manager{% else %}Member{% endif %}</div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
 {# Tasks, with subtasks under their main task #}
 <div class="card">
   <div class="card-header">
