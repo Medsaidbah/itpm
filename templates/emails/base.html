@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ subject }}</title>
+</head>
+{# Emails are built with tables and styles written on each tag, because many email programs #}
+{# (like Outlook) ignore modern page layouts and <style> blocks. Links need the full address (site_url). #}
+<body style="margin:0; padding:0; background-color:#f5f5f5;">
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#f5f5f5;">
+    <tr>
+      <td align="center" style="padding:24px 12px;">
+        {# Outlook on Windows ignores max-width: this table, only seen by Outlook, keeps the email 600px wide #}
+        <!--[if mso]><table role="presentation" width="600" align="center" cellpadding="0" cellspacing="0" border="0"><tr><td><![endif]-->
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+               style="max-width:600px; background-color:#ffffff; border:1px solid #e5e5e5; border-radius:6px; font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size:15px; line-height:1.5; color:#252525;">
+          <tr>
+            <td style="padding:16px 24px; border-bottom:1px solid #e5e5e5; font-size:17px; font-weight:bold;">
+              <a href="{{ site_url }}/" style="color:#252525; text-decoration:none;">IT Projects</a>
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:24px;">
+              {% block content %}{% endblock %}
+            </td>
+          </tr>
+          <tr>
+            <td style="padding:16px 24px; border-top:1px solid #e5e5e5; font-size:12px; color:#737373;">
+              {% block footer %}{% endblock %}
+            </td>
+          </tr>
+        </table>
+        <!--[if mso]></td></tr></table><![endif]-->
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

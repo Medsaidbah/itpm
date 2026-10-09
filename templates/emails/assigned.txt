@@ -1,0 +1,14 @@
+{% autoescape off %}{# Plain text: no HTML escaping #}Hello {{ person.first_name|default:person.username }},
+
+{{ assigned_by }} gave you a task in "{{ task.project.name }}":
+
+  {{ task.title }}
+  {% if task.due_date %}Due {{ task.due_date|date:"D j M Y" }}{% else %}No due date{% endif %} · {{ task.get_priority_display }} priority{% if task.parent %} · Part of "{{ task.parent.title }}"{% endif %}
+{% if task.description %}
+{{ task.description|truncatechars:300 }}
+{% endif %}
+Open the task: {{ site_url }}{{ task.get_absolute_url }}
+
+--
+IT Projects
+{% endautoescape %}

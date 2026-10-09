@@ -1,0 +1,41 @@
+{% extends "emails/base.html" %}
+
+{% block content %}
+<p style="margin:0 0 16px;">Hello {{ person.first_name|default:person.username }},</p>
+{% if sections %}
+<p style="margin:0;">These tasks need your attention today, {{ today|date:"l j F" }}.</p>
+
+{% for section in sections %}
+<h2 style="margin:24px 0 4px; font-size:16px; color:{% if section.late %}#d63939{% else %}#252525{% endif %};">{{ section.title }} ({{ section.count }})</h2>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+  {% for task in section.tasks %}
+  <tr>
+    <td style="padding:8px 0; border-top:1px solid #e5e5e5;">
+      <a href="{{ site_url }}{{ task.get_absolute_url }}" style="color:#066fd1; font-weight:bold; text-decoration:none;">{{ task.title }}</a><br>
+      <span style="font-size:13px; color:#737373;">{{ task.project.name }}{% if section.show_assignee %} · {{ task.assignee|default:"Unassigned" }}{% endif %} · </span><span style="font-size:13px; color:{% if section.late %}#d63939{% else %}#737373{% endif %};">{{ task.due_text }}</span>
+    </td>
+  </tr>
+  {% endfor %}
+  {% if section.more %}
+  <tr>
+    <td style="padding:8px 0; border-top:1px solid #e5e5e5; font-size:13px; color:#737373;">…and {{ section.more }} more</td>
+  </tr>
+  {% endif %}
+</table>
+{% endfor %}
+
+{% else %}
+<p style="margin:0;">Nothing needs your attention today.</p>
+{% endif %}
+
+{# A button made of a colored table cell: it works in every email program, Outlook too #}
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-top:24px;">
+  <tr>
+    <td bgcolor="#066fd1" style="padding:10px 18px; border-radius:4px;">
+      <a href="{{ site_url }}{% url 'my_tasks' %}" style="color:#ffffff; font-weight:bold; text-decoration:none;">Open my tasks</a>
+    </td>
+  </tr>
+</table>
+{% endblock %}
+
+{% block footer %}You get this email when tasks assigned to you are late or due soon{% if person.can_manage %}, or when tasks in projects you manage are late{% endif %}.{% endblock %}

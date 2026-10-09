@@ -4,11 +4,15 @@
 {% block nav_my_tasks %}active{% endblock %}
 
 {% block content %}
-<div class="mb-4">
-  <h2 class="page-title">My tasks</h2>
-  <div class="text-secondary">
-    {% if open_count %}{{ open_count }} open task{{ open_count|pluralize }} assigned to you, in active projects.{% endif %}
+<div class="d-flex flex-wrap align-items-start gap-2 mb-4">
+  <div class="me-auto">
+    <h2 class="page-title">My tasks</h2>
+    <div class="text-secondary">
+      {% if open_count %}{{ open_count }} open task{{ open_count|pluralize }} assigned to you, in active projects.{% endif %}
+    </div>
   </div>
+  {# The daily reminder email, as it would look today (opens in a new tab) #}
+  <a href="{% url 'reminder_preview' %}" class="btn" target="_blank" rel="noopener"><i class="ti ti-mail me-2"></i>My reminder email</a>
 </div>
 
 {% for key, label, icon, tasks in sections %}

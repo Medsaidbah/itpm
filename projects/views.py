@@ -14,6 +14,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
 from .activity import get_events
+from .emails import email_new_assignee
 from .forms import MAX_UPLOAD_MB, AttachmentForm, CommentForm, ProjectForm, TaskForm
 from .models import Attachment, Comment, Project, Task
 
@@ -182,6 +183,15 @@ def task_detail(request, pk):
     return render(request, "projects/task_detail.html", context)
 
 
+def tell_new_assignee(request, task, previous_assignee_id):
+    """After a task is saved: email the person it was just given to.
+    No email when the task was already theirs, or when people give a task to themselves."""
+    if task.assignee_id in (None, previous_assignee_id, request.user.pk):
+        return
+    if not email_new_assignee(task, assigned_by=request.user):
+        messages.warning(request, f"The task is saved, but the email to {task.assignee} couldn't be sent.")
+
+
 @login_required
 def task_create(request, project_pk):
     project = get_object_or_404(Project, pk=project_pk)
@@ -193,6 +203,7 @@ def task_create(request, project_pk):
         if form.is_valid():
             task = form.save()
             messages.success(request, f'Task "{task.title}" created.')
+            tell_new_assignee(request, task, previous_assignee_id=None)
             return redirect(task)
     else:
         # "Add subtask" links end with ?parent=<number of the main task>
@@ -208,10 +219,12 @@ def task_edit(request, pk):
         raise PermissionDenied("Only admins and managers can edit tasks.")
 
     if request.method == "POST":
+        previous_assignee_id = task.assignee_id  # read it now: checking the form changes the task
         form = TaskForm(request.POST, instance=task, project=task.project)
         if form.is_valid():
             form.save()
             messages.success(request, "Changes saved.")
+            tell_new_assignee(request, task, previous_assignee_id)
             return redirect(task)
     else:
         form = TaskForm(instance=task, project=task.project)

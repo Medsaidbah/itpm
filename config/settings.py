@@ -110,7 +110,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = "Africa/Nouakchott"
 
 USE_I18N = True
 
@@ -135,3 +135,20 @@ AUTH_USER_MODEL = "accounts.User"
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "home"
 LOGOUT_REDIRECT_URL = "login"
+
+
+
+# ---------- Email (Step 13) ----------
+# While developing, emails are printed in the terminal instead of being sent.
+# On the server (Step 15), the real mail server's details will go in .env.
+EMAIL_BACKEND = os.environ.get("EMAIL_BACKEND", "django.core.mail.backends.console.EmailBackend")
+EMAIL_HOST = os.environ.get("EMAIL_HOST", "localhost")
+EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
+EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
+EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True") == "True"
+EMAIL_TIMEOUT = 10  # seconds: a slow mail server can't freeze a page for long
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "IT Projects <it-projects@example.com>")
+
+# The app's address, for the links inside emails
+SITE_URL = os.environ.get("SITE_URL", "http://127.0.0.1:8000")

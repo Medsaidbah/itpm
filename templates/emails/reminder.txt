@@ -1,0 +1,16 @@
+{% autoescape off %}{# Plain text: no HTML escaping, so "R&D" stays "R&D" and not "R&amp;D" #}Hello {{ person.first_name|default:person.username }},
+{% if sections %}
+These tasks need your attention today, {{ today|date:"l j F" }}.
+{% for section in sections %}
+{{ section.title|upper }} ({{ section.count }})
+{% for task in section.tasks %}- {{ task.title }} ({{ task.project.name }}{% if section.show_assignee %}, {{ task.assignee|default:"Unassigned" }}{% endif %}): {{ task.due_text }}
+  {{ site_url }}{{ task.get_absolute_url }}
+{% endfor %}{% if section.more %}...and {{ section.more }} more
+{% endif %}{% endfor %}{% else %}
+Nothing needs your attention today.
+{% endif %}
+Open my tasks: {{ site_url }}{% url 'my_tasks' %}
+
+--
+IT Projects
+{% endautoescape %}
