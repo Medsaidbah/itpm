@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}{% if task %}History · {{ task.title }}{% else %}Activity{% endif %} · IT Projects{% endblock %}
+{% block nav_activity %}active{% endblock %}
+
+{% block content %}
+{% if task %}
+{# The history of one task: its History button opens this page with ?task=<number> #}
+<div class="mb-3">
+  <a href="{{ task.get_absolute_url }}" class="text-secondary"><i class="ti ti-arrow-left me-1"></i>{{ task.title }}</a>
+</div>
+<div class="d-flex flex-wrap align-items-center gap-2 mb-4">
+  <div class="me-auto">
+    <div class="page-pretitle">History of the task</div>
+    <h2 class="page-title">{{ task.title }}</h2>
+  </div>
+  <a href="{% url 'activity' %}" class="btn"><i class="ti ti-activity me-2"></i>All activity</a>
+</div>
+
+{% else %}
+<div class="d-flex flex-wrap align-items-center gap-2 mb-4">
+  <h2 class="page-title me-auto">Activity</h2>
+</div>
+
+{# Filters: a normal form that reloads this page with ?project=...&person=... in the address #}
+<form method="get" class="row g-2 mb-3">
+  <div class="col-sm-6 col-md-4">
+    {# Picking something sends the form straight away #}
+    <select name="project" class="form-select" aria-label="Project" onchange="this.form.submit()">
+      <option value="">All projects</option>
+      {% for choice in projects %}
+      <option value="{{ choice.pk }}" {% if choice == project %}selected{% endif %}>{{ choice.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-sm-6 col-md-4">
+    <select name="person" class="form-select" aria-label="Person" onchange="this.form.submit()">
+      <option value="">Everyone</option>
+      {% for choice in people %}
+      <option value="{{ choice.pk }}" {% if choice == person %}selected{% endif %}>{{ choice }}</option>
+      {% endfor %}
+    </select>
+  </div>
+</form>
+{% endif %}
+
+{# One card per day, newest first #}
+{% for day, events in days %}
+<div class="card mb-3">
+  <div class="card-header">
+    <h3 class="card-title">
+      {% if day == today %}Today{% elif day == yesterday %}Yesterday{% else %}{{ day|date:"l j F Y" }}{% endif %}
+    </h3>
+  </div>
+  <div class="list-group list-group-flush">
+    {% for event in events %}
+      {% include "includes/activity_item.html" %}
+    {% endfor %}
+  </div>
+</div>
+{% empty %}
+<div class="card mb-3">
+  <div class="card-body text-secondary">
+    {% if is_older_page %}Nothing older to show.{% elif project or person or task %}Nothing to show for this choice yet.{% else %}Nothing has happened yet.{% endif %}
+  </div>
+</div>
+{% endfor %}
+
+{# {% querystring %} repeats the address's filters and changes only "before" #}
+<div class="d-flex flex-wrap justify-content-center gap-2">
+  {% if is_older_page %}
+  <a href="{% url 'activity' %}{% querystring before=None %}" class="btn"><i class="ti ti-arrow-up me-2"></i>Back to the newest</a>
+  {% endif %}
+  {% if older_than %}
+  <a href="{% url 'activity' %}{% querystring before=older_than %}" class="btn"><i class="ti ti-arrow-down me-2"></i>Show older activity</a>
+  {% endif %}
+</div>
+{% endblock %}

@@ -60,6 +60,9 @@
             <li class="nav-item {% block nav_my_tasks %}{% endblock %}">
               <a class="nav-link" href="{% url 'my_tasks' %}"><i class="ti ti-checklist me-2"></i>My tasks</a>
             </li>
+            <li class="nav-item {% block nav_activity %}{% endblock %}">
+              <a class="nav-link" href="{% url 'activity' %}"><i class="ti ti-activity me-2"></i>Activity</a>
+            </li>
             {% if user.can_manage %}
             <li class="nav-item {% block nav_dashboard %}{% endblock %}">
               <a class="nav-link" href="{% url 'dashboard' %}"><i class="ti ti-chart-bar me-2"></i>Dashboard</a>

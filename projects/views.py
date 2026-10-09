@@ -13,6 +13,7 @@ from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
+from .activity import get_events
 from .forms import MAX_UPLOAD_MB, AttachmentForm, CommentForm, ProjectForm, TaskForm
 from .models import Attachment, Comment, Project, Task
 
@@ -77,7 +78,7 @@ def project_list(request):
 
 @login_required
 def project_detail(request, pk):
-    """One project: its details, progress and tasks."""
+    """One project: its details, progress, tasks and recent activity."""
     project = get_object_or_404(
         Project.objects.with_task_counts().select_related("manager"), pk=pk
     )
@@ -97,10 +98,13 @@ def project_detail(request, pk):
             ),
         )
     )
+    # The last 5 things that happened in this project (the Activity page shows everything)
+    recent_activity, _ = get_events(project=project, limit=5)
     context = {
         "project": project,
         "tasks": tasks,
         "can_edit": project.can_edit(request.user),
+        "recent_activity": recent_activity,
     }
     return render(request, "projects/project_detail.html", context)
 

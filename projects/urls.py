@@ -1,11 +1,12 @@
 from django.urls import path
 
-from . import reports, views
+from . import activity, reports, views
 
 urlpatterns = [
     path("", views.home, name="home"),
     path("my-tasks/", views.my_tasks, name="my_tasks"),
     path("dashboard/", views.dashboard, name="dashboard"),
+    path("activity/", activity.activity_feed, name="activity"),
     path("projects/", views.project_list, name="project_list"),
     path("projects/new/", views.project_create, name="project_create"),
     path("projects/<int:pk>/", views.project_detail, name="project_detail"),

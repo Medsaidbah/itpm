@@ -23,9 +23,8 @@
     <span class="badge bg-{{ task.priority_color }}-lt">{{ task.get_priority_display }} priority</span>
     {% if task.is_overdue %}<span class="badge bg-red-lt">Late</span>{% endif %}
   </div>
-  {% if user.is_staff %}
-  <a href="{% url 'admin:projects_task_history' task.pk %}" class="btn"><i class="ti ti-history me-2"></i>History</a>
-  {% endif %}
+  {# Everything that happened to this task, on the Activity page #}
+  <a href="{% url 'activity' %}?task={{ task.pk }}" class="btn"><i class="ti ti-history me-2"></i>History</a>
   {% if can_edit %}
   <a href="{% url 'task_delete' task.pk %}" class="btn btn-outline-danger"><i class="ti ti-trash me-2"></i>Delete</a>
   <a href="{% url 'task_edit' task.pk %}" class="btn btn-primary"><i class="ti ti-pencil me-2"></i>Edit</a>
