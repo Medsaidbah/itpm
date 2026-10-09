@@ -16,6 +16,7 @@
     <span class="badge bg-{{ project.priority_color }}-lt">{{ project.get_priority_display }} priority</span>
     {% if project.is_overdue %}<span class="badge bg-red-lt">Late</span>{% endif %}
   </div>
+  <a href="{% url 'project_board' project.pk %}" class="btn"><i class="ti ti-layout-kanban me-2"></i>Board</a>
   {# The change history lives in the admin panel, so only staff see this button #}
   {% if user.is_staff %}
   <a href="{% url 'admin:projects_project_history' project.pk %}" class="btn"><i class="ti ti-history me-2"></i>History</a>

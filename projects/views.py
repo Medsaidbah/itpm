@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import F, Prefetch
-from django.http import FileResponse, Http404
+from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
@@ -69,15 +69,19 @@ def project_detail(request, pk):
     project = get_object_or_404(
         Project.objects.with_task_counts().select_related("manager"), pk=pk
     )
-    # Main tasks only; each one brings along its subtasks and the tasks it waits for
+    # Main tasks only; each one brings along its subtasks and the tasks it waits for.
+    # Sorted by due date: the order people choose by dragging only applies on the board.
     tasks = (
         project.tasks.filter(parent__isnull=True)
         .select_related("assignee")
+        .order_by("due_date", "id")
         .prefetch_related(
             "depends_on",
             Prefetch(
                 "subtasks",
-                queryset=Task.objects.select_related("assignee").prefetch_related("depends_on"),
+                queryset=Task.objects.select_related("assignee")
+                .prefetch_related("depends_on")
+                .order_by("due_date", "id"),
             ),
         )
     )
@@ -145,7 +149,9 @@ def task_detail(request, pk):
 
     context = {
         "task": task,
-        "subtasks": task.subtasks.select_related("assignee").prefetch_related("depends_on"),
+        "subtasks": task.subtasks.select_related("assignee")
+        .prefetch_related("depends_on")
+        .order_by("due_date", "id"),
         "depends_on": task.depends_on.select_related("assignee"),
         "needed_by": task.blocking.select_related("assignee"),
         "status_choices": Task.Status.choices,
@@ -303,3 +309,61 @@ def attachment_download(request, path):
     # as_attachment=True: the browser saves the file instead of opening it inside the app,
     # so an uploaded web page can't run inside our site
     return FileResponse(file, as_attachment=True, filename=attachment.filename)
+
+
+# ---------- Kanban board ----------
+
+
+@login_required
+def project_board(request, pk):
+    """The project's tasks as cards in four columns, one column per status."""
+    project = get_object_or_404(Project, pk=pk)
+    # Cards keep the order people chose by dragging ("position"), then their due date
+    tasks = project.tasks.select_related("assignee", "parent", "project").prefetch_related(
+        "depends_on"
+    )
+    cards_by_status = {status: [] for status in Task.Status.values}
+    for task in tasks:
+        # Only the people who may change a task's status can drag its card
+        task.movable = task.can_update_status(request.user)
+        cards_by_status[task.status].append(task)
+
+    context = {
+        "project": project,
+        "columns": [(status, label, cards_by_status[status]) for status, label in Task.Status.choices],
+    }
+    return render(request, "projects/project_board.html", context)
+
+
+@login_required
+@require_POST
+def task_move(request, pk):
+    """After a drag-and-drop, the board sends the card's new column (its status)
+    and the new order of the cards in that column. The answer is JSON, not a page."""
+    task = get_object_or_404(Task.objects.select_related("project"), pk=pk)
+    if not task.can_update_status(request.user):
+        return JsonResponse({"error": "You can only move tasks assigned to you."}, status=403)
+    new_status = request.POST.get("status")
+    if new_status not in Task.Status.values:
+        return JsonResponse({"error": "Unknown status."}, status=400)
+
+    if new_status != task.status:
+        task.status = new_status
+        task.save()  # a status change is recorded in the history
+
+    # Save each card's place in the column (0 = top). Only cards of this project and column count.
+    order = [int(task_id) for task_id in request.POST.getlist("order") if task_id.isdigit()]
+    places = {task_id: place for place, task_id in enumerate(order)}
+    cards = list(Task.objects.filter(project=task.project, status=new_status, pk__in=places))
+    for card in cards:
+        card.position = places[card.pk]
+    Task.objects.bulk_update(cards, ["position"])  # the order isn't recorded in the history
+
+    # Tell the board which cards are late or waiting now, so it can update their look
+    project_tasks = Task.objects.filter(project=task.project).order_by()
+    late = project_tasks.filter(due_date__lt=timezone.localdate()).exclude(status=Task.Status.DONE)
+    waiting = project_tasks.filter(depends_on__in=Task.objects.exclude(status=Task.Status.DONE))
+    return JsonResponse({
+        "overdue_ids": list(late.values_list("pk", flat=True)),
+        "waiting_ids": list(waiting.values_list("pk", flat=True).distinct()),
+    })
