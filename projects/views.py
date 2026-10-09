@@ -2,12 +2,13 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.db.models import F, Prefetch
+from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
-from .forms import ProjectForm, TaskForm
-from .models import Project, Task
+from .forms import MAX_UPLOAD_MB, AttachmentForm, CommentForm, ProjectForm, TaskForm
+from .models import Attachment, Comment, Project, Task
 
 
 @login_required
@@ -129,8 +130,19 @@ def project_edit(request, pk):
 
 @login_required
 def task_detail(request, pk):
-    """One task: its details, status buttons, subtasks and dependencies."""
+    """One task: its details, status buttons, subtasks, dependencies, comments and files."""
     task = get_object_or_404(Task.objects.select_related("project", "parent", "assignee"), pk=pk)
+
+    # "task__project" comes along so can_delete() needs no extra database queries
+    comments = list(task.comments.select_related("author", "task__project"))
+    for comment in comments:
+        comment.deletable = comment.can_delete(request.user)
+    attachments = list(
+        task.attachments.select_related("uploaded_by", "task__project").order_by("uploaded_at")
+    )
+    for attachment in attachments:
+        attachment.deletable = attachment.can_delete(request.user)
+
     context = {
         "task": task,
         "subtasks": task.subtasks.select_related("assignee").prefetch_related("depends_on"),
@@ -139,6 +151,11 @@ def task_detail(request, pk):
         "status_choices": Task.Status.choices,
         "can_edit": task.can_edit(request.user),
         "can_update_status": task.can_update_status(request.user),
+        "comments": comments,
+        "attachments": attachments,
+        "comment_form": CommentForm(),
+        "attachment_form": AttachmentForm(),
+        "max_upload_mb": MAX_UPLOAD_MB,
     }
     return render(request, "projects/task_detail.html", context)
 
@@ -216,3 +233,73 @@ def task_delete(request, pk):
         return redirect(project)
 
     return render(request, "projects/task_confirm_delete.html", {"task": task})
+
+
+# ---------- Comments and files ----------
+# Everyone who is logged in can comment on any task and add files to it.
+
+
+@login_required
+@require_POST
+def comment_add(request, task_pk):
+    task = get_object_or_404(Task, pk=task_pk)
+    form = CommentForm(request.POST)
+    if not form.is_valid():
+        messages.error(request, "Write something before sending a comment.")
+        return redirect(task)
+    comment = form.save(commit=False)  # build the comment, but don't save it yet...
+    comment.task = task  # ...because the task and the author come from the page, not the form
+    comment.author = request.user
+    comment.save()
+    # "#comments" scrolls the page down to the comments
+    return redirect(f"{task.get_absolute_url()}#comments")
+
+
+@login_required
+@require_POST
+def comment_delete(request, pk):
+    comment = get_object_or_404(Comment.objects.select_related("task__project"), pk=pk)
+    if not comment.can_delete(request.user):
+        raise PermissionDenied("You can only delete your own comments.")
+    comment.delete()
+    return redirect(f"{comment.task.get_absolute_url()}#comments")
+
+
+@login_required
+@require_POST
+def attachment_add(request, task_pk):
+    task = get_object_or_404(Task, pk=task_pk)
+    # Files arrive in request.FILES, separately from the other form fields
+    form = AttachmentForm(request.POST, request.FILES)
+    if not form.is_valid():
+        messages.error(request, " ".join(form.errors["file"]))
+        return redirect(task)
+    attachment = form.save(commit=False)
+    attachment.task = task
+    attachment.uploaded_by = request.user
+    attachment.save()
+    return redirect(f"{task.get_absolute_url()}#files")
+
+
+@login_required
+@require_POST
+def attachment_delete(request, pk):
+    attachment = get_object_or_404(Attachment.objects.select_related("task__project"), pk=pk)
+    if not attachment.can_delete(request.user):
+        raise PermissionDenied("You can only delete files you uploaded.")
+    attachment.delete()  # the file on the disk is deleted too (see models.py)
+    return redirect(f"{attachment.task.get_absolute_url()}#files")
+
+
+@login_required
+def attachment_download(request, path):
+    """Every uploaded file is downloaded through here, so only logged-in people can get it.
+    Only files that belong to an attachment are given out, nothing else from the disk."""
+    attachment = get_object_or_404(Attachment, file=path)
+    try:
+        file = attachment.file.open("rb")
+    except OSError:
+        raise Http404("This file is missing from the server.")
+    # as_attachment=True: the browser saves the file instead of opening it inside the app,
+    # so an uploaded web page can't run inside our site
+    return FileResponse(file, as_attachment=True, filename=attachment.filename)

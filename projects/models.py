@@ -1,7 +1,11 @@
+import os
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.db.models import Count, Q
+from django.db.models.signals import post_delete
+from django.dispatch import receiver
 from django.urls import reverse
 from django.utils import timezone
 from simple_history.models import HistoricalRecords
@@ -254,6 +258,10 @@ class Comment(models.Model):
     def __str__(self):
         return f"Comment by {self.author} on {self.task}"
 
+    def can_delete(self, user):
+        """The author can delete a comment, and so can anyone who can edit the task."""
+        return self.author_id == user.pk or self.task.can_edit(user)
+
 
 class Attachment(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="attachments")
@@ -265,3 +273,29 @@ class Attachment(models.Model):
 
     def __str__(self):
         return self.file.name
+
+    @property
+    def filename(self):
+        """The file's name without its folders, for example "quote.pdf"."""
+        return os.path.basename(self.file.name)
+
+    @property
+    def size(self):
+        """The file's size in bytes, or None if the file is missing from the disk."""
+        try:
+            return self.file.size
+        except OSError:
+            return None
+
+    def can_delete(self, user):
+        """The person who uploaded a file can delete it, and so can anyone who can edit the task."""
+        return self.uploaded_by_id == user.pk or self.task.can_edit(user)
+
+
+@receiver(post_delete, sender=Attachment)
+def delete_attachment_file(sender, instance, **kwargs):
+    """When an attachment is deleted (on its own, or with its task), delete its file from the disk too.
+    on_commit waits until the database change is final before touching the disk."""
+    name, storage = instance.file.name, instance.file.storage
+    if name:
+        transaction.on_commit(lambda: storage.delete(name))

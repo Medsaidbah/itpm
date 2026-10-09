@@ -1,6 +1,9 @@
 from django import forms
 
-from .models import Project, Task
+from .models import Attachment, Comment, Project, Task
+
+# The largest file people can upload, in megabytes
+MAX_UPLOAD_MB = 10
 
 
 class BootstrapFormMixin:
@@ -99,3 +102,24 @@ class TaskForm(BootstrapFormMixin, forms.ModelForm):
                         f'"{task}" already waits for this task, so this task can\'t wait for it.'
                     )
         return chosen
+
+
+class CommentForm(BootstrapFormMixin, forms.ModelForm):
+    class Meta:
+        model = Comment
+        fields = ["body"]
+        widgets = {"body": forms.Textarea(attrs={"rows": 3, "placeholder": "Write a comment…"})}
+        labels = {"body": "Comment"}
+
+
+class AttachmentForm(BootstrapFormMixin, forms.ModelForm):
+    class Meta:
+        model = Attachment
+        fields = ["file"]
+        error_messages = {"file": {"required": "Choose a file before clicking Upload."}}
+
+    def clean_file(self):
+        file = self.cleaned_data["file"]
+        if file.size > MAX_UPLOAD_MB * 1024 * 1024:
+            raise forms.ValidationError(f"This file is too big: files can be up to {MAX_UPLOAD_MB} MB.")
+        return file

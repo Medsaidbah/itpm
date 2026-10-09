@@ -183,4 +183,93 @@
     </div>
   </div>
 </div>
+
+<div class="row row-cards mt-0">
+  {# Comments: everyone can comment. id="comments" lets the page jump here after sending. #}
+  <div class="col-lg-7">
+    <div class="card h-100" id="comments">
+      <div class="card-header">
+        <h3 class="card-title">Comments <span class="badge bg-secondary-lt ms-1">{{ comments|length }}</span></h3>
+      </div>
+      <div class="card-body">
+        {% for comment in comments %}
+        <div class="d-flex mb-3">
+          <span class="avatar avatar-sm me-3 flex-shrink-0">{{ comment.author.username|first|upper }}</span>
+          <div class="flex-fill" style="min-width: 0">
+            <div class="d-flex align-items-center gap-2">
+              <strong>{{ comment.author }}</strong>
+              {# Hover over the time to see the exact date #}
+              <span class="text-secondary small" title="{{ comment.created_at|date:'d M Y, H:i' }}">{{ comment.created_at|timesince }} ago</span>
+              {% if comment.deletable %}
+              {# return confirm(...) asks "are you sure?" before sending the form #}
+              <form method="post" action="{% url 'comment_delete' comment.pk %}" class="ms-auto"
+                    onsubmit="return confirm('Delete this comment?');">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-ghost-secondary btn-icon" title="Delete comment" aria-label="Delete comment"><i class="ti ti-trash"></i></button>
+              </form>
+              {% endif %}
+            </div>
+            <div class="text-break">{{ comment.body|linebreaksbr }}</div>
+          </div>
+        </div>
+        {% empty %}
+        <p class="text-secondary">No comments yet.</p>
+        {% endfor %}
+
+        <form method="post" action="{% url 'comment_add' task.pk %}">
+          {% csrf_token %}
+          <label class="visually-hidden" for="{{ comment_form.body.id_for_label }}">Comment</label>
+          {{ comment_form.body }}
+          <div class="mt-2 text-end">
+            <button type="submit" class="btn btn-primary"><i class="ti ti-message me-2"></i>Add comment</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  {# Files: everyone can add files; they can only be downloaded by people who are logged in #}
+  <div class="col-lg-5">
+    <div class="card h-100" id="files">
+      <div class="card-header">
+        <h3 class="card-title">Files <span class="badge bg-secondary-lt ms-1">{{ attachments|length }}</span></h3>
+      </div>
+      {% if attachments %}
+      <div class="list-group list-group-flush">
+        {% for attachment in attachments %}
+        <div class="list-group-item d-flex align-items-center gap-2">
+          <i class="ti ti-file text-secondary"></i>
+          <div class="flex-fill" style="min-width: 0">
+            <a href="{{ attachment.file.url }}" class="d-block text-truncate" title="{{ attachment.filename }}">{{ attachment.filename }}</a>
+            <div class="text-secondary small">
+              {% if attachment.size is None %}<span class="text-danger">File missing</span>{% else %}{{ attachment.size|filesizeformat }}{% endif %}
+              · {{ attachment.uploaded_by }} · {{ attachment.uploaded_at|timesince }} ago
+            </div>
+          </div>
+          {% if attachment.deletable %}
+          <form method="post" action="{% url 'attachment_delete' attachment.pk %}"
+                onsubmit="return confirm('Delete this file?');">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-ghost-secondary btn-icon" title="Delete file" aria-label="Delete file"><i class="ti ti-trash"></i></button>
+          </form>
+          {% endif %}
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
+      <div class="card-body">
+        {# enctype="multipart/form-data" is required, or the browser sends only the file's name #}
+        <form method="post" action="{% url 'attachment_add' task.pk %}" enctype="multipart/form-data">
+          {% csrf_token %}
+          <label class="visually-hidden" for="{{ attachment_form.file.id_for_label }}">File</label>
+          <div class="input-group">
+            {{ attachment_form.file }}
+            <button type="submit" class="btn btn-primary"><i class="ti ti-upload me-2"></i>Upload</button>
+          </div>
+          <div class="form-hint">Up to {{ max_upload_mb }} MB per file.</div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
 {% endblock %}
