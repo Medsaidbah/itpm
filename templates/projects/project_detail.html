@@ -17,6 +17,7 @@
     {% if project.is_overdue %}<span class="badge bg-red-lt">Late</span>{% endif %}
   </div>
   <a href="{% url 'project_board' project.pk %}" class="btn"><i class="ti ti-layout-kanban me-2"></i>Board</a>
+  <a href="{% url 'project_gantt' project.pk %}" class="btn"><i class="ti ti-timeline me-2"></i>Timeline</a>
   {# The change history lives in the admin panel, so only staff see this button #}
   {% if user.is_staff %}
   <a href="{% url 'admin:projects_project_history' project.pk %}" class="btn"><i class="ti ti-history me-2"></i>History</a>

@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Timeline · {{ project.name }} · IT Projects{% endblock %}
+{% block nav_projects %}active{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/frappe-gantt@1.2.2/dist/frappe-gantt.css">
+<style>
+  /* Bar colors by status: the same colors as the status badges */
+  .gantt .bar-wrapper.status-todo .bar { fill: #e3e7ed; }
+  .gantt .bar-wrapper.status-in_progress .bar { fill: #cfe2fc; }
+  .gantt .bar-wrapper.status-blocked .bar { fill: #f8d3d3; }
+  .gantt .bar-wrapper.status-done .bar { fill: #c9ecd3; }
+  .gantt .bar-label { font-family: inherit; }
+  /* Keep the chart's sticky header under the menus of the page */
+  .gantt-container .grid-header { z-index: 2; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mb-3">
+  <a href="{{ project.get_absolute_url }}" class="text-secondary"><i class="ti ti-arrow-left me-1"></i>{{ project }}</a>
+</div>
+<div class="mb-3">
+  <h2 class="page-title">Timeline</h2>
+  <div class="text-secondary">
+    Each bar runs from a task's start date to its due date, and arrows point from a task to the tasks waiting for it.
+    Click a bar to see the task.
+    {% if can_edit %}Drag a bar to move a task, or drag its ends to change its dates. Tasks that wait for it move along with it.{% endif %}
+  </div>
+</div>
+
+{# Legend: what the bar colors mean #}
+<div class="d-flex flex-wrap gap-2 mb-3">
+  <span class="badge bg-secondary-lt">To do</span>
+  <span class="badge bg-blue-lt">In progress</span>
+  <span class="badge bg-red-lt">Blocked</span>
+  <span class="badge bg-green-lt">Done</span>
+  <span class="text-secondary small ms-2">◆ milestone · ↳ subtask</span>
+</div>
+
+{% if chart_tasks %}
+<div class="card mb-4">
+  <div class="card-body p-0">
+    <div id="gantt" data-csrf="{{ csrf_token }}" data-can-edit="{{ can_edit|yesno:'true,false' }}" data-scroll-to="{{ scroll_to }}"></div>
+  </div>
+</div>
+{% else %}
+<div class="card mb-4">
+  <div class="card-body text-secondary">No task has a date yet. Give tasks a start date or a due date to see them here.</div>
+</div>
+{% endif %}
+
+{% if undated %}
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">Not on the timeline</h3>
+  </div>
+  <div class="card-body">
+    <p class="text-secondary mb-2">These tasks have no start date and no due date yet:</p>
+    <ul class="mb-0">
+      {% for task in undated %}<li><a href="{{ task.get_absolute_url }}">{{ task.title }}</a></li>{% endfor %}
+    </ul>
+  </div>
+</div>
+{% endif %}
+
+{# The tasks, as data the script can read. json_script makes this safe, whatever the task titles contain. #}
+{{ chart_tasks|json_script:"gantt-tasks" }}
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/frappe-gantt@1.2.2/dist/frappe-gantt.umd.js"></script>
+<script>
+  (function () {
+    var element = document.getElementById("gantt");
+    if (!element) return;  // no task with dates
+
+    // The chart shows names as HTML, so "<" in a title must become "&lt;" first.
+    // Otherwise a task title could contain code that runs in the page.
+    function escapeHtml(text) {
+      var div = document.createElement("div");
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // A date as "2026-10-12", using the computer's own calendar
+    function toISODate(d) {
+      return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0");
+    }
+
+    // Send a task's new dates to the server; if it refuses, reload to show the saved dates again
+    function save(change) {
+      var data = new URLSearchParams();
+      data.append("start_date", change.start);
+      data.append("due_date", change.end);
+      fetch(change.url, {
+        method: "POST",
+        headers: { "X-CSRFToken": element.dataset.csrf },
+        body: data,
+      })
+        .then(function (response) {
+          if (response.ok) return;
+          return response.json()
+            .catch(function () { return {}; })
+            .then(function (answer) { throw new Error(answer.error || "The server refused the change."); });
+        })
+        .catch(function (error) {
+          alert("The new dates weren't saved. " + error.message + " The page will reload.");
+          location.reload();
+        });
+    }
+
+    // While a bar is dragged, the chart reports new dates at every step (every day it crosses).
+    // We only remember the latest dates of each task, and save them once, when the mouse button is released.
+    var pending = {};
+    document.addEventListener("mouseup", function () {
+      Object.keys(pending).forEach(function (id) {
+        save(pending[id]);
+        delete pending[id];
+      });
+    });
+
+    var tasks = JSON.parse(document.getElementById("gantt-tasks").textContent);
+    tasks.forEach(function (task) { task.name = escapeHtml(task.name); });
+
+    new Gantt(element, tasks, {
+      view_mode: "Week",
+      view_mode_select: true,          // a list to switch between days, weeks, months...
+      scroll_to: element.dataset.scrollTo,
+      readonly: element.dataset.canEdit !== "true",  // only admins and managers can move bars
+      readonly_progress: true,
+      popup: function (popup) {
+        var task = popup.task;
+        popup.set_title(task.name);    // already made safe above
+        popup.set_subtitle(escapeHtml(task.dates));
+        popup.set_details(escapeHtml(task.status + " · " + task.assignee));
+        popup.add_action("Open task", function () { window.location.href = task.url; });
+      },
+      // Runs while a bar is dragged or stretched: remember the task's latest dates (saved on release)
+      on_date_change: function (task, start, end) {
+        pending[task.id] = { url: task.dates_url, start: toISODate(start), end: toISODate(end) };
+      },
+    });
+  })();
+</script>
+{% endblock %}

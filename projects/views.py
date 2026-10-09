@@ -1,9 +1,12 @@
+from datetime import date
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.exceptions import PermissionDenied
+from django.core.exceptions import PermissionDenied, ValidationError
 from django.db.models import F, Prefetch
 from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 from django.utils import timezone
 from django.views.decorators.http import require_POST
 
@@ -367,3 +370,82 @@ def task_move(request, pk):
         "overdue_ids": list(late.values_list("pk", flat=True)),
         "waiting_ids": list(waiting.values_list("pk", flat=True).distinct()),
     })
+
+
+# ---------- Gantt chart (timeline) ----------
+
+
+@login_required
+def project_gantt(request, pk):
+    """The project's tasks as bars on a timeline, from their start date to their due date."""
+    project = get_object_or_404(Project, pk=pk)
+    tasks = list(project.tasks.select_related("assignee").prefetch_related("depends_on"))
+
+    # A task needs at least one date to be drawn; the others are listed under the chart
+    dated = [task for task in tasks if task.start_date or task.due_date]
+    undated = [task for task in tasks if not (task.start_date or task.due_date)]
+    dated_ids = {task.pk for task in dated}
+
+    def first_day(task):
+        return task.start_date or task.due_date
+
+    # Rows: main tasks by date, each one followed by its subtasks
+    main_tasks = sorted((t for t in dated if t.parent_id is None or t.parent_id not in dated_ids),
+                        key=lambda t: (first_day(t), t.pk))
+    rows = []
+    for main in main_tasks:
+        rows.append(main)
+        rows.extend(sorted((t for t in dated if t.parent_id == main.pk), key=lambda t: (first_day(t), t.pk)))
+
+    chart_tasks = []
+    for task in rows:
+        start = task.start_date or task.due_date  # one date only: a one-day bar
+        end = task.due_date or task.start_date
+        prefix = "◆ " if task.is_milestone else ("↳ " if task.parent_id in dated_ids else "")
+        chart_tasks.append({
+            "id": str(task.pk),
+            "name": prefix + task.title,
+            "start": start.isoformat(),
+            "end": end.isoformat(),
+            "progress": 0,
+            # Arrows: only to tasks that are on the chart too
+            "dependencies": ", ".join(str(d.pk) for d in task.depends_on.all() if d.pk in dated_ids),
+            "custom_class": f"status-{task.status}",  # colors the bar (see the page's styles)
+            "status": task.get_status_display(),
+            "assignee": str(task.assignee or "Unassigned"),
+            "dates": f"{start:%d %b %Y} → {end:%d %b %Y}",
+            "url": task.get_absolute_url(),
+            "dates_url": reverse("task_dates", args=[task.pk]),
+        })
+
+    today = timezone.localdate()
+    spans_today = any(first_day(t) <= today <= (t.due_date or t.start_date) for t in dated)
+    context = {
+        "project": project,
+        "chart_tasks": chart_tasks,
+        "undated": undated,
+        "can_edit": project.can_edit(request.user),
+        # Open the chart on today if a task is running now, otherwise on the first task
+        "scroll_to": "today" if spans_today else "start",
+    }
+    return render(request, "projects/project_gantt.html", context)
+
+
+@login_required
+@require_POST
+def task_dates(request, pk):
+    """After a bar is dragged or stretched, the chart sends the task's new dates here."""
+    task = get_object_or_404(Task.objects.select_related("project", "parent"), pk=pk)
+    if not task.can_edit(request.user):
+        return JsonResponse({"error": "Only admins and managers can change dates."}, status=403)
+    try:
+        task.start_date = date.fromisoformat(request.POST["start_date"])
+        task.due_date = date.fromisoformat(request.POST["due_date"])
+    except (KeyError, ValueError):
+        return JsonResponse({"error": "These dates aren't valid."}, status=400)
+    try:
+        task.clean()  # the same rules as the task form, like "the due date can't be before the start"
+    except ValidationError as error:
+        return JsonResponse({"error": " ".join(error.messages)}, status=400)
+    task.save()  # recorded in the history
+    return JsonResponse({"start_date": task.start_date.isoformat(), "due_date": task.due_date.isoformat()})
