@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %}My tasks · IT Projects{% endblock %}
+{% block nav_my_tasks %}active{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <h2 class="page-title">My tasks</h2>
+  <div class="text-secondary">
+    {% if open_count %}{{ open_count }} open task{{ open_count|pluralize }} assigned to you, in active projects.{% endif %}
+  </div>
+</div>
+
+{% for key, label, icon, tasks in sections %}
+{% if tasks %}
+<div class="card mb-4" id="{{ key }}">
+  <div class="card-header">
+    <h3 class="card-title"><i class="ti {{ icon }} me-2"></i>{{ label }} <span class="badge bg-secondary-lt ms-1">{{ tasks|length }}</span></h3>
+  </div>
+  <div class="table-responsive">
+    <table class="table card-table table-vcenter">
+      <tbody>
+        {% for task in tasks %}
+        <tr>
+          <td>
+            <div class="d-flex align-items-start">
+              {% if task.is_milestone %}<i class="ti ti-flag text-orange me-1 mt-1" title="Milestone"></i>{% endif %}
+              <div>
+                <a href="{{ task.get_absolute_url }}">{{ task.title }}</a>
+                {% if task.waiting_for %}<i class="ti ti-lock text-secondary ms-1" title="Waiting for other tasks"></i>{% endif %}
+                <div class="small text-secondary">
+                  <a href="{{ task.project.get_absolute_url }}" class="text-secondary">{{ task.project }}</a>{% if task.parent %} / {{ task.parent }}{% endif %}
+                </div>
+              </div>
+            </div>
+          </td>
+          <td><span class="badge bg-{{ task.status_color }}-lt">{{ task.get_status_display }}</span></td>
+          <td class="d-none d-sm-table-cell"><span class="badge bg-{{ task.priority_color }}-lt">{{ task.get_priority_display }}</span></td>
+          <td class="text-nowrap {% if task.is_overdue %}text-danger{% else %}text-secondary{% endif %}">{{ task.due_date|date:"d M Y"|default:"" }}</td>
+          <td class="w-1">
+            {# One click marks the task done; "next" brings you back to this page #}
+            <form method="post" action="{% url 'task_status' task.pk %}">
+              {% csrf_token %}
+              <input type="hidden" name="next" value="{% url 'my_tasks' %}">
+              <button type="submit" name="status" value="done" class="btn btn-sm btn-ghost-success btn-icon"
+                      title="Mark as done" aria-label="Mark {{ task.title }} as done"><i class="ti ti-check"></i></button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endif %}
+{% endfor %}
+
+{% if not open_count %}
+<div class="card mb-4">
+  <div class="card-body text-secondary"><i class="ti ti-circle-check text-green me-2"></i>You have no open tasks. Nice work!</div>
+</div>
+{% endif %}
+
+{% if recently_done %}
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title"><i class="ti ti-circle-check me-2"></i>Done in the last 14 days</h3>
+  </div>
+  <div class="list-group list-group-flush">
+    {% for task in recently_done %}
+    <div class="list-group-item d-flex align-items-center gap-2">
+      <a href="{{ task.get_absolute_url }}" class="me-auto">{{ task.title }}</a>
+      <span class="small text-secondary d-none d-sm-inline">{{ task.project }}</span>
+      <span class="small text-secondary text-nowrap">{{ task.completed_at|date:"d M" }}</span>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endif %}
+{% endblock %}

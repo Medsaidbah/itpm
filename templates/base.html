@@ -57,10 +57,14 @@
             <li class="nav-item {% block nav_projects %}{% endblock %}">
               <a class="nav-link" href="{% url 'project_list' %}"><i class="ti ti-briefcase me-2"></i>Projects</a>
             </li>
-            {# This page comes in a later step #}
-            <li class="nav-item">
-              <span class="nav-link disabled"><i class="ti ti-checklist me-2"></i>My tasks</span>
+            <li class="nav-item {% block nav_my_tasks %}{% endblock %}">
+              <a class="nav-link" href="{% url 'my_tasks' %}"><i class="ti ti-checklist me-2"></i>My tasks</a>
             </li>
+            {% if user.can_manage %}
+            <li class="nav-item {% block nav_dashboard %}{% endblock %}">
+              <a class="nav-link" href="{% url 'dashboard' %}"><i class="ti ti-chart-bar me-2"></i>Dashboard</a>
+            </li>
+            {% endif %}
           </ul>
         </div>
       </div>

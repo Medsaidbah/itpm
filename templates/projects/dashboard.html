@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard · IT Projects{% endblock %}
+{% block nav_dashboard %}active{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <h2 class="page-title">Dashboard</h2>
+  <div class="text-secondary">The big picture across all active projects.</div>
+</div>
+
+{# Headline numbers #}
+<div class="row row-cards mb-4">
+  {% for kpi in kpis %}
+  <div class="col-6 col-md-4 col-xl">
+    <div class="card card-sm h-100">
+      <div class="card-body">
+        <div class="subheader">
+          {% if kpi.warn and kpi.value %}<i class="ti ti-alert-triangle text-danger me-1"></i>{% endif %}{{ kpi.label }}
+        </div>
+        <div class="h1 mb-0">{{ kpi.value }}</div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="row row-cards mb-4">
+  {# Workload: open tasks per person #}
+  <div class="col-lg-7">
+    <div class="card h-100">
+      <div class="card-header">
+        <div>
+          <h3 class="card-title">Workload</h3>
+          <div class="card-subtitle">Open tasks per person, in active projects</div>
+        </div>
+      </div>
+      <div class="card-body">
+        {% if workload %}
+        <div class="chart-box" id="workload-box"><canvas id="workload-chart" role="img" aria-label="Open tasks per person"></canvas></div>
+        {# The same numbers as a table, for screen readers and exact values #}
+        <details class="mt-3">
+          <summary class="text-secondary small"><i class="ti ti-table me-1"></i>Show as a table</summary>
+          <table class="table table-sm mt-2 mb-0">
+            <thead><tr><th>Person</th><th class="text-end">On time</th><th class="text-end">Overdue</th></tr></thead>
+            <tbody>
+              {% for row in workload %}
+              <tr><td>{{ row.name }}</td><td class="text-end">{{ row.on_time }}</td><td class="text-end">{{ row.late }}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </details>
+        {% else %}
+        <div class="text-secondary">No open tasks right now.</div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+  {# Throughput: tasks finished per week #}
+  <div class="col-lg-5">
+    <div class="card h-100">
+      <div class="card-header">
+        <div>
+          <h3 class="card-title">Tasks done per week</h3>
+          <div class="card-subtitle">The last 8 weeks, each starting on Monday</div>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="chart-box" style="height: 16rem"><canvas id="done-chart" role="img" aria-label="Tasks done per week"></canvas></div>
+        <details class="mt-3">
+          <summary class="text-secondary small"><i class="ti ti-table me-1"></i>Show as a table</summary>
+          <table class="table table-sm mt-2 mb-0">
+            <thead><tr><th>Week of</th><th class="text-end">Tasks done</th></tr></thead>
+            <tbody>
+              {% for row in done_per_week %}<tr><td>{{ row.week }}</td><td class="text-end">{{ row.count }}</td></tr>{% endfor %}
+            </tbody>
+          </table>
+        </details>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row row-cards">
+  {# The overdue tasks, oldest first #}
+  <div class="col-lg-7">
+    <div class="card h-100" id="overdue">
+      <div class="card-header">
+        <h3 class="card-title">Most overdue tasks</h3>
+      </div>
+      {% if oldest_overdue %}
+      <div class="table-responsive">
+        <table class="table card-table table-vcenter">
+          <thead><tr><th>Task</th><th class="d-none d-sm-table-cell">Assigned to</th><th class="text-end">Late by</th></tr></thead>
+          <tbody>
+            {% for task in oldest_overdue %}
+            <tr>
+              <td>
+                <a href="{{ task.get_absolute_url }}">{{ task.title }}</a>
+                <div class="small text-secondary">{{ task.project }}</div>
+              </td>
+              <td class="d-none d-sm-table-cell">{{ task.assignee|default:"Unassigned" }}</td>
+              <td class="text-end text-nowrap text-danger">{{ task.days_late }} day{{ task.days_late|pluralize }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% else %}
+      <div class="card-body text-secondary"><i class="ti ti-circle-check text-green me-2"></i>No overdue tasks.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  {# Projects that are late or have late tasks #}
+  <div class="col-lg-5">
+    <div class="card h-100">
+      <div class="card-header">
+        <h3 class="card-title">Projects that need attention</h3>
+      </div>
+      {% if needs_attention %}
+      <div class="list-group list-group-flush">
+        {% for project in needs_attention %}
+        <a href="{{ project.get_absolute_url }}" class="list-group-item list-group-item-action">
+          <div class="d-flex align-items-center gap-2">
+            <span class="fw-medium me-auto">{{ project.name }}</span>
+            {% if project.is_overdue %}<span class="badge bg-red-lt">Late</span>{% endif %}
+          </div>
+          <div class="small text-secondary mb-1">
+            {{ project.manager }} · {{ project.task_overdue }} overdue task{{ project.task_overdue|pluralize }}
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <div class="progress progress-sm flex-fill">
+              <div class="progress-bar" style="width: {{ project.progress }}%" role="progressbar"
+                   aria-valuenow="{{ project.progress }}" aria-valuemin="0" aria-valuemax="100"
+                   aria-label="{{ project.progress }}% done"></div>
+            </div>
+            <span class="small text-secondary">{{ project.progress }}%</span>
+          </div>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="card-body text-secondary"><i class="ti ti-circle-check text-green me-2"></i>Every active project is on time.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{# The chart data, as safe JSON the script can read #}
+{{ workload|json_script:"workload-data" }}
+{{ done_per_week|json_script:"done-data" }}
+{% endblock %}
+
+{% block extra_head %}
+<style>
+  .chart-box { position: relative; }  /* Chart.js sizes the chart to this box */
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+<script>
+  (function () {
+    var page = getComputedStyle(document.body);
+    var BLUE = "#2a78d6";    // "on time" and "done": the main series color
+    var RED = "#d03b3b";     // "overdue": a warning color, always with its label
+    var SURFACE = "#ffffff"; // the card background, used for the thin gaps between bars
+    var GRID = "#e6e7e9";    // hairline grid
+
+    Chart.defaults.font.family = page.fontFamily;
+    Chart.defaults.color = page.getPropertyValue("--tblr-secondary").trim() || "#667382";
+
+    // Round only the outer end of a bar: corners where it meets the next segment stay square
+    function outerEndRadius(context) {
+      var later = context.chart.data.datasets.slice(context.datasetIndex + 1).some(function (d) {
+        return d.data[context.dataIndex] > 0;
+      });
+      return later ? 0 : { topRight: 4, bottomRight: 4, topLeft: 0, bottomLeft: 0 };
+    }
+
+    // Workload: one bar per person, "on time" and "overdue" stacked
+    var workload = JSON.parse(document.getElementById("workload-data").textContent);
+    var workloadCanvas = document.getElementById("workload-chart");
+    if (workloadCanvas) {
+      // The chart grows with the number of people, so names never squeeze together
+      document.getElementById("workload-box").style.height = (70 + workload.length * 36) + "px";
+      new Chart(workloadCanvas, {
+        type: "bar",
+        data: {
+          labels: workload.map(function (row) { return row.name; }),
+          datasets: [
+            { label: "On time", data: workload.map(function (row) { return row.on_time; }), backgroundColor: BLUE },
+            { label: "Overdue", data: workload.map(function (row) { return row.late; }), backgroundColor: RED },
+          ],
+        },
+        options: {
+          indexAxis: "y",               // horizontal bars
+          maintainAspectRatio: false,
+          datasets: { bar: { maxBarThickness: 24, borderColor: SURFACE, borderWidth: 1, borderSkipped: false, borderRadius: outerEndRadius } },
+          interaction: { mode: "index", axis: "y", intersect: false },  // one tooltip shows both numbers
+          plugins: { legend: { position: "top", align: "start", labels: { boxWidth: 12, boxHeight: 12 } } },
+          scales: {
+            x: { stacked: true, beginAtZero: true, ticks: { precision: 0 }, grid: { color: GRID }, border: { display: false } },
+            y: { stacked: true, grid: { display: false } },
+          },
+        },
+      });
+    }
+
+    // Tasks done per week: one column per week
+    var done = JSON.parse(document.getElementById("done-data").textContent);
+    new Chart(document.getElementById("done-chart"), {
+      type: "bar",
+      data: {
+        labels: done.map(function (row) { return row.week; }),
+        datasets: [{ label: "Tasks done", data: done.map(function (row) { return row.count; }), backgroundColor: BLUE }],
+      },
+      options: {
+        maintainAspectRatio: false,
+        datasets: { bar: { maxBarThickness: 24, borderRadius: 4, borderSkipped: "start" } },
+        plugins: { legend: { display: false } },  // one series: the card title says what it is
+        scales: {
+          y: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: GRID }, border: { display: false } },
+          x: { grid: { display: false } },
+        },
+      },
+    });
+  })();
+</script>
+{% endblock %}

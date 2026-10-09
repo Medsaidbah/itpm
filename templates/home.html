@@ -20,20 +20,20 @@
     </a>
   </div>
   <div class="col-sm-4">
-    <div class="card card-sm">
+    <a href="{% url 'my_tasks' %}" class="card card-sm card-link">
       <div class="card-body">
         <div class="subheader">My open tasks</div>
         <div class="h1 mb-0">{{ open_tasks }}</div>
       </div>
-    </div>
+    </a>
   </div>
   <div class="col-sm-4">
-    <div class="card card-sm">
+    <a href="{% url 'my_tasks' %}#overdue" class="card card-sm card-link">
       <div class="card-body">
         <div class="subheader">My overdue tasks</div>
         <div class="h1 mb-0 {% if overdue_tasks %}text-danger{% endif %}">{{ overdue_tasks }}</div>
       </div>
-    </div>
+    </a>
   </div>
 </div>
 
@@ -41,6 +41,9 @@
 <div class="card">
   <div class="card-header">
     <h3 class="card-title">My next tasks</h3>
+    <div class="card-actions">
+      <a href="{% url 'my_tasks' %}" class="btn btn-sm">See all my tasks</a>
+    </div>
   </div>
   {% if next_tasks %}
   <div class="table-responsive">

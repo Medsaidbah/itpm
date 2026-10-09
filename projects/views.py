@@ -1,13 +1,16 @@
-from datetime import date
+from datetime import date, timedelta
 
 from django.contrib import messages
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.db.models import F, Prefetch
+from django.db.models import Count, F, Prefetch, Q
+from django.db.models.functions import TruncWeek
 from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
 
 from .forms import MAX_UPLOAD_MB, AttachmentForm, CommentForm, ProjectForm, TaskForm
@@ -223,7 +226,15 @@ def task_status(request, pk):
     elif new_status != task.status:
         task.status = new_status
         task.save()
-        messages.success(request, f"Status changed to {task.get_status_display()}.")
+        messages.success(request, f'"{task.title}" is now {task.get_status_display()}.')
+
+    # A button can ask to come back to its own page (like My tasks) with a "next" field.
+    # Only addresses on this site are accepted, so a link can't send people elsewhere.
+    next_page = request.POST.get("next")
+    if next_page and url_has_allowed_host_and_scheme(
+        next_page, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+    ):
+        return redirect(next_page)
     return redirect(task)
 
 
@@ -449,3 +460,127 @@ def task_dates(request, pk):
         return JsonResponse({"error": " ".join(error.messages)}, status=400)
     task.save()  # recorded in the history
     return JsonResponse({"start_date": task.start_date.isoformat(), "due_date": task.due_date.isoformat()})
+
+
+# ---------- My tasks ----------
+
+
+@login_required
+def my_tasks(request):
+    """Everything assigned to the person who is logged in, sorted by when it's due."""
+    today = timezone.localdate()
+    open_tasks = (
+        Task.objects.filter(assignee=request.user, project__status__in=Project.ACTIVE_STATUSES)
+        .exclude(status=Task.Status.DONE)
+        .select_related("project", "parent")
+        .prefetch_related("depends_on")
+        .order_by("due_date", "id")
+    )
+    sections = {"overdue": [], "this_week": [], "later": [], "no_date": []}
+    for task in open_tasks:
+        if task.due_date is None:
+            sections["no_date"].append(task)
+        elif task.due_date < today:
+            sections["overdue"].append(task)
+        elif task.due_date <= today + timedelta(days=6):
+            sections["this_week"].append(task)
+        else:
+            sections["later"].append(task)
+
+    recently_done = (
+        Task.objects.filter(
+            assignee=request.user,
+            status=Task.Status.DONE,
+            completed_at__gte=timezone.now() - timedelta(days=14),
+        )
+        .select_related("project")
+        .order_by("-completed_at")[:10]
+    )
+    context = {
+        "sections": [
+            ("overdue", "Overdue", "ti-alert-triangle text-danger", sections["overdue"]),
+            ("this_week", "Due in the next 7 days", "ti-calendar-event", sections["this_week"]),
+            ("later", "Later", "ti-calendar", sections["later"]),
+            ("no_date", "No due date", "ti-calendar-off", sections["no_date"]),
+        ],
+        "open_count": sum(len(tasks) for tasks in sections.values()),
+        "recently_done": recently_done,
+    }
+    return render(request, "projects/my_tasks.html", context)
+
+
+# ---------- Dashboard for managers ----------
+
+
+@login_required
+def dashboard(request):
+    """The big picture for admins and managers: numbers, workload, and what needs attention."""
+    if not request.user.can_manage:
+        raise PermissionDenied("Only admins and managers can see the dashboard.")
+
+    today = timezone.localdate()
+    active_projects = Project.objects.filter(status__in=Project.ACTIVE_STATUSES)
+    open_tasks = Task.objects.filter(project__status__in=Project.ACTIVE_STATUSES).exclude(
+        status=Task.Status.DONE
+    )
+    overdue_tasks = open_tasks.filter(due_date__lt=today)
+
+    # Workload: each person's open tasks, split into late and on time (one query)
+    rows = (
+        open_tasks.values("assignee")
+        .annotate(total=Count("id"), late=Count("id", filter=Q(due_date__lt=today)))
+        .order_by("-total")
+    )
+    names = {user.pk: str(user) for user in get_user_model().objects.filter(pk__in=[r["assignee"] for r in rows])}
+    workload = [
+        {"name": names[r["assignee"]], "on_time": r["total"] - r["late"], "late": r["late"]}
+        for r in rows if r["assignee"]
+    ]
+    unassigned = [r for r in rows if not r["assignee"]]
+    if unassigned:  # unassigned work goes last
+        r = unassigned[0]
+        workload.append({"name": "Unassigned", "on_time": r["total"] - r["late"], "late": r["late"]})
+
+    # Tasks finished per week, for the last 8 weeks (weeks start on Monday)
+    first_monday = today - timedelta(days=today.weekday(), weeks=7)
+    finished = (
+        Task.objects.filter(completed_at__date__gte=first_monday)
+        .annotate(week=TruncWeek("completed_at"))
+        .values("week")
+        .annotate(count=Count("id"))
+        .order_by()
+    )
+    per_week = {row["week"].date(): row["count"] for row in finished}
+    weeks = [first_monday + timedelta(weeks=i) for i in range(8)]
+    done_per_week = [{"week": f"{week:%d %b}", "count": per_week.get(week, 0)} for week in weeks]
+
+    # Active projects that are late or have overdue tasks, worst first
+    needs_attention = [
+        project
+        for project in Project.objects.with_task_counts()
+        .filter(status__in=Project.ACTIVE_STATUSES)
+        .select_related("manager")
+        if project.is_overdue or project.task_overdue
+    ]
+    needs_attention.sort(key=lambda project: -project.task_overdue)
+
+    oldest_overdue = list(overdue_tasks.select_related("project", "assignee").order_by("due_date", "id")[:10])
+    for task in oldest_overdue:
+        task.days_late = (today - task.due_date).days
+
+    context = {
+        # The headline numbers; "warn" adds a warning icon when the number isn't zero
+        "kpis": [
+            {"label": "Active projects", "value": active_projects.count()},
+            {"label": "Late projects", "value": active_projects.filter(end_date__lt=today).count(), "warn": True},
+            {"label": "Open tasks", "value": open_tasks.count()},
+            {"label": "Overdue tasks", "value": overdue_tasks.count(), "warn": True},
+            {"label": "Done in the last 30 days",
+             "value": Task.objects.filter(completed_at__gte=timezone.now() - timedelta(days=30)).count()},
+        ],
+        "workload": workload,
+        "done_per_week": done_per_week,
+        "needs_attention": needs_attention,
+        "oldest_overdue": oldest_overdue,
+    }
+    return render(request, "projects/dashboard.html", context)
