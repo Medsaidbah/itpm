@@ -18,6 +18,11 @@ class User(AbstractUser):
         # Admins and managers can create projects and assign work
         return self.role in (self.Role.ADMIN, self.Role.MANAGER)
 
+    @property
+    def is_admin(self):
+        # Admins can do everything, in every project
+        return self.role == self.Role.ADMIN
+
     def save(self, *args, **kwargs):
         # A superuser is always an admin in the app
         if self.is_superuser:

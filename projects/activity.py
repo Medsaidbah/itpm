@@ -3,7 +3,8 @@
 Nothing new is saved for this. The app already keeps everything the feed needs:
   - every version of every project and task, with who saved it and when
     (django-simple-history, added in Step 3);
-  - comments and files, with their author and date (Step 7).
+  - comments and files, with their author and date (Step 7);
+  - who added whom to a project's team, or removed them, and when (Stage 16).
 This file reads them, newest first, and turns them into short sentences.
 """
 
@@ -19,7 +20,7 @@ from django.utils.dateparse import parse_datetime
 from django.utils.formats import date_format
 from django.utils.timesince import timesince
 
-from .models import Attachment, Comment, Project, Task
+from .models import Attachment, Comment, Project, ProjectMember, Task
 
 PAGE_SIZE = 30  # events per page
 
@@ -168,6 +169,30 @@ def task_event(version, tasks, projects, people):
     return event
 
 
+def team_event(version, projects, people):
+    """Someone added a person to a project's team, or removed them from it."""
+    project = projects.get(version.project_id)
+    if project is None:
+        return None  # the project was deleted since: the feed already says so
+    person = people.get(version.user_id)
+    name = str(person) if person else "a deleted user"
+    if version.history_type == "+":
+        icon, color, action = "ti-user-plus", "green", f"added {name} to the team of"
+    elif version.history_type == "-":
+        icon, color, action = "ti-user-minus", "orange", f"removed {name} from the team of"
+    else:
+        return None  # "~": nothing that the feed shows changed
+    return Event(
+        when=version.history_date,
+        who=version.history_user,
+        icon=icon,
+        color=color,
+        action=action,
+        name=project.name,
+        url=project.get_absolute_url(),
+    )
+
+
 def comment_event(comment):
     return Event(
         when=comment.created_at,
@@ -213,11 +238,12 @@ def get_events(project=None, task=None, person=None, before=None, limit=PAGE_SIZ
     Returns (events, older_than). older_than is the moment where the next page starts,
     or None when there is nothing older."""
 
-    # 1. The four places where things are recorded
+    # 1. The five places where things are recorded
     project_versions = with_previous_id(Project.history.select_related("history_user"))
     task_versions = with_previous_id(Task.history.select_related("history_user"))
     comments = Comment.objects.select_related("author", "task__project")
     files = Attachment.objects.select_related("uploaded_by", "task__project")
+    team_versions = ProjectMember.history.select_related("history_user")  # people added to a team or removed
 
     # 2. The filters
     if project:
@@ -225,21 +251,25 @@ def get_events(project=None, task=None, person=None, before=None, limit=PAGE_SIZ
         task_versions = task_versions.filter(project_id=project.pk)
         comments = comments.filter(task__project=project)
         files = files.filter(task__project=project)
+        team_versions = team_versions.filter(project_id=project.pk)
     if task:
         project_versions = project_versions.none()
         task_versions = task_versions.filter(id=task.pk)
         comments = comments.filter(task=task)
         files = files.filter(task=task)
+        team_versions = team_versions.none()  # a team belongs to a project, not to a task
     if person:
         project_versions = project_versions.filter(history_user=person)
         task_versions = task_versions.filter(history_user=person)
         comments = comments.filter(author=person)
         files = files.filter(uploaded_by=person)
+        team_versions = team_versions.filter(history_user=person)
     if before:  # "Show older activity": only what happened before that moment
         project_versions = project_versions.filter(history_date__lt=before)
         task_versions = task_versions.filter(history_date__lt=before)
         comments = comments.filter(created_at__lt=before)
         files = files.filter(uploaded_at__lt=before)
+        team_versions = team_versions.filter(history_date__lt=before)
 
     # 3. The newest of each kind, all mixed together and sorted by date.
     #    We take one more than a page, to find out if there is anything older.
@@ -248,6 +278,7 @@ def get_events(project=None, task=None, person=None, before=None, limit=PAGE_SIZ
         + [(v.history_date, "task", v) for v in task_versions.order_by("-history_date", "-history_id")[: limit + 1]]
         + [(c.created_at, "comment", c) for c in comments.order_by("-created_at")[: limit + 1]]
         + [(f.uploaded_at, "file", f) for f in files.order_by("-uploaded_at")[: limit + 1]]
+        + [(v.history_date, "team", v) for v in team_versions.order_by("-history_date", "-history_id")[: limit + 1]]
     )
     found.sort(key=lambda item: item[0], reverse=True)  # newest first
     page = found[:limit]
@@ -262,9 +293,10 @@ def get_events(project=None, task=None, person=None, before=None, limit=PAGE_SIZ
         for version in versions:
             version.previous = previous.get(version.previous_id)
 
-    people = get_user_model().objects.in_bulk()  # the whole team (it's small)
+    people = get_user_model().objects.in_bulk()  # everyone (there aren't many people)
     task_ids = set()
     project_ids = {version.id for version in page_project_versions}
+    project_ids |= {item.project_id for _, kind, item in page if kind == "team"}
     for version in page_task_versions:
         task_ids.add(version.id)
         project_ids.add(version.project_id)
@@ -283,6 +315,8 @@ def get_events(project=None, task=None, person=None, before=None, limit=PAGE_SIZ
             event = task_event(item, tasks, projects, people)
         elif kind == "comment":
             event = comment_event(item)
+        elif kind == "team":
+            event = team_event(item, projects, people)
         else:
             event = file_event(item)
         if event:  # None for a save that changed nothing that the feed shows

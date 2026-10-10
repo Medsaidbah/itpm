@@ -1,6 +1,7 @@
 import os
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models import Count, Q
@@ -98,6 +99,10 @@ class Project(models.Model):
         This is the only place the rule is written, so it's easy to change later."""
         return user.can_manage
 
+    def can_manage_team(self, user):
+        """Who may add people to the team and remove them: admins and this project's manager."""
+        return user.is_admin or user.pk == self.manager_id
+
     def team(self):
         """Everyone in the team: the manager first, then the members by name."""
         members = sorted(
@@ -105,6 +110,24 @@ class Project(models.Model):
             key=lambda person: str(person).lower(),
         )
         return [self.manager] + members
+
+    def team_queryset(self):
+        """The people in the team (the manager and the members), as a database query."""
+        return get_user_model().objects.filter(
+            Q(pk=self.manager_id) | Q(pk__in=self.memberships.values("user"))
+        )
+
+    def add_to_team(self, user, added_by=None):
+        """Puts this person in the team, if they aren't in it already.
+        Returns True if they were added, False if they were in the team already."""
+        if user.pk == self.manager_id:
+            return False  # the manager is always part of the team
+        _, added = self.memberships.get_or_create(user=user, defaults={"added_by": added_by})
+        return added
+
+    def open_tasks_of(self, user):
+        """This person's tasks in this project that aren't done yet."""
+        return self.tasks.filter(assignee=user).exclude(status=Task.Status.DONE)
 
     def clean(self):
         if self.start_date and self.end_date and self.end_date < self.start_date:
@@ -143,7 +166,8 @@ class Project(models.Model):
 
 class ProjectMember(models.Model):
     """One person in a project's team. The project's manager is always part of the team
-    (through Project.manager), so the manager doesn't need a line here."""
+    (through Project.manager), so the manager doesn't need a line here. When a member becomes
+    the manager, their line just stays: it's ignored while they are the manager."""
 
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="memberships")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="memberships")

@@ -68,7 +68,7 @@ class WaitsForRuleTests(TeamTestCase):
         self.task.depends_on.add(order)  # "Install" waits for "Order"
         # Now try to make "Order" wait for "Install": that would be a loop
         form = TaskForm(self.task_form_data(order, depends_on=[self.task.pk]),
-                        instance=order, project=self.project)
+                        instance=order, project=self.project, user=self.omar)
         self.assertFalse(form.is_valid())
         self.assertIn('"Install the firewall" already waits for this task, so this task can\'t wait for it.',
                       form.errors["depends_on"])

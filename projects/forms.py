@@ -1,4 +1,6 @@
 from django import forms
+from django.contrib.auth import get_user_model
+from django.db.models import Q
 
 from .models import Attachment, Comment, Project, Task
 
@@ -73,7 +75,8 @@ class TaskForm(BootstrapFormMixin, forms.ModelForm):
             "depends_on": "Tick the tasks that must be done before this one can start.",
         }
 
-    def __init__(self, *args, project, **kwargs):
+    def __init__(self, *args, project, user, **kwargs):
+        """project: the task's project. user: the person filling in the form."""
         super().__init__(*args, **kwargs)
         # The project comes from the page address, not from the form
         self.instance.project = project
@@ -85,12 +88,42 @@ class TaskForm(BootstrapFormMixin, forms.ModelForm):
 
         self.fields["parent"].queryset = others.filter(parent__isnull=True)
         self.fields["parent"].empty_label = "None (this is a main task)"
-        self.fields["assignee"].empty_label = "Unassigned"
         self.fields["depends_on"].queryset = others
         # Show subtasks as "Main task › Subtask", so tasks with the same name can be told apart
         self.fields["depends_on"].label_from_instance = (
             lambda task: f"{task.parent} › {task}" if task.parent_id else str(task)
         )
+        self.set_assignee_choices(project, user)
+
+    def set_assignee_choices(self, project, user):
+        """Who the task can be given to (only people whose account is active):
+        - the people in the project's team;
+        - the person the task is assigned to now, even if they left the team,
+          so that saving the task never takes it away from them;
+        - admins can choose anyone: a person outside the team joins it when the task is saved."""
+        field = self.fields["assignee"]
+        field.empty_label = "Unassigned"
+        people = get_user_model().objects.filter(is_active=True).order_by("first_name", "last_name", "username")
+
+        if not user.is_admin:
+            allowed = Q(pk__in=project.team_queryset().values("pk"))
+            if self.instance.assignee_id:
+                allowed |= Q(pk=self.instance.assignee_id)
+            field.queryset = people.filter(allowed)
+            field.help_text = (
+                "Only people in this project's team are listed. People are added to the team on the project page."
+            )
+            field.error_messages["invalid_choice"] = "Choose someone in the project's team."
+            return
+
+        # Admins: everyone, in two groups in the list: the team first, then the others
+        field.queryset = people
+        team = set(project.team_queryset().values_list("pk", flat=True))
+        in_team = [(person.pk, str(person)) for person in people if person.pk in team]
+        others = [(person.pk, str(person)) for person in people if person.pk not in team]
+        groups = [("In the team", in_team), ("Not in the team: they will join it", others)]
+        field.choices = [("", field.empty_label)] + [(label, options) for label, options in groups if options]
+        field.help_text = "As an admin, you can choose anyone. A person outside the team joins the team when you save."
 
     def clean_depends_on(self):
         chosen = self.cleaned_data["depends_on"]
@@ -102,6 +135,28 @@ class TaskForm(BootstrapFormMixin, forms.ModelForm):
                         f'"{task}" already waits for this task, so this task can\'t wait for it.'
                     )
         return chosen
+
+
+class TeamMemberForm(BootstrapFormMixin, forms.Form):
+    """The "Add to the team" box on the project page."""
+
+    person = forms.ModelChoiceField(
+        queryset=None,  # set below, for each project
+        empty_label="Choose a person…",
+        error_messages={
+            "required": "Choose a person to add to the team.",
+            "invalid_choice": "This person can't be added: they are in the team already, or their account is disabled.",
+        },
+    )
+
+    def __init__(self, *args, project, **kwargs):
+        super().__init__(*args, **kwargs)
+        # People whose account is active and who aren't in the team yet
+        self.fields["person"].queryset = (
+            get_user_model().objects.filter(is_active=True)
+            .exclude(pk__in=project.team_queryset().values("pk"))
+            .order_by("first_name", "last_name", "username")
+        )
 
 
 class CommentForm(BootstrapFormMixin, forms.ModelForm):

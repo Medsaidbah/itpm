@@ -15,8 +15,8 @@ from django.views.decorators.http import require_POST
 
 from .activity import get_events
 from .emails import email_new_assignee
-from .forms import MAX_UPLOAD_MB, AttachmentForm, CommentForm, ProjectForm, TaskForm
-from .models import Attachment, Comment, Project, Task
+from .forms import MAX_UPLOAD_MB, AttachmentForm, CommentForm, ProjectForm, TaskForm, TeamMemberForm
+from .models import Attachment, Comment, Project, ProjectMember, Task
 
 
 @login_required
@@ -99,12 +99,29 @@ def project_detail(request, pk):
             ),
         )
     )
+    # The team, with each person's open tasks in this project (counted in one query)
+    team = project.team()
+    open_tasks = dict(
+        project.tasks.exclude(status=Task.Status.DONE)
+        .values_list("assignee")
+        .annotate(count=Count("id"))
+        .order_by()
+    )
+    for person in team:
+        person.open_tasks = open_tasks.get(person.pk, 0)
+    can_manage_team = project.can_manage_team(request.user)
+    team_form = TeamMemberForm(project=project) if can_manage_team else None
+
     # The last 5 things that happened in this project (the Activity page shows everything)
     recent_activity, _ = get_events(project=project, limit=5)
     context = {
         "project": project,
         "tasks": tasks,
-        "team": project.team(),
+        "team": team,
+        "can_manage_team": can_manage_team,
+        "team_form": team_form,
+        # False when everyone is in the team already
+        "people_to_add": team_form is not None and team_form.fields["person"].queryset.exists(),
         "can_edit": project.can_edit(request.user),
         "recent_activity": recent_activity,
     }
@@ -136,15 +153,71 @@ def project_edit(request, pk):
         raise PermissionDenied("Only admins and managers can edit projects.")
 
     if request.method == "POST":
+        previous_manager = project.manager  # read it now: checking the form changes the project
         form = ProjectForm(request.POST, instance=project)
         if form.is_valid():
             form.save()
             messages.success(request, "Changes saved.")
+            # A new manager: the previous one stays in the team, as a member
+            if project.manager_id != previous_manager.pk and project.add_to_team(
+                previous_manager, added_by=request.user
+            ):
+                messages.info(request, f"{previous_manager} stays in the team, as a member.")
             return redirect(project)
     else:
         form = ProjectForm(instance=project)
 
     return render(request, "projects/project_form.html", {"form": form, "project": project})
+
+
+# ---------- The project's team ----------
+# The project's manager and the admins add people to the team and remove them.
+
+
+@login_required
+@require_POST
+def team_add(request, pk):
+    project = get_object_or_404(Project, pk=pk)
+    if not project.can_manage_team(request.user):
+        raise PermissionDenied("Only the project's manager and admins can change its team.")
+
+    form = TeamMemberForm(request.POST, project=project)
+    if form.is_valid():
+        person = form.cleaned_data["person"]
+        project.add_to_team(person, added_by=request.user)
+        messages.success(request, f"{person} is now in the team.")
+    else:
+        messages.error(request, " ".join(form.errors["person"]))
+    # Back to the top of the project page, where the message is shown (the team is just below)
+    return redirect(project)
+
+
+@login_required
+@require_POST
+def team_remove(request, pk, user_pk):
+    project = get_object_or_404(Project, pk=pk)
+    if not project.can_manage_team(request.user):
+        raise PermissionDenied("Only the project's manager and admins can change its team.")
+    membership = get_object_or_404(ProjectMember.objects.select_related("user"), project=project, user_id=user_pk)
+    person = membership.user
+    if person.pk == project.manager_id:
+        messages.error(request, f"{person} is the project's manager: the manager is always in the team.")
+        return redirect(project)
+
+    # The person's open tasks must first go to someone else, so nobody is left with tasks
+    # in a project they're not part of. Finished tasks don't count: they keep the person's name.
+    open_count = project.open_tasks_of(person).count()
+    if open_count:
+        them = "it" if open_count == 1 else "them"
+        messages.error(
+            request,
+            f"{person} still has {open_count} open task{'s' if open_count > 1 else ''} in this project. "
+            f"Give {them} to someone else (or finish {them}), then remove {person} from the team.",
+        )
+    else:
+        membership.delete()  # recorded in the history, so the Activity page shows it
+        messages.success(request, f"{person} is no longer in the team.")
+    return redirect(project)
 
 
 # ---------- Tasks ----------
@@ -193,6 +266,16 @@ def tell_new_assignee(request, task, previous_assignee_id):
         messages.warning(request, f"The task is saved, but the email to {task.assignee} couldn't be sent.")
 
 
+def join_team_if_needed(request, task, previous_assignee_id):
+    """After a task is saved: if it was just given to someone outside the team
+    (only admins can do that), that person joins the project's team."""
+    person = task.assignee
+    if person is None or person.pk == previous_assignee_id:
+        return
+    if task.project.add_to_team(person, added_by=request.user):
+        messages.info(request, f"{person} is now in the team of this project.")
+
+
 @login_required
 def task_create(request, project_pk):
     project = get_object_or_404(Project, pk=project_pk)
@@ -200,15 +283,16 @@ def task_create(request, project_pk):
         raise PermissionDenied("Only admins and managers can add tasks.")
 
     if request.method == "POST":
-        form = TaskForm(request.POST, project=project)
+        form = TaskForm(request.POST, project=project, user=request.user)
         if form.is_valid():
             task = form.save()
             messages.success(request, f'Task "{task.title}" created.')
+            join_team_if_needed(request, task, previous_assignee_id=None)
             tell_new_assignee(request, task, previous_assignee_id=None)
             return redirect(task)
     else:
         # "Add subtask" links end with ?parent=<number of the main task>
-        form = TaskForm(project=project, initial={"parent": request.GET.get("parent")})
+        form = TaskForm(project=project, user=request.user, initial={"parent": request.GET.get("parent")})
 
     return render(request, "projects/task_form.html", {"form": form, "project": project})
 
@@ -221,14 +305,15 @@ def task_edit(request, pk):
 
     if request.method == "POST":
         previous_assignee_id = task.assignee_id  # read it now: checking the form changes the task
-        form = TaskForm(request.POST, instance=task, project=task.project)
+        form = TaskForm(request.POST, instance=task, project=task.project, user=request.user)
         if form.is_valid():
             form.save()
             messages.success(request, "Changes saved.")
+            join_team_if_needed(request, task, previous_assignee_id)
             tell_new_assignee(request, task, previous_assignee_id)
             return redirect(task)
     else:
-        form = TaskForm(instance=task, project=task.project)
+        form = TaskForm(instance=task, project=task.project, user=request.user)
 
     context = {"form": form, "project": task.project, "task": task}
     return render(request, "projects/task_form.html", context)

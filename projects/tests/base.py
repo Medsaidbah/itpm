@@ -6,7 +6,7 @@ from django.test import TestCase
 from django.utils import timezone
 
 from accounts.models import User
-from projects.models import Project, Task
+from projects.models import Project, ProjectMember, Task
 
 
 def days_from_today(days):
@@ -17,7 +17,7 @@ def days_from_today(days):
 class TeamTestCase(TestCase):
     """Each test in a class built on this one starts with:
     - Amina (admin), Omar (manager), Sara and Karim (members)
-    - the project "Firewall", managed by Omar
+    - the project "Firewall", managed by Omar. Its team: Omar and Sara (Karim isn't in it)
     - the task "Install the firewall" in it, assigned to Sara, due in 5 days.
     Whatever a test changes is undone after it, so tests can't disturb each other."""
 
@@ -31,6 +31,7 @@ class TeamTestCase(TestCase):
         cls.karim = User.objects.create_user("karim", "karim@example.com", first_name="Karim")
 
         cls.project = Project.objects.create(name="Firewall", manager=cls.omar, status="in_progress")
+        ProjectMember.objects.create(project=cls.project, user=cls.sara)
         cls.task = Task.objects.create(project=cls.project, title="Install the firewall",
                                        assignee=cls.sara, due_date=days_from_today(5))
 

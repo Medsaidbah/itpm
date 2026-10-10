@@ -82,8 +82,8 @@
   </div>
 </div>
 
-{# The team: the manager and the members (Step 16a). Admins change it in the admin panel for now. #}
-<div class="card mb-4">
+{# The team: the manager and the members. The manager and admins add and remove people here. #}
+<div class="card mb-4" id="team">
   <div class="card-header">
     <h3 class="card-title">Team <span class="badge bg-secondary-lt ms-1">{{ team|length }}</span></h3>
   </div>
@@ -93,13 +93,39 @@
       <div class="d-flex align-items-center gap-2">
         <span class="avatar avatar-sm">{{ person.username|first|upper }}</span>
         <div>
-          <div>{{ person }}</div>
-          <div class="small text-secondary">{% if person.pk == project.manager_id %}Manager{% else %}Member{% endif %}</div>
+          <div>{{ person }}{% if not person.is_active %} <span class="badge bg-secondary-lt">Account disabled</span>{% endif %}</div>
+          <div class="small text-secondary">
+            {% if person.pk == project.manager_id %}Manager{% else %}Member{% endif %}
+            {% if person.open_tasks %}· {{ person.open_tasks }} open task{{ person.open_tasks|pluralize }}{% endif %}
+          </div>
         </div>
+        {% if can_manage_team and person.pk != project.manager_id %}
+        {# escapejs: a name with a quote in it can't break the question #}
+        <form method="post" action="{% url 'team_remove' project.pk person.pk %}"
+              onsubmit="return confirm('Remove {{ person|escapejs }} from the team?');">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-sm btn-ghost-secondary btn-icon" title="Remove from the team"
+                  aria-label="Remove {{ person }} from the team"><i class="ti ti-x"></i></button>
+        </form>
+        {% endif %}
       </div>
       {% endfor %}
     </div>
   </div>
+  {% if can_manage_team %}
+  <div class="card-footer">
+    {% if people_to_add %}
+    <form method="post" action="{% url 'team_add' project.pk %}" class="d-flex flex-wrap gap-2">
+      {% csrf_token %}
+      <label class="visually-hidden" for="{{ team_form.person.id_for_label }}">Person to add to the team</label>
+      <div class="flex-fill" style="max-width: 22rem">{{ team_form.person }}</div>
+      <button type="submit" class="btn"><i class="ti ti-user-plus me-2"></i>Add to the team</button>
+    </form>
+    {% else %}
+    <div class="text-secondary">Everyone is in the team already.</div>
+    {% endif %}
+  </div>
+  {% endif %}
 </div>
 
 {# Tasks, with subtasks under their main task #}

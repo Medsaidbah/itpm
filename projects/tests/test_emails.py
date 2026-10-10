@@ -101,6 +101,7 @@ class NewTaskEmailTests(TeamTestCase):
         self.assertEqual(mail.outbox, [])
 
     def test_giving_a_task_to_someone_else_sends_an_email(self):
+        self.project.add_to_team(self.karim)  # tasks only go to people in the team
         self.login(self.omar)
         self.client.post(f"/tasks/{self.task.pk}/edit/", self.task_form_data(assignee=self.karim.pk))
         self.assertEqual([email.to for email in mail.outbox], [["karim@example.com"]])
