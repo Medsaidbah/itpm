@@ -1,5 +1,7 @@
 {% load static %}
 {% load people %}
+{# i18n: {% translate "..." %} marks a text for the translations of Stage 17c #}
+{% load i18n %}
 <!doctype html>
 <html lang="en">
 <head>
@@ -41,7 +43,8 @@
               <a href="{% url 'profile' %}" class="dropdown-item"><i class="ti ti-user me-2"></i>My profile</a>
               <div class="dropdown-divider"></div>
               {% if user.is_staff and user.is_admin %}
-              <a href="{% url 'admin:index' %}" class="dropdown-item"><i class="ti ti-settings me-2"></i>Admin panel</a>
+              {# Django's own admin panel: a technical tool. The app's Administration is in the main menu. #}
+              <a href="{% url 'admin:index' %}" class="dropdown-item"><i class="ti ti-tool me-2"></i>{% translate "Django admin (technical)" %}</a>
               <div class="dropdown-divider"></div>
               {% endif %}
               {# Since Django 5, logging out must be a small form (POST), not a plain link #}
@@ -71,6 +74,12 @@
             <li class="nav-item {% block nav_dashboard %}{% endblock %}">
               <a class="nav-link" href="{% url 'dashboard' %}"><i class="ti ti-chart-bar me-2"></i>Dashboard</a>
             </li>
+            {# Only admins see this item (and only they can open the pages behind it) #}
+            {% if user.is_admin %}
+            <li class="nav-item {% block nav_administration %}{% endblock %}">
+              <a class="nav-link" href="{% url 'admin_home' %}"><i class="ti ti-shield-lock me-2"></i>{% translate "Administration" %}</a>
+            </li>
+            {% endif %}
           </ul>
         </div>
       </div>

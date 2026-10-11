@@ -94,7 +94,7 @@
       <div class="d-flex align-items-center gap-2">
         {% avatar person %}
         <div>
-          <div>{% person_link person "text-reset" %}{% if not person.is_active %} <span class="badge bg-secondary-lt">Account disabled</span>{% endif %}</div>
+          <div>{% person_link person "text-reset" %}{% if not person.is_active %} <span class="badge bg-secondary-lt">Account deactivated</span>{% endif %}</div>
           <div class="small text-secondary">
             {% if person.pk == project.manager_id %}Manager{% else %}Member{% endif %}
             {% if person.open_tasks %}· {{ person.open_tasks }} open task{{ person.open_tasks|pluralize }}{% endif %}

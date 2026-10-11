@@ -3,6 +3,7 @@ from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
+from django.utils.translation import gettext_lazy
 
 
 def validate_phone(value):
@@ -54,6 +55,18 @@ class User(AbstractUser):
             # Delete the old file once the database change is final ("on commit")
             storage = self.picture.storage
             transaction.on_commit(lambda: storage.delete(old_picture))
+
+
+# Shown when a change would leave the app without any active admin
+NO_ADMIN_LEFT = gettext_lazy("The app needs at least one active admin. Give the Admin role to someone else first.")
+
+
+def leaves_no_active_admin(person, role, is_active):
+    """True if giving this person this role and this active status would leave the app without
+    any active admin. Then nobody could manage the people and the projects anymore, so it's refused."""
+    if role == User.Role.ADMIN and is_active:
+        return False
+    return not User.objects.filter(role=User.Role.ADMIN, is_active=True).exclude(pk=person.pk).exists()
 
 
 @receiver(post_delete, sender=User)

@@ -1,0 +1,104 @@
+{% extends "administration/base.html" %}
+{% load i18n people %}
+
+{% block title %}{% translate "Tasks" %} · {% translate "Administration" %} · IT Projects{% endblock %}
+{% block page_title %}{% translate "Tasks" %}{% endblock %}
+
+{% block section_content %}
+{# Filters: a normal form that reloads this page with ?state=...&project=...&person=...&q=... in the address #}
+<form method="get" class="row g-2 mb-3">
+  <div class="col-12 col-md-4 col-lg-3">
+    <input type="search" name="q" value="{{ query }}" class="form-control"
+           placeholder="{% translate 'Words of the title…' %}" aria-label="{% translate 'Search' %}">
+  </div>
+  <div class="col-6 col-md-2">
+    <select name="state" class="form-select" aria-label="{% translate 'Tasks' %}" onchange="this.form.submit()">
+      <option value="open" {% if state == "open" %}selected{% endif %}>{% translate "Open" %}</option>
+      <option value="late" {% if state == "late" %}selected{% endif %}>{% translate "Late" %}</option>
+      <option value="done" {% if state == "done" %}selected{% endif %}>{% translate "Done" %}</option>
+      <option value="all" {% if state == "all" %}selected{% endif %}>{% translate "All tasks" %}</option>
+    </select>
+  </div>
+  <div class="col-6 col-md-3 col-lg-2">
+    <select name="project" class="form-select" aria-label="{% translate 'Project' %}" onchange="this.form.submit()">
+      <option value="">{% translate "All projects" %}</option>
+      {% for item in projects %}
+      <option value="{{ item.pk }}" {% if project == item.pk|stringformat:"d" %}selected{% endif %}>{{ item.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-8 col-md-3 col-lg-2">
+    <select name="person" class="form-select" aria-label="{% translate 'Assigned to' %}" onchange="this.form.submit()">
+      <option value="">{% translate "Everyone" %}</option>
+      <option value="none" {% if person == "none" %}selected{% endif %}>{% translate "Unassigned" %}</option>
+      {% for item in people %}
+      <option value="{{ item.pk }}" {% if person == item.pk|stringformat:"d" %}selected{% endif %}>{{ item }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn"><i class="ti ti-search me-2"></i>{% translate "Search" %}</button>
+  </div>
+</form>
+
+<div class="card">
+  <div class="card-header">
+    <h3 class="card-title">
+      {% blocktranslate count counter=page.paginator.count %}{{ counter }} task{% plural %}{{ counter }} tasks{% endblocktranslate %}
+    </h3>
+  </div>
+  {% if page.object_list %}
+  <div class="table-responsive">
+    <table class="table card-table table-vcenter">
+      <thead>
+        <tr>
+          <th>{% translate "Task" %}</th>
+          <th class="d-none d-md-table-cell">{% translate "Assigned to" %}</th>
+          <th class="d-none d-sm-table-cell">{% translate "Status" %}</th>
+          <th>{% translate "Due date" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for task in page.object_list %}
+        <tr>
+          <td class="text-break">
+            <a href="{{ task.get_absolute_url }}">{{ task.title }}</a>
+            <div class="small text-secondary">
+              {{ task.project }}{% if task.parent %} · {{ task.parent }}{% endif %}
+              {# On phones, the person and the status go here #}
+              <span class="d-md-none">· {{ task.assignee|default:_("Unassigned") }}</span>
+              <span class="d-sm-none">· {{ task.get_status_display }}</span>
+            </div>
+          </td>
+          <td class="d-none d-md-table-cell">
+            <div class="d-flex align-items-center gap-2">
+              {% avatar task.assignee %}
+              {% if task.assignee %}{{ task.assignee }}{% if not task.assignee.is_active %} <span class="badge bg-red-lt">{% translate "Account deactivated" %}</span>{% endif %}{% else %}<span class="text-secondary">{% translate "Unassigned" %}</span>{% endif %}
+            </div>
+          </td>
+          <td class="d-none d-sm-table-cell"><span class="badge bg-{{ task.status_color }}-lt">{{ task.get_status_display }}</span></td>
+          <td class="text-nowrap {% if task.is_overdue %}text-danger{% endif %}">{{ task.due_date|date:"d M Y"|default:_("No date") }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% if page.has_other_pages %}
+  {# Previous and next pages of the list, with the same filters #}
+  <div class="card-footer d-flex align-items-center gap-2">
+    <span class="text-secondary me-auto">{% blocktranslate with number=page.number total=page.paginator.num_pages %}Page {{ number }} of {{ total }}{% endblocktranslate %}</span>
+    {% if page.has_previous %}
+    <a href="?{% if filters %}{{ filters }}&amp;{% endif %}page={{ page.previous_page_number }}" class="btn btn-sm"><i class="ti ti-chevron-left me-1"></i>{% translate "Previous" %}</a>
+    {% endif %}
+    {% if page.has_next %}
+    <a href="?{% if filters %}{{ filters }}&amp;{% endif %}page={{ page.next_page_number }}" class="btn btn-sm">{% translate "Next" %}<i class="ti ti-chevron-right ms-1"></i></a>
+    {% endif %}
+  </div>
+  {% endif %}
+  {% else %}
+  <div class="card-body text-secondary">
+    {% if filtered %}{% translate "No task matches these filters." %}{% else %}{% translate "There are no open tasks." %}{% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

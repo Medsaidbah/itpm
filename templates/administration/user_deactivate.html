@@ -1,0 +1,53 @@
+{% extends "administration/base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Deactivate" %} · {% translate "Administration" %} · IT Projects{% endblock %}
+{% block page_title %}{% translate "Users" %}{% endblock %}
+
+{% block section_content %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <form method="post" class="card">
+      {% csrf_token %}
+      <div class="card-status-top bg-danger"></div>
+      <div class="card-body">
+        <h2 class="h3 mb-3"><i class="ti ti-user-off text-danger me-2"></i>{% blocktranslate with person=person %}Deactivate the account of {{ person }}?{% endblocktranslate %}</h2>
+        <ul>
+          <li>{% translate "They can't log in anymore: they are logged out at their next click." %}</li>
+          <li>{% translate "They get no more reminder emails, and nobody can give them new tasks." %}</li>
+          <li>{% translate "Nothing is deleted: their projects, tasks, comments and files stay, with their name." %}</li>
+          <li>{% translate "You can reactivate the account at any time." %}</li>
+        </ul>
+
+        {% if managed_projects %}
+        <div class="alert alert-warning" role="alert">
+          <div class="mb-1">{% translate "They manage these active projects. Only admins can edit a project whose manager is deactivated, so choose a new manager on each project's Edit page:" %}</div>
+          <ul class="mb-0">
+            {% for project in managed_projects %}
+            <li><a href="{% url 'project_edit' project.pk %}">{{ project.name }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+
+        {% if open_tasks %}
+        <div class="alert alert-warning" role="alert">
+          <div class="mb-1">
+            {% blocktranslate count counter=open_tasks|length %}They still have {{ counter }} open task. It stays theirs until someone gives it to another person:{% plural %}They still have {{ counter }} open tasks. They stay theirs until someone gives them to another person:{% endblocktranslate %}
+          </div>
+          <ul class="mb-0">
+            {% for task in open_tasks %}
+            <li><a href="{{ task.get_absolute_url }}">{{ task.title }}</a> <span class="text-secondary">· {{ task.project }}</span></li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+      </div>
+      <div class="card-footer d-flex justify-content-end gap-2">
+        <a href="{% url 'admin_user' person.pk %}" class="btn">{% translate "Cancel" %}</a>
+        <button type="submit" class="btn btn-danger"><i class="ti ti-user-off me-2"></i>{% translate "Deactivate the account" %}</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

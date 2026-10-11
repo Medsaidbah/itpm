@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{# Shown before deleting a project (admins only). The project is deleted when this form is sent with its name. #}
+{% block title %}{% translate "Delete project" %} · IT Projects{% endblock %}
+{% block nav_projects %}active{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <form method="post" class="card">
+      {% csrf_token %}
+      {% if next %}<input type="hidden" name="next" value="{{ next }}">{% endif %}
+      <div class="card-status-top bg-danger"></div>
+      <div class="card-body">
+        <h2 class="h3 mb-3"><i class="ti ti-alert-triangle text-danger me-2"></i>{% translate "Delete this project?" %}</h2>
+        <p>{% blocktranslate with name=project.name %}You're about to delete the project <strong>{{ name }}</strong> and everything in it:{% endblocktranslate %}</p>
+        <ul>
+          <li>{% blocktranslate count counter=task_count %}{{ counter }} task, subtasks included{% plural %}{{ counter }} tasks, subtasks included{% endblocktranslate %}</li>
+          <li>{% blocktranslate count counter=comment_count %}{{ counter }} comment{% plural %}{{ counter }} comments{% endblocktranslate %}</li>
+          <li>{% blocktranslate count counter=file_count %}{{ counter }} file{% plural %}{{ counter }} files{% endblocktranslate %}</li>
+          <li>{% blocktranslate count counter=team_count %}its team of {{ counter }} person (the person keeps their account){% plural %}its team of {{ counter }} people (the people keep their accounts){% endblocktranslate %}</li>
+        </ul>
+        <p class="text-danger">{% translate "This can't be undone." %}</p>
+        <p class="text-secondary">
+          {% translate "To stop a project without losing anything, set its status to Cancelled or Completed instead: it then leaves the list of active projects, and everything in it stays." %}
+        </p>
+
+        <div class="mb-2">{% translate "Project name:" %} <strong class="user-select-all">{{ project.name }}</strong></div>
+        {% include "includes/form_field.html" with field=form.name %}
+      </div>
+      <div class="card-footer d-flex flex-wrap justify-content-end gap-2">
+        <a href="{% if next %}{{ next }}{% else %}{% url 'project_edit' project.pk %}{% endif %}" class="btn">{% translate "Cancel" %}</a>
+        <button type="submit" class="btn btn-danger"><i class="ti ti-trash me-2"></i>{% translate "Delete project" %}</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

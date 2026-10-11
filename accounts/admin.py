@@ -4,7 +4,9 @@ from django.contrib.auth.admin import UserAdmin
 from .forms import UserAdminChangeForm
 from .models import User
 
-admin.site.site_header = "IT Projects administration"
+# Django's own admin panel. Since Stage 17b, the app has its own Administration section
+# (in the menu), and this panel stays as a technical tool: its menu link is "Django admin (technical)".
+admin.site.site_header = "IT Projects · Django admin (technical)"
 
 # The admin panel (people, roles, every project) is for the app's admins only.
 # Django already asks for "Staff status"; this also asks for the Admin role, so someone

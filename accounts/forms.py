@@ -3,7 +3,7 @@ from django.contrib.auth.forms import PasswordChangeForm, UserChangeForm
 
 from projects.forms import BootstrapFormMixin
 
-from .models import User
+from .models import NO_ADMIN_LEFT, User, leaves_no_active_admin
 from .pictures import MAX_PICTURE_MB, make_profile_picture
 
 
@@ -45,4 +45,15 @@ class StyledPasswordChangeForm(BootstrapFormMixin, PasswordChangeForm):
 
 
 class UserAdminChangeForm(PictureFormMixin, UserChangeForm):
-    """The person's page in Django's admin panel: a new picture is made small and square too."""
+    """The person's page in Django's admin panel: a new picture is made small and square too,
+    and the last active admin can't lose the Admin role or be deactivated there."""
+
+    def clean(self):
+        cleaned_data = super().clean()
+        # A superuser is always an admin (see User.save)
+        superuser = cleaned_data.get("is_superuser", self.instance.is_superuser)
+        role = User.Role.ADMIN if superuser else cleaned_data.get("role", self.instance.role)
+        is_active = cleaned_data.get("is_active", self.instance.is_active)
+        if leaves_no_active_admin(self.instance, role, is_active):
+            raise forms.ValidationError(NO_ADMIN_LEFT)
+        return cleaned_data

@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth import get_user_model
 from django.db.models import Q
+from django.utils.translation import gettext_lazy as _
 
 from .models import Attachment, Comment, Project, Task
 
@@ -62,6 +63,27 @@ class ProjectForm(BootstrapFormMixin, forms.ModelForm):
             manager.help_text = "Only admins can change the manager."
         else:
             manager.help_text = "The manager can edit the project, its tasks and its team."
+
+
+class ProjectDeleteForm(BootstrapFormMixin, forms.Form):
+    """Deleting a project can't be undone, so its name must be typed again to confirm."""
+
+    name = forms.CharField(
+        label=_("Type the project's name to confirm"),
+        max_length=200,
+        error_messages={"required": _("Type the project's name to confirm.")},
+    )
+
+    def __init__(self, *args, project, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.project = project
+        self.fields["name"].widget.attrs["autocomplete"] = "off"
+
+    def clean_name(self):
+        # The spaces before and after are left out (by Django); everything else must be the same
+        if self.cleaned_data["name"] != self.project.name.strip():
+            raise forms.ValidationError(_("This isn't the project's name. Type it exactly as it is written above."))
+        return self.cleaned_data["name"]
 
 
 class TaskForm(BootstrapFormMixin, forms.ModelForm):
@@ -159,7 +181,9 @@ class TeamMemberForm(BootstrapFormMixin, forms.Form):
         empty_label="Choose a person…",
         error_messages={
             "required": "Choose a person to add to the team.",
-            "invalid_choice": "This person can't be added: they are in the team already, or their account is disabled.",
+            "invalid_choice": (
+                "This person can't be added: they are in the team already, or their account is deactivated."
+            ),
         },
     )
 

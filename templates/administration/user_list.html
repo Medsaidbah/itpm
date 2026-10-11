@@ -1,0 +1,95 @@
+{% extends "administration/base.html" %}
+{% load i18n people %}
+
+{% block title %}{% translate "Users" %} · {% translate "Administration" %} · IT Projects{% endblock %}
+{% block page_title %}{% translate "Users" %}{% endblock %}
+
+{% block section_content %}
+{# Search and filters: a normal form that reloads this page with ?q=...&status=...&role=... in the address #}
+<form method="get" class="row g-2 mb-3">
+  <div class="col-12 col-md-5 col-lg-4">
+    <input type="search" name="q" value="{{ query }}" class="form-control"
+           placeholder="{% translate 'Name, username, email or phone…' %}" aria-label="{% translate 'Search' %}">
+  </div>
+  <div class="col-7 col-md-3 col-lg-2">
+    {# Picking a choice sends the form straight away #}
+    <select name="status" class="form-select" aria-label="{% translate 'Accounts' %}" onchange="this.form.submit()">
+      <option value="active" {% if status == "active" %}selected{% endif %}>{% translate "Active accounts" %}</option>
+      <option value="deactivated" {% if status == "deactivated" %}selected{% endif %}>{% translate "Deactivated accounts" %}</option>
+      <option value="all" {% if status == "all" %}selected{% endif %}>{% translate "All accounts" %}</option>
+    </select>
+  </div>
+  <div class="col-5 col-md-2">
+    <select name="role" class="form-select" aria-label="{% translate 'Role' %}" onchange="this.form.submit()">
+      <option value="">{% translate "All roles" %}</option>
+      {% for value, label in role_choices %}
+      <option value="{{ value }}" {% if role == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  {% if missing %}<input type="hidden" name="missing" value="1">{% endif %}
+  <div class="col-auto">
+    <button type="submit" class="btn"><i class="ti ti-search me-2"></i>{% translate "Search" %}</button>
+  </div>
+  <div class="col-auto ms-auto">
+    <a href="{% url 'admin_user_create' %}" class="btn btn-primary"><i class="ti ti-user-plus me-2"></i>{% translate "New user" %}</a>
+  </div>
+</form>
+
+{% if missing %}
+<div class="alert alert-info" role="alert">
+  {% translate "These accounts have no first name, no last name or no email. Open each one to complete it." %}
+  <a href="{% url 'admin_users' %}">{% translate "Show every account" %}</a>
+</div>
+{% endif %}
+
+<div class="card">
+  {% if people %}
+  <div class="table-responsive">
+    <table class="table card-table table-vcenter">
+      {# d-none d-md-table-cell: this column is hidden on phones and shown on wider screens #}
+      <thead>
+        <tr>
+          <th>{% translate "Person" %}</th>
+          <th class="d-none d-md-table-cell">{% translate "Email" %}</th>
+          <th>{% translate "Role" %}</th>
+          <th class="d-none d-sm-table-cell">{% translate "Projects" %}</th>
+          <th class="d-none d-sm-table-cell">{% translate "Open tasks" %}</th>
+          <th class="d-none d-lg-table-cell">{% translate "Last login" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for person in people %}
+        <tr>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              {% avatar person %}
+              <div class="text-break">
+                <a href="{% url 'admin_user' person.pk %}">{{ person }}</a>
+                <div class="small text-secondary">{{ person.username }}</div>
+                {% if not person.is_active %}<span class="badge bg-secondary-lt">{% translate "Deactivated" %}</span>{% endif %}
+                {% if person.is_locked %}<span class="badge bg-red-lt"><i class="ti ti-lock me-1"></i>{% translate "Login locked" %}</span>{% endif %}
+                {% if person.has_missing_details %}<span class="badge bg-orange-lt">{% translate "Missing details" %}</span>{% endif %}
+              </div>
+            </div>
+          </td>
+          <td class="d-none d-md-table-cell text-break">{{ person.email|default:"—" }}</td>
+          <td>
+            {% if person.is_admin %}<span class="badge bg-blue-lt">{{ person.get_role_display }}</span>
+            {% else %}<span class="badge bg-secondary-lt">{{ person.get_role_display }}</span>{% endif %}
+          </td>
+          <td class="d-none d-sm-table-cell">{{ person.project_count }}</td>
+          <td class="d-none d-sm-table-cell">{{ person.open_task_count }}</td>
+          <td class="d-none d-lg-table-cell text-secondary">{{ person.last_login|date:"d M Y"|default:_("Never") }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="card-body text-secondary">
+    {% if filtered %}{% translate "No account matches this search." %}{% else %}{% translate "There are no accounts yet." %}{% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

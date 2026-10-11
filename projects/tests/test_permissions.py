@@ -35,6 +35,11 @@ OK, MOVED, FORBIDDEN, HIDDEN = 200, 302, 403, 404
 # (Django lets only admins with "staff status" into the admin panel)
 NOT_ABOUT_PROJECTS = {"login", "logout", "admin"}
 
+# What Amina, Omar, Sara, Lina and Karim get from the Administration section (Stage 17b):
+# a page for the admin, "No access" for everyone else, whatever they can see in the projects
+ADMINS_ONLY_PAGE = (OK, FORBIDDEN, FORBIDDEN, FORBIDDEN, FORBIDDEN)
+ADMINS_ONLY_ACTION = (MOVED, FORBIDDEN, FORBIDDEN, FORBIDDEN, FORBIDDEN)
+
 
 class LoginRequiredTests(TeamTestCase):
     def test_pages_need_a_login(self):
@@ -50,6 +55,13 @@ class LoginRequiredTests(TeamTestCase):
             "/activity/",
             "/dashboard/",
             "/reminders/preview/",
+            f"/projects/{self.project.pk}/delete/",
+            "/administration/",
+            "/administration/users/",
+            f"/administration/users/{self.sara.pk}/",
+            "/administration/projects/",
+            "/administration/tasks/",
+            "/administration/logins/",
         ]
         for page in pages:
             with self.subTest(page=page):  # if one page fails, the message says which one
@@ -126,6 +138,26 @@ class EveryAddressTests(TeamTestCase):
             ("password_change", "get", "/profile/password/", None, (OK, OK, OK, OK, OK)),
             ("person_detail", "get", f"/people/{self.sara.pk}/", None, (OK, OK, OK, OK, HIDDEN)),
             ("person_picture", "get", f"/people/{self.sara.pk}/picture/", None, (OK, OK, OK, OK, HIDDEN)),
+            # Deleting a project: admins only. Like the other project pages, outsiders get "Page not found".
+            ("project_delete", "get", f"/projects/{p}/delete/", None, (OK, FORBIDDEN, FORBIDDEN, FORBIDDEN, HIDDEN)),
+            # The Administration section (Stage 17b): admins only, everyone else gets "No access"
+            ("admin_home", "get", "/administration/", None, ADMINS_ONLY_PAGE),
+            ("admin_users", "get", "/administration/users/", None, ADMINS_ONLY_PAGE),
+            ("admin_user_create", "get", "/administration/users/new/", None, ADMINS_ONLY_PAGE),
+            ("admin_user", "get", f"/administration/users/{self.sara.pk}/", None, ADMINS_ONLY_PAGE),
+            ("admin_user_password", "get", f"/administration/users/{self.sara.pk}/password/", None, ADMINS_ONLY_PAGE),
+            ("admin_user_deactivate", "get", f"/administration/users/{self.sara.pk}/deactivate/", None,
+             ADMINS_ONLY_PAGE),
+            ("admin_user_reactivate", "post", f"/administration/users/{self.karim.pk}/reactivate/", None,
+             ADMINS_ONLY_ACTION),
+            ("admin_user_add_project", "post", f"/administration/users/{self.karim.pk}/projects/add/",
+             {"project": p}, ADMINS_ONLY_ACTION),
+            ("admin_user_remove_project", "post", f"/administration/users/{self.lina.pk}/projects/{p}/remove/", None,
+             ADMINS_ONLY_ACTION),
+            ("admin_projects", "get", "/administration/projects/", None, ADMINS_ONLY_PAGE),
+            ("admin_tasks", "get", "/administration/tasks/", None, ADMINS_ONLY_PAGE),
+            ("admin_logins", "get", "/administration/logins/", None, ADMINS_ONLY_PAGE),
+            ("admin_unlock", "post", "/administration/logins/unlock/", {"username": "sara"}, ADMINS_ONLY_ACTION),
         ]
 
     def test_every_address_has_a_rule(self):

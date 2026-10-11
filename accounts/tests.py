@@ -52,10 +52,10 @@ class AdminPanelTests(TestCase):
         omar = User.objects.create_user("omar", "omar@example.com", is_staff=True)
         self.client.force_login(omar)
         self.assertRedirects(self.client.get("/admin/"), "/admin/login/?next=/admin/")
-        self.assertNotContains(self.client.get("/"), "Admin panel")
+        self.assertNotContains(self.client.get("/"), "Django admin (technical)")
         self.client.force_login(boss)
         self.assertEqual(self.client.get("/admin/").status_code, 200)
-        self.assertContains(self.client.get("/"), "Admin panel")
+        self.assertContains(self.client.get("/"), "Django admin (technical)")
 
 
 # Checking a password is slow on purpose (to slow down password guessing). These tests check

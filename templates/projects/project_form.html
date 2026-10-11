@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {# The same page is used to create a project and to edit one #}
 {% block title %}{% if project %}Edit project{% else %}New project{% endif %} · IT Projects{% endblock %}
@@ -31,7 +32,11 @@
           <div class="col-md-6">{% include "includes/form_field.html" with field=form.end_date %}</div>
         </div>
       </div>
-      <div class="card-footer d-flex justify-content-end gap-2">
+      <div class="card-footer d-flex flex-wrap justify-content-end gap-2">
+        {# Only admins delete projects: the next page asks to type the project's name first #}
+        {% if project and user.is_admin %}
+        <a href="{% url 'project_delete' project.pk %}" class="btn btn-outline-danger me-auto"><i class="ti ti-trash me-2"></i>{% translate "Delete project" %}</a>
+        {% endif %}
         <a href="{% if project %}{{ project.get_absolute_url }}{% else %}{% url 'project_list' %}{% endif %}" class="btn">Cancel</a>
         <button type="submit" class="btn btn-primary">{% if project %}Save changes{% else %}Create project{% endif %}</button>
       </div>

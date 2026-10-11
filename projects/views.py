@@ -11,11 +11,20 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
 from .activity import get_events
 from .emails import email_new_assignee
-from .forms import MAX_UPLOAD_MB, AttachmentForm, CommentForm, ProjectForm, TaskForm, TeamMemberForm
+from .forms import (
+    MAX_UPLOAD_MB,
+    AttachmentForm,
+    CommentForm,
+    ProjectDeleteForm,
+    ProjectForm,
+    TaskForm,
+    TeamMemberForm,
+)
 from .models import Attachment, Comment, Project, ProjectMember, Task
 
 
@@ -131,7 +140,7 @@ def project_detail(request, pk):
     team_form = TeamMemberForm(project=project) if can_manage_team else None
 
     # The last 5 things that happened in this project (the Activity page shows everything)
-    recent_activity, _ = get_events(viewer=request.user, project=project, limit=5)
+    recent_activity, _older_than = get_events(viewer=request.user, project=project, limit=5)
     context = {
         "project": project,
         "tasks": tasks,
@@ -184,6 +193,45 @@ def project_edit(request, pk):
         form = ProjectForm(instance=project, user=request.user)
 
     return render(request, "projects/project_form.html", {"form": form, "project": project})
+
+
+@login_required
+def project_delete(request, pk):
+    """Only admins delete projects (like only admins create them). A page asks to type the project's
+    name first; the project is deleted when that page is sent with the right name."""
+    project = get_object_or_404(visible_projects(request), pk=pk)
+    if not request.user.is_admin:
+        raise PermissionDenied(_("Only admins can delete projects."))
+
+    # The page to go back to (like Administration > Projects), given by the link as ?next=...
+    # Only addresses on this site are accepted, so a link can't send people elsewhere.
+    next_page = request.POST.get("next") or request.GET.get("next", "")
+    if not url_has_allowed_host_and_scheme(next_page, allowed_hosts={request.get_host()},
+                                           require_https=request.is_secure()):
+        next_page = ""
+
+    if request.method == "POST":
+        form = ProjectDeleteForm(request.POST, project=project)
+        if form.is_valid():
+            name = project.name
+            # Its tasks, comments, files and team go with it. The history keeps a trace:
+            # admins still see "deleted the project" on the Activity page.
+            project.delete()
+            messages.success(request, _('Project "%(name)s" deleted.') % {"name": name})
+            return redirect(next_page or "project_list")
+    else:
+        form = ProjectDeleteForm(project=project)
+
+    context = {
+        "project": project,
+        "form": form,
+        "next": next_page,
+        "task_count": project.tasks.count(),
+        "comment_count": Comment.objects.filter(task__project=project).count(),
+        "file_count": Attachment.objects.filter(task__project=project).count(),
+        "team_count": len(project.team()),
+    }
+    return render(request, "projects/project_confirm_delete.html", context)
 
 
 # ---------- The project's team ----------

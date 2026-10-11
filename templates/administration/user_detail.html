@@ -1,0 +1,215 @@
+{% extends "administration/base.html" %}
+{% load i18n people %}
+
+{% block title %}{{ person }} · {% translate "Administration" %} · IT Projects{% endblock %}
+{% block page_title %}{% translate "Users" %}{% endblock %}
+
+{% block section_content %}
+<div class="mb-3">
+  <a href="{% url 'admin_users' %}" class="text-secondary"><i class="ti ti-arrow-left me-1"></i>{% translate "All users" %}</a>
+</div>
+
+{% if not person.is_active %}
+<div class="alert alert-warning" role="alert">
+  <div class="d-flex flex-wrap align-items-center gap-2">
+    <div class="me-auto">
+      <strong>{% translate "This account is deactivated." %}</strong>
+      {% blocktranslate with person=person %}{{ person }} can't log in. Their projects, tasks and comments are kept.{% endblocktranslate %}
+    </div>
+    <form method="post" action="{% url 'admin_user_reactivate' person.pk %}">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-success"><i class="ti ti-user-check me-2"></i>{% translate "Reactivate" %}</button>
+    </form>
+  </div>
+</div>
+{% endif %}
+
+{# Who it is, and the buttons for the password and for deactivating #}
+<div class="card mb-4">
+  <div class="card-body d-flex flex-wrap align-items-center gap-3">
+    {% avatar person "xl" %}
+    <div class="me-auto">
+      <h3 class="h2 mb-1">{{ person }}</h3>
+      <div class="text-secondary">
+        {{ person.username }} ·
+        {% if person.last_login %}{% blocktranslate with date=person.last_login|date:"d M Y, H:i" %}last login {{ date }}{% endblocktranslate %}{% else %}{% translate "never logged in" %}{% endif %}
+      </div>
+      <div class="mt-2">
+        {% if person.is_admin %}<span class="badge bg-blue-lt">{{ person.get_role_display }}</span>{% else %}<span class="badge bg-secondary-lt">{{ person.get_role_display }}</span>{% endif %}
+        {% if not person.is_active %}<span class="badge bg-secondary-lt">{% translate "Deactivated" %}</span>{% endif %}
+        {% if is_me %}<span class="badge bg-green-lt">{% translate "You" %}</span>{% endif %}
+      </div>
+    </div>
+    <div class="btn-list">
+      {% if is_me %}
+      <a href="{% url 'person_detail' person.pk %}" class="btn"><i class="ti ti-id me-2"></i>{% translate "My page" %}</a>
+      <a href="{% url 'password_change' %}" class="btn"><i class="ti ti-key me-2"></i>{% translate "Change my password" %}</a>
+      {% else %}
+      <a href="{% url 'person_detail' person.pk %}" class="btn"><i class="ti ti-id me-2"></i>{% translate "Their page" %}</a>
+      <a href="{% url 'admin_user_password' person.pk %}" class="btn"><i class="ti ti-key me-2"></i>{% translate "Set a new password" %}</a>
+      {% if person.is_active %}
+      <a href="{% url 'admin_user_deactivate' person.pk %}" class="btn btn-outline-danger"><i class="ti ti-user-off me-2"></i>{% translate "Deactivate" %}</a>
+      {% endif %}
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<div class="row row-cards">
+  {# The account's details, changed here. enctype="multipart/form-data" is needed to send a picture. #}
+  <div class="col-lg-7">
+    <form method="post" enctype="multipart/form-data" class="card">
+      {% csrf_token %}
+      <div class="card-header">
+        <h3 class="card-title">{% translate "Account details" %}</h3>
+      </div>
+      <div class="card-body">
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger" role="alert">
+          {% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}
+        </div>
+        {% endif %}
+        <div class="row">
+          <div class="col-md-6">{% include "includes/form_field.html" with field=form.first_name %}</div>
+          <div class="col-md-6">{% include "includes/form_field.html" with field=form.last_name %}</div>
+        </div>
+        <div class="row">
+          <div class="col-md-6">{% include "includes/form_field.html" with field=form.email %}</div>
+          <div class="col-md-6">{% include "includes/form_field.html" with field=form.phone %}</div>
+        </div>
+        <div class="row">
+          <div class="col-md-6">{% include "includes/form_field.html" with field=form.username %}</div>
+          <div class="col-md-6">{% include "includes/form_field.html" with field=form.role %}</div>
+        </div>
+        {% include "includes/form_field.html" with field=form.picture %}
+        {% if person.picture %}{% include "includes/form_field.html" with field=form.remove_picture %}{% endif %}
+      </div>
+      <div class="card-footer text-end">
+        <button type="submit" class="btn btn-primary">{% translate "Save changes" %}</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="col-lg-5">
+    {# Every project the person manages or is a member of, with their open tasks in it #}
+    <div class="card mb-4">
+      <div class="card-header">
+        <h3 class="card-title">{% translate "Projects" %} <span class="badge bg-secondary-lt ms-1">{{ project_count }}</span></h3>
+      </div>
+      {% if managed_projects or member_projects %}
+      <div class="list-group list-group-flush">
+        {% for project in managed_projects %}
+        <div class="list-group-item">
+          <div class="d-flex align-items-center gap-2">
+            <div class="me-auto text-break">
+              <a href="{{ project.get_absolute_url }}">{{ project.name }}</a>
+              <div class="small text-secondary">
+                {% translate "Manager" %}{% if project.open_count %} · {% blocktranslate count counter=project.open_count %}{{ counter }} open task{% plural %}{{ counter }} open tasks{% endblocktranslate %}{% endif %}
+              </div>
+            </div>
+            <span class="badge bg-{{ project.status_color }}-lt">{{ project.get_status_display }}</span>
+          </div>
+        </div>
+        {% endfor %}
+        {% for project in member_projects %}
+        <div class="list-group-item">
+          <div class="d-flex align-items-center gap-2">
+            <div class="me-auto text-break">
+              <a href="{{ project.get_absolute_url }}">{{ project.name }}</a>
+              <div class="small text-secondary">
+                {% translate "Member" %}{% if project.open_count %} · {% blocktranslate count counter=project.open_count %}{{ counter }} open task{% plural %}{{ counter }} open tasks{% endblocktranslate %}{% endif %}
+              </div>
+            </div>
+            <span class="badge bg-{{ project.status_color }}-lt">{{ project.get_status_display }}</span>
+            {# The question is kept in data-confirm, where any name is written safely #}
+            {% blocktranslate asvar question with person=person project=project.name %}Take {{ person }} out of the team of {{ project }}?{% endblocktranslate %}
+            <form method="post" action="{% url 'admin_user_remove_project' person.pk project.pk %}"
+                  data-confirm="{{ question }}" onsubmit="return confirm(this.dataset.confirm);">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-sm btn-ghost-secondary btn-icon"
+                      title="{% translate 'Take out of the team' %}" aria-label="{{ question }}"><i class="ti ti-x"></i></button>
+            </form>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="card-body text-secondary">{% translate "Not in any project's team." %}</div>
+      {% endif %}
+      <div class="card-footer">
+        {% if not add_form %}
+        <div class="text-secondary">{% translate "Reactivate the account to add this person to projects." %}</div>
+        {% elif projects_to_add %}
+        <form method="post" action="{% url 'admin_user_add_project' person.pk %}" class="d-flex flex-wrap gap-2">
+          {% csrf_token %}
+          <label class="visually-hidden" for="{{ add_form.project.id_for_label }}">{% translate "Project" %}</label>
+          <div class="flex-fill">{{ add_form.project }}</div>
+          <button type="submit" class="btn"><i class="ti ti-user-plus me-2"></i>{% translate "Add to the team" %}</button>
+        </form>
+        {% else %}
+        <div class="text-secondary">{% translate "In the team of every project already." %}</div>
+        {% endif %}
+      </div>
+    </div>
+
+    {# Their open tasks, in every project #}
+    <div class="card mb-4">
+      <div class="card-header">
+        <h3 class="card-title">{% translate "Open tasks" %} <span class="badge bg-secondary-lt ms-1">{{ open_tasks|length }}</span></h3>
+      </div>
+      {% if open_tasks %}
+      <div class="list-group list-group-flush">
+        {% for task in open_tasks %}
+        <a href="{{ task.get_absolute_url }}" class="list-group-item list-group-item-action">
+          <div class="d-flex align-items-center gap-2">
+            <span class="me-auto text-break">{{ task.title }}</span>
+            <span class="small {% if task.is_overdue %}text-danger{% else %}text-secondary{% endif %} text-nowrap">{{ task.due_date|date:"d M Y"|default:_("No date") }}</span>
+          </div>
+          <div class="small text-secondary">{{ task.project }}</div>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="card-body text-secondary">{% translate "No open tasks." %}</div>
+      {% endif %}
+      {% if person.is_active and person.email %}
+      <div class="card-footer">
+        <a href="{% url 'reminder_preview' %}?user={{ person.pk }}" target="_blank" rel="noopener">
+          <i class="ti ti-mail me-1"></i>{% if is_me %}{% translate "See my reminder email" %}{% else %}{% translate "See the reminder email they get" %}{% endif %}
+        </a>
+      </div>
+      {% endif %}
+    </div>
+
+    {# Wrong passwords typed with this username lately, and the lock they cause #}
+    {% if failed_logins %}
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">{% translate "Login" %}</h3>
+      </div>
+      <div class="list-group list-group-flush">
+        {% for group in failed_logins %}
+        <div class="list-group-item">
+          {% if group.locked %}
+          <div class="text-danger"><i class="ti ti-lock me-1"></i>{% blocktranslate with time=group.locked_until|time:"H:i" %}Locked until {{ time }}{% endblocktranslate %}</div>
+          {% endif %}
+          <div class="small text-secondary">
+            {% blocktranslate count counter=group.failures with address=group.ip_address %}{{ counter }} wrong password from {{ address }}{% plural %}{{ counter }} wrong passwords from {{ address }}{% endblocktranslate %}
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+      <div class="card-footer">
+        {# Unlocks this username from every address #}
+        <form method="post" action="{% url 'admin_unlock' %}">
+          {% csrf_token %}
+          <input type="hidden" name="username" value="{{ person.username }}">
+          <input type="hidden" name="next" value="{{ request.path }}">
+          <button type="submit" class="btn"><i class="ti ti-lock-open me-2"></i>{% translate "Unlock and forget the wrong passwords" %}</button>
+        </form>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

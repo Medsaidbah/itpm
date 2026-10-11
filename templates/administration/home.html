@@ -1,0 +1,103 @@
+{% extends "administration/base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Administration" %} · IT Projects{% endblock %}
+{% block page_title %}{% translate "Overview" %}{% endblock %}
+
+{% block section_content %}
+<p class="text-secondary mb-4">
+  {% translate "As an admin, you see every project. You edit any project, task or team from its own page, and you manage the accounts here." %}
+</p>
+
+<div class="row row-cards">
+  {# The accounts #}
+  <div class="col-md-6 col-xl-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="subheader">{% translate "Users" %}</div>
+        <div class="h1 mb-1">{{ active_count }}</div>
+        <div class="text-secondary">
+          {% blocktranslate count counter=active_count %}active account{% plural %}active accounts{% endblocktranslate %}
+          · {% blocktranslate count counter=admin_count %}{{ counter }} admin{% plural %}{{ counter }} admins{% endblocktranslate %}
+          · {% blocktranslate count counter=deactivated_count %}{{ counter }} deactivated{% plural %}{{ counter }} deactivated{% endblocktranslate %}
+        </div>
+        {% if missing_count %}
+        <div class="mt-2">
+          <a href="{% url 'admin_users' %}?missing=1" class="text-warning">
+            <i class="ti ti-alert-triangle me-1"></i>{% blocktranslate count counter=missing_count %}{{ counter }} account has no name or no email{% plural %}{{ counter }} accounts have no name or no email{% endblocktranslate %}
+          </a>
+        </div>
+        {% endif %}
+      </div>
+      <div class="card-footer d-flex flex-wrap gap-2">
+        <a href="{% url 'admin_users' %}" class="btn me-auto"><i class="ti ti-users me-2"></i>{% translate "Manage users" %}</a>
+        <a href="{% url 'admin_user_create' %}" class="btn btn-primary"><i class="ti ti-user-plus me-2"></i>{% translate "New user" %}</a>
+      </div>
+    </div>
+  </div>
+
+  {# Projects, with their managers and teams #}
+  <div class="col-md-6 col-xl-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="subheader">{% translate "Projects" %}</div>
+        <div class="h1 mb-1">{{ active_projects }}</div>
+        <div class="text-secondary">
+          {% blocktranslate count counter=active_projects %}active project{% plural %}active projects{% endblocktranslate %}
+          · {% blocktranslate count counter=finished_projects %}{{ counter }} finished{% plural %}{{ counter }} finished{% endblocktranslate %}
+        </div>
+      </div>
+      <div class="card-footer d-flex flex-wrap gap-2">
+        <a href="{% url 'admin_projects' %}" class="btn me-auto"><i class="ti ti-briefcase me-2"></i>{% translate "Projects and teams" %}</a>
+        <a href="{% url 'project_create' %}" class="btn btn-primary"><i class="ti ti-plus me-2"></i>{% translate "New project" %}</a>
+      </div>
+    </div>
+  </div>
+
+  {# Every task of every project #}
+  <div class="col-md-6 col-xl-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="subheader">{% translate "Tasks" %}</div>
+        <div class="h1 mb-1">{{ open_tasks }}</div>
+        <div class="text-secondary">
+          {% blocktranslate count counter=open_tasks %}open task{% plural %}open tasks{% endblocktranslate %}
+          {% if late_tasks %}· <a href="{% url 'admin_tasks' %}?state=late" class="text-danger">{% blocktranslate count counter=late_tasks %}{{ counter }} late{% plural %}{{ counter }} late{% endblocktranslate %}</a>{% endif %}
+        </div>
+      </div>
+      <div class="card-footer">
+        <a href="{% url 'admin_tasks' %}" class="btn"><i class="ti ti-checklist me-2"></i>{% translate "All tasks" %}</a>
+      </div>
+    </div>
+  </div>
+
+  {# Logins locked after too many wrong passwords #}
+  <div class="col-md-6 col-xl-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="subheader">{% translate "Locked logins" %}</div>
+        <div class="h1 mb-1 {% if locked_count %}text-danger{% endif %}">{{ locked_count }}</div>
+        <div class="text-secondary">{% translate "Logins locked after too many wrong passwords. You can unlock them." %}</div>
+      </div>
+      <div class="card-footer">
+        <a href="{% url 'admin_logins' %}" class="btn"><i class="ti ti-lock-open me-2"></i>{% translate "See the locked logins" %}</a>
+      </div>
+    </div>
+  </div>
+
+  {# Django's own admin panel: only for admins who also have "staff status" #}
+  {% if user.is_staff %}
+  <div class="col-md-6 col-xl-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="subheader">{% translate "Django admin (technical)" %}</div>
+        <div class="text-secondary">{% translate "Django's own admin panel, for technical work only. Everything else is done in the app's pages." %}</div>
+      </div>
+      <div class="card-footer">
+        <a href="{% url 'admin:index' %}" class="btn"><i class="ti ti-tool me-2"></i>{% translate "Open the Django admin" %}</a>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

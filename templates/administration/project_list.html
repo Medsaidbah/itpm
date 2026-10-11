@@ -1,0 +1,93 @@
+{% extends "administration/base.html" %}
+{% load i18n people %}
+
+{% block title %}{% translate "Projects" %} · {% translate "Administration" %} · IT Projects{% endblock %}
+{% block page_title %}{% translate "Projects and teams" %}{% endblock %}
+
+{% block section_content %}
+{# Search and filter: a normal form that reloads this page with ?q=...&status=... in the address #}
+<form method="get" class="row g-2 mb-3">
+  <div class="col-12 col-md-5 col-lg-4">
+    <input type="search" name="q" value="{{ query }}" class="form-control"
+           placeholder="{% translate 'Search by name…' %}" aria-label="{% translate 'Search by name' %}">
+  </div>
+  <div class="col-7 col-md-3 col-lg-2">
+    <select name="status" class="form-select" aria-label="{% translate 'Show' %}" onchange="this.form.submit()">
+      <option value="all" {% if status == "all" %}selected{% endif %}>{% translate "All projects" %}</option>
+      <option value="active" {% if status == "active" %}selected{% endif %}>{% translate "Active projects" %}</option>
+      {% for value, label in status_choices %}
+      <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn"><i class="ti ti-search me-2"></i>{% translate "Search" %}</button>
+  </div>
+  <div class="col-auto ms-auto">
+    <a href="{% url 'project_create' %}" class="btn btn-primary"><i class="ti ti-plus me-2"></i>{% translate "New project" %}</a>
+  </div>
+</form>
+
+<div class="card">
+  {% if projects %}
+  <div class="table-responsive">
+    <table class="table card-table table-vcenter">
+      <thead>
+        <tr>
+          <th>{% translate "Project" %}</th>
+          <th class="d-none d-sm-table-cell">{% translate "Status" %}</th>
+          <th class="d-none d-md-table-cell">{% translate "Manager" %}</th>
+          <th class="d-none d-lg-table-cell">{% translate "Team" %}</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for project in projects %}
+        <tr>
+          <td class="text-break">
+            <a href="{{ project.get_absolute_url }}">{{ project.name }}</a>
+            <div class="small text-secondary">
+              {# On phones, the status and the manager go here #}
+              <span class="d-sm-none">{{ project.get_status_display }} ·</span>
+              <span class="d-md-none">{{ project.manager }} ·</span>
+              {% blocktranslate count counter=project.open_count %}{{ counter }} open task{% plural %}{{ counter }} open tasks{% endblocktranslate %}{% if project.task_overdue %} · <span class="text-danger">{% blocktranslate count counter=project.task_overdue %}{{ counter }} late{% plural %}{{ counter }} late{% endblocktranslate %}</span>{% endif %}
+            </div>
+          </td>
+          <td class="d-none d-sm-table-cell"><span class="badge bg-{{ project.status_color }}-lt">{{ project.get_status_display }}</span></td>
+          <td class="d-none d-md-table-cell">
+            <div class="d-flex align-items-center gap-2">
+              {% avatar project.manager %}
+              <div>
+                <a href="{% url 'admin_user' project.manager.pk %}" class="text-reset">{{ project.manager }}</a>
+                {% if not project.manager.is_active %}<div><span class="badge bg-red-lt">{% translate "Account deactivated" %}</span></div>{% endif %}
+              </div>
+            </div>
+          </td>
+          <td class="d-none d-lg-table-cell">
+            {% if project.other_members %}
+            <div class="avatar-list avatar-list-stacked">
+              {% for person in project.other_members|slice:":6" %}{% avatar person %}{% endfor %}
+              {% if project.other_members|length > 6 %}<span class="avatar avatar-sm">+{{ project.other_members|length|add:"-6" }}</span>{% endif %}
+            </div>
+            {% else %}
+            <span class="text-secondary">{% translate "Only the manager" %}</span>
+            {% endif %}
+          </td>
+          <td class="text-end text-nowrap">
+            <a href="{% url 'project_edit' project.pk %}" class="btn btn-sm btn-ghost-secondary btn-icon"
+               title="{% translate 'Edit' %}" aria-label="{% translate 'Edit' %}"><i class="ti ti-pencil"></i></a>
+            <a href="{% url 'project_delete' project.pk %}?next={{ request.path|urlencode }}" class="btn btn-sm btn-ghost-danger btn-icon"
+               title="{% translate 'Delete' %}" aria-label="{% translate 'Delete' %}"><i class="ti ti-trash"></i></a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="card-body text-secondary">
+    {% if query or status != "all" %}{% translate "No project matches this search." %}{% else %}{% translate "There are no projects yet." %}{% endif %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load people %}
+{% load i18n people %}
 
 {% block title %}{{ person }} · IT Projects{% endblock %}
 
@@ -12,11 +12,15 @@
       <h2 class="page-title mb-1">{{ person }}</h2>
       <div>
         {% if person.is_admin %}<span class="badge bg-blue-lt">Admin</span>{% endif %}
-        {% if not person.is_active %}<span class="badge bg-secondary-lt">Account disabled</span>{% endif %}
+        {% if not person.is_active %}<span class="badge bg-secondary-lt">Account deactivated</span>{% endif %}
       </div>
     </div>
     {% if person == user %}
     <a href="{% url 'profile' %}" class="btn"><i class="ti ti-pencil me-2"></i>Edit my profile</a>
+    {% endif %}
+    {# Admins manage the account (details, password, projects) in the Administration section #}
+    {% if user.is_admin %}
+    <a href="{% url 'admin_user' person.pk %}" class="btn"><i class="ti ti-user-cog me-2"></i>{% translate "Manage the account" %}</a>
     {% endif %}
   </div>
   <div class="card-body border-top">

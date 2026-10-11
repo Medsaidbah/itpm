@@ -1,0 +1,77 @@
+{% extends "administration/base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Locked logins" %} · {% translate "Administration" %} · IT Projects{% endblock %}
+{% block page_title %}{% translate "Locked logins" %}{% endblock %}
+
+{% block section_content %}
+<p class="text-secondary">
+  {% if cool_off_hours %}
+  {% blocktranslate count counter=cool_off_hours with limit=failure_limit %}After {{ limit }} wrong passwords in a row, logging in with that username from that internet address (IP) is locked for {{ counter }} hour.{% plural %}After {{ limit }} wrong passwords in a row, logging in with that username from that internet address (IP) is locked for {{ counter }} hours.{% endblocktranslate %}
+  {% else %}
+  {% blocktranslate count counter=cool_off_minutes with limit=failure_limit %}After {{ limit }} wrong passwords in a row, logging in with that username from that internet address (IP) is locked for {{ counter }} minute.{% plural %}After {{ limit }} wrong passwords in a row, logging in with that username from that internet address (IP) is locked for {{ counter }} minutes.{% endblocktranslate %}
+  {% endif %}
+  {% translate "Unlock it if the person remembers their password; if they forgot it, set a new password on their page instead (that unlocks it too)." %}
+</p>
+
+<div class="card">
+  {% if groups %}
+  <div class="table-responsive">
+    <table class="table card-table table-vcenter">
+      <thead>
+        {# On phones, the address and the number of wrong passwords go under the username #}
+        <tr>
+          <th>{% translate "Username typed" %}</th>
+          <th class="d-none d-md-table-cell">{% translate "Internet address (IP)" %}</th>
+          <th class="d-none d-md-table-cell">{% translate "Wrong passwords" %}</th>
+          <th class="d-none d-lg-table-cell">{% translate "Last try" %}</th>
+          <th>{% translate "Login" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for group in groups %}
+        <tr>
+          <td class="text-break">
+            {% if group.account %}
+            <a href="{% url 'admin_user' group.account.pk %}">{{ group.username }}</a>
+            <div class="small text-secondary">{{ group.account }}</div>
+            {% else %}
+            {{ group.username|default:"—" }}
+            <div class="small text-secondary">{% translate "No account has this username" %}</div>
+            {% endif %}
+            <div class="small text-secondary d-md-none">
+              {% blocktranslate count counter=group.failures with address=group.ip_address %}{{ counter }} wrong password from {{ address }}{% plural %}{{ counter }} wrong passwords from {{ address }}{% endblocktranslate %}
+            </div>
+          </td>
+          <td class="d-none d-md-table-cell">{{ group.ip_address|default:"—" }}</td>
+          <td class="d-none d-md-table-cell">{{ group.failures }}</td>
+          <td class="d-none d-lg-table-cell text-secondary">{{ group.last_try|date:"d M Y, H:i" }}</td>
+          <td>
+            <div class="d-flex flex-wrap align-items-center gap-2">
+            {% if group.locked %}
+            <span class="badge bg-red-lt me-auto"><i class="ti ti-lock me-1"></i>{% blocktranslate with time=group.locked_until|time:"H:i" %}Locked until {{ time }}{% endblocktranslate %}</span>
+            {% else %}
+            <span class="badge bg-secondary-lt me-auto">{% translate "Not locked" %}</span>
+            {% endif %}
+            <form method="post" action="{% url 'admin_unlock' %}">
+              {% csrf_token %}
+              <input type="hidden" name="username" value="{{ group.username }}">
+              <input type="hidden" name="ip_address" value="{{ group.ip_address }}">
+              {% if group.locked %}
+              <button type="submit" class="btn btn-sm"><i class="ti ti-lock-open me-1"></i>{% translate "Unlock" %}</button>
+              {% else %}
+              <button type="submit" class="btn btn-sm btn-ghost-secondary">{% translate "Forget" %}</button>
+              {% endif %}
+            </form>
+            </div>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="card-body text-secondary">{% translate "No wrong passwords lately: no login is locked." %}</div>
+  {% endif %}
+</div>
+{% endblock %}

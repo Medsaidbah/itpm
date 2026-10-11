@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{# The layout of every page of the Administration section: its title and its tabs. #}
+{# Each view says which tab is open with "section" (home, users, projects, tasks or logins). #}
+{% block nav_administration %}active{% endblock %}
+
+{% block content %}
+<div class="mb-3">
+  <div class="page-pretitle">{% translate "Administration" %}</div>
+  <h2 class="page-title">{% block page_title %}{% endblock %}</h2>
+</div>
+
+<ul class="nav nav-bordered mb-4">
+  <li class="nav-item">
+    <a href="{% url 'admin_home' %}" class="nav-link{% if section == 'home' %} active{% endif %}"{% if section == 'home' %} aria-current="page"{% endif %}>
+      <i class="ti ti-layout-dashboard me-2"></i>{% translate "Overview" %}
+    </a>
+  </li>
+  <li class="nav-item">
+    <a href="{% url 'admin_users' %}" class="nav-link{% if section == 'users' %} active{% endif %}"{% if section == 'users' %} aria-current="page"{% endif %}>
+      <i class="ti ti-users me-2"></i>{% translate "Users" %}
+    </a>
+  </li>
+  <li class="nav-item">
+    <a href="{% url 'admin_projects' %}" class="nav-link{% if section == 'projects' %} active{% endif %}"{% if section == 'projects' %} aria-current="page"{% endif %}>
+      <i class="ti ti-briefcase me-2"></i>{% translate "Projects" %}
+    </a>
+  </li>
+  <li class="nav-item">
+    <a href="{% url 'admin_tasks' %}" class="nav-link{% if section == 'tasks' %} active{% endif %}"{% if section == 'tasks' %} aria-current="page"{% endif %}>
+      <i class="ti ti-checklist me-2"></i>{% translate "Tasks" %}
+    </a>
+  </li>
+  <li class="nav-item">
+    <a href="{% url 'admin_logins' %}" class="nav-link{% if section == 'logins' %} active{% endif %}"{% if section == 'logins' %} aria-current="page"{% endif %}>
+      <i class="ti ti-lock me-2"></i>{% translate "Locked logins" %}
+    </a>
+  </li>
+</ul>
+
+{% block section_content %}{% endblock %}
+{% endblock %}
