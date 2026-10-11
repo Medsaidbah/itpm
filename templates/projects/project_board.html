@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load people %}
 
 {% block title %}Board · {{ project.name }} · IT Projects{% endblock %}
 {% block nav_projects %}active{% endblock %}
@@ -51,7 +52,7 @@
           <div class="d-flex align-items-center gap-2 mt-2 small">
             <span class="badge bg-{{ task.priority_color }}-lt">{{ task.get_priority_display }}</span>
             <span class="board-due {% if task.is_overdue %}text-danger{% else %}text-secondary{% endif %}">{{ task.due_date|date:"d M Y" }}</span>
-            <span class="avatar avatar-xs ms-auto" title="{{ task.assignee|default:'Unassigned' }}">{% if task.assignee %}{{ task.assignee.username|first|upper }}{% else %}?{% endif %}</span>
+            <span class="ms-auto">{% avatar task.assignee "xs" %}</span>
           </div>
         </div>
       </div>

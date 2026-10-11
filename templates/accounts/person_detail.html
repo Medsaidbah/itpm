@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% load people %}
+
+{% block title %}{{ person }} · IT Projects{% endblock %}
+
+{% block content %}
+{# Who this person is, and how to reach them #}
+<div class="card mb-4">
+  <div class="card-body d-flex flex-wrap align-items-center gap-3">
+    {% avatar person "xl" %}
+    <div class="me-auto">
+      <h2 class="page-title mb-1">{{ person }}</h2>
+      <div>
+        {% if person.is_admin %}<span class="badge bg-blue-lt">Admin</span>{% endif %}
+        {% if not person.is_active %}<span class="badge bg-secondary-lt">Account disabled</span>{% endif %}
+      </div>
+    </div>
+    {% if person == user %}
+    <a href="{% url 'profile' %}" class="btn"><i class="ti ti-pencil me-2"></i>Edit my profile</a>
+    {% endif %}
+  </div>
+  <div class="card-body border-top">
+    <div class="datagrid">
+      <div class="datagrid-item">
+        <div class="datagrid-title">Email</div>
+        <div class="datagrid-content text-break">
+          {% if person.email %}<a href="mailto:{{ person.email }}">{{ person.email }}</a>{% else %}<span class="text-secondary">Not set</span>{% endif %}
+        </div>
+      </div>
+      <div class="datagrid-item">
+        <div class="datagrid-title">Phone</div>
+        <div class="datagrid-content">
+          {# "tel:" lets phones call the number with one tap #}
+          {% if person.phone %}<a href="tel:{{ person.phone|cut:' ' }}">{{ person.phone }}</a>{% else %}<span class="text-secondary">Not set</span>{% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row row-cards">
+  {# Their projects: only the ones the person looking at this page can see (admins: all of them) #}
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header">
+        <div>
+          <h3 class="card-title">Projects</h3>
+          {% if not user.is_admin and person != user %}<div class="card-subtitle">Only the projects you are part of</div>{% endif %}
+        </div>
+      </div>
+      {% if managed_projects or member_projects %}
+      <div class="list-group list-group-flush">
+        {% for project in managed_projects %}
+        <a href="{{ project.get_absolute_url }}" class="list-group-item list-group-item-action d-flex align-items-center gap-2">
+          <span class="me-auto">{{ project.name }}</span>
+          <span class="badge bg-{{ project.status_color }}-lt">{{ project.get_status_display }}</span>
+          <span class="badge bg-blue-lt">Manager</span>
+        </a>
+        {% endfor %}
+        {% for project in member_projects %}
+        <a href="{{ project.get_absolute_url }}" class="list-group-item list-group-item-action d-flex align-items-center gap-2">
+          <span class="me-auto">{{ project.name }}</span>
+          <span class="badge bg-{{ project.status_color }}-lt">{{ project.get_status_display }}</span>
+          <span class="badge bg-secondary-lt">Member</span>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="card-body text-secondary">No projects to show.</div>
+      {% endif %}
+    </div>
+  </div>
+
+  {# Their open tasks, in those same projects #}
+  <div class="col-lg-6">
+    <div class="card h-100">
+      <div class="card-header">
+        <h3 class="card-title">Open tasks <span class="badge bg-secondary-lt ms-1">{{ open_tasks|length }}</span></h3>
+      </div>
+      {% if open_tasks %}
+      <div class="list-group list-group-flush">
+        {% for task in open_tasks %}
+        <a href="{{ task.get_absolute_url }}" class="list-group-item list-group-item-action">
+          <div class="d-flex align-items-center gap-2">
+            <span class="me-auto text-break">{{ task.title }}</span>
+            <span class="small {% if task.is_overdue %}text-danger{% else %}text-secondary{% endif %} text-nowrap">{{ task.due_date|date:"d M Y"|default:"No date" }}</span>
+          </div>
+          <div class="small text-secondary">{{ task.project }}</div>
+        </a>
+        {% endfor %}
+      </div>
+      {% else %}
+      <div class="card-body text-secondary">No open tasks to show.</div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

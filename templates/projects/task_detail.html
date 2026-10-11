@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load people %}
 
 {% block title %}{{ task.title }} · IT Projects{% endblock %}
 {% block nav_projects %}active{% endblock %}
@@ -50,7 +51,9 @@
         <div class="datagrid">
           <div class="datagrid-item">
             <div class="datagrid-title">Assigned to</div>
-            <div class="datagrid-content">{{ task.assignee|default:"Unassigned" }}</div>
+            <div class="datagrid-content">
+              {% if task.assignee %}<span class="d-inline-flex align-items-center gap-2">{% avatar task.assignee "xs" %}{% person_link task.assignee %}</span>{% else %}Unassigned{% endif %}
+            </div>
           </div>
           <div class="datagrid-item">
             <div class="datagrid-title">Start date</div>
@@ -193,10 +196,10 @@
       <div class="card-body">
         {% for comment in comments %}
         <div class="d-flex mb-3">
-          <span class="avatar avatar-sm me-3 flex-shrink-0">{{ comment.author.username|first|upper }}</span>
+          <span class="me-3">{% avatar comment.author %}</span>
           <div class="flex-fill" style="min-width: 0">
             <div class="d-flex align-items-center gap-2">
-              <strong>{{ comment.author }}</strong>
+              <strong>{% person_link comment.author "text-reset" %}</strong>
               {# Hover over the time to see the exact date #}
               <span class="text-secondary small" title="{{ comment.created_at|date:'d M Y, H:i' }}">{{ comment.created_at|timesince }} ago</span>
               {% if comment.deletable %}

@@ -1,4 +1,5 @@
 {% load static %}
+{% load people %}
 <!doctype html>
 <html lang="en">
 <head>
@@ -30,13 +31,15 @@
         <div class="navbar-nav flex-row order-md-last">
           <div class="nav-item dropdown">
             <a href="#" class="nav-link d-flex lh-1 p-0 px-2" data-bs-toggle="dropdown" aria-label="Open user menu">
-              <span class="avatar avatar-sm">{{ user.username|first|upper }}</span>
+              {% avatar user %}
               <div class="d-none d-xl-block ps-2">
                 <div>{{ user }}</div>
                 <div class="mt-1 small text-secondary">{{ user.get_role_display }}</div>
               </div>
             </a>
             <div class="dropdown-menu dropdown-menu-end">
+              <a href="{% url 'profile' %}" class="dropdown-item"><i class="ti ti-user me-2"></i>My profile</a>
+              <div class="dropdown-divider"></div>
               {% if user.is_staff and user.is_admin %}
               <a href="{% url 'admin:index' %}" class="dropdown-item"><i class="ti ti-settings me-2"></i>Admin panel</a>
               <div class="dropdown-divider"></div>

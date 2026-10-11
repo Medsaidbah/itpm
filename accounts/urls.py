@@ -1,0 +1,10 @@
+from django.urls import path
+
+from . import views
+
+urlpatterns = [
+    path("profile/", views.profile, name="profile"),
+    path("profile/password/", views.PasswordChangeView.as_view(), name="password_change"),
+    path("people/<int:pk>/", views.person_detail, name="person_detail"),
+    path("people/<int:pk>/picture/", views.person_picture, name="person_picture"),
+]

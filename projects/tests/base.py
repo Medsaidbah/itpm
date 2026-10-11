@@ -1,9 +1,12 @@
 """What most tests start from: a small team and one project."""
 
+import io
 from datetime import timedelta
 
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import TestCase
 from django.utils import timezone
+from PIL import Image
 
 from accounts.models import User
 from projects.models import Project, ProjectMember, Task
@@ -12,6 +15,18 @@ from projects.models import Project, ProjectMember, Task
 def days_from_today(days):
     """A date some days from today: days_from_today(-2) is the day before yesterday."""
     return timezone.localdate() + timedelta(days=days)
+
+
+def picture_file(name="me.png", size=(400, 300), image_format="PNG", **info):
+    """A picture, as if someone uploaded it. info: hidden details saved in a JPEG,
+    like artist="Sara" (what cameras and phones write in their photos)."""
+    output = io.BytesIO()
+    image = Image.new("RGB", size, "teal")
+    exif = image.getexif()
+    if "artist" in info:
+        exif[0x013B] = info["artist"]  # 0x013B = the "Artist" tag of EXIF
+    image.save(output, image_format, **({"exif": exif} if image_format == "JPEG" else {}))
+    return SimpleUploadedFile(name, output.getvalue(), content_type=f"image/{image_format.lower()}")
 
 
 class TeamTestCase(TestCase):

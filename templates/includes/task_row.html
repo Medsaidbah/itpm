@@ -1,4 +1,4 @@
-{# One row of a task table. Subtasks are indented under their main task. #}
+{% load people %}{# One row of a task table. Subtasks are indented under their main task. #}
 <tr>
   <td>
     <div class="d-flex align-items-start">
@@ -10,6 +10,8 @@
     </div>
   </td>
   <td><span class="badge bg-{{ task.status_color }}-lt">{{ task.get_status_display }}</span></td>
-  <td class="d-none d-sm-table-cell">{{ task.assignee|default:"Unassigned" }}</td>
+  <td class="d-none d-sm-table-cell">
+    {% if task.assignee %}<span class="d-inline-flex align-items-center gap-2">{% avatar task.assignee "xs" %}{{ task.assignee }}</span>{% else %}<span class="text-secondary">Unassigned</span>{% endif %}
+  </td>
   <td {% if task.is_overdue %}class="text-danger"{% endif %}>{{ task.due_date|date:"d M Y"|default:"No date" }}</td>
 </tr>

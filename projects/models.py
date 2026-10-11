@@ -229,6 +229,18 @@ class ProjectMember(models.Model):
         return f"{self.user} in {self.project}"
 
 
+def people_visible_to(user):
+    """The people whose profile (email, phone, picture, projects) this person can see:
+    everyone for admins; for everyone else, themselves and the people they share a project with."""
+    User = get_user_model()
+    if not user.is_authenticated:
+        return User.objects.none()
+    if user.is_admin:
+        return User.objects.all()
+    teammates = Project.objects.visible_to(user).people().values("pk")
+    return User.objects.filter(Q(pk=user.pk) | Q(pk__in=teammates))
+
+
 class TaskQuerySet(models.QuerySet):
     def visible_to(self, user):
         """The tasks of the projects this person can see (see ProjectQuerySet.visible_to)."""

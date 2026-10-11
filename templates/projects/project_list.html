@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load people %}
 
 {% block title %}Projects · IT Projects{% endblock %}
 {% block nav_projects %}active{% endblock %}
@@ -56,7 +57,9 @@
           <td><a href="{{ project.get_absolute_url }}">{{ project.name }}</a></td>
           <td><span class="badge bg-{{ project.status_color }}-lt">{{ project.get_status_display }}</span></td>
           <td class="d-none d-md-table-cell"><span class="badge bg-{{ project.priority_color }}-lt">{{ project.get_priority_display }}</span></td>
-          <td class="d-none d-md-table-cell">{{ project.manager }}</td>
+          <td class="d-none d-md-table-cell">
+            <span class="d-inline-flex align-items-center gap-2">{% avatar project.manager "xs" %}{{ project.manager }}</span>
+          </td>
           <td class="d-none d-sm-table-cell {% if project.is_overdue %}text-danger{% endif %}">{{ project.end_date|date:"d M Y"|default:"Not set" }}</td>
           <td>
             <div class="d-flex align-items-center gap-2">

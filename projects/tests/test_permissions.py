@@ -21,10 +21,11 @@ from django.urls import URLPattern, URLResolver, get_resolver
 from openpyxl import load_workbook
 
 from accounts.models import User
+from accounts.pictures import make_profile_picture
 from projects.emails import reminder_for
 from projects.models import Attachment, Comment, Project, Task
 
-from .base import TeamTestCase, days_from_today
+from .base import TeamTestCase, days_from_today, picture_file
 from .test_activity import visible_text
 
 # What a page answers
@@ -74,6 +75,8 @@ class EveryAddressTests(TeamTestCase):
         self.attachment = Attachment.objects.create(
             task=self.task, uploaded_by=self.sara, file=SimpleUploadedFile("plan.pdf", b"%PDF-1.4 test")
         )
+        self.sara.picture = make_profile_picture(picture_file())
+        self.sara.save()
 
     def rules(self):
         """(name of the address, method, address, data sent,
@@ -118,6 +121,11 @@ class EveryAddressTests(TeamTestCase):
             ("attachment_delete", "post", f"/files/{self.attachment.pk}/delete/", None,  # Sara's file
              (MOVED, MOVED, MOVED, FORBIDDEN, HIDDEN)),
             ("attachment_download", "get", self.attachment.file.url, None, (OK, OK, OK, OK, HIDDEN)),
+            # People: your own profile, and the pages and pictures of the people you share a project with
+            ("profile", "get", "/profile/", None, (OK, OK, OK, OK, OK)),
+            ("password_change", "get", "/profile/password/", None, (OK, OK, OK, OK, OK)),
+            ("person_detail", "get", f"/people/{self.sara.pk}/", None, (OK, OK, OK, OK, HIDDEN)),
+            ("person_picture", "get", f"/people/{self.sara.pk}/picture/", None, (OK, OK, OK, OK, HIDDEN)),
         ]
 
     def test_every_address_has_a_rule(self):
@@ -249,9 +257,11 @@ class OnlyYourProjectsTests(TeamTestCase):
 class NoLeakTests(TeamTestCase):
     """Follow every link of the app as one person, like a visitor clicking everywhere, and check
     that nothing from a project they aren't part of shows anywhere: its name, its tasks, its
-    comments, its files. A new page is checked too, as soon as a link leads to it."""
+    comments, its files, and the email and phone of people they share no project with.
+    A new page is checked too, as soon as a link leads to it."""
 
-    SECRETS = ["Secret Wi-Fi", "Secret access points", "Secret comment", "secret-quote"]
+    SECRETS = ["Secret Wi-Fi", "Secret access points", "Secret comment", "secret-quote",
+               "karim@example.com", "+222 44 55 66 77"]
 
     def setUp(self):
         media_folder = tempfile.mkdtemp()
@@ -260,7 +270,8 @@ class NoLeakTests(TeamTestCase):
         self.addCleanup(settings_change.disable)
         self.addCleanup(shutil.rmtree, media_folder, ignore_errors=True)
 
-        # Karim's project, with a team that doesn't include Sara
+        # Karim's project, with a team that doesn't include Sara. His details are secret for her too.
+        User.objects.filter(pk=self.karim.pk).update(phone="+222 44 55 66 77")
         wifi = Project.objects.create(name="Secret Wi-Fi", manager=self.karim, status="in_progress")
         task = Task.objects.create(project=wifi, title="Secret access points", assignee=self.karim,
                                    due_date=days_from_today(-1))
