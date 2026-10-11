@@ -40,7 +40,7 @@ class ExcelTests(TeamTestCase):
 
     def test_project_list_file_uses_the_page_filters(self):
         Project.objects.create(name="Old laptops", manager=self.omar, status="completed")
-        self.login(self.sara)
+        self.login(self.omar)
         workbook = self.open_workbook(self.client.get("/projects/export.xlsx?status=completed"))
         names = [row[0] for row in workbook["Projects"].iter_rows(min_row=2, values_only=True)]
         self.assertEqual(names, ["Old laptops"])

@@ -1,26 +1,61 @@
 """Tests for people: roles, logging in and out, and the lock after too many wrong passwords."""
 
+import importlib
 from io import StringIO
 
+from django.apps import apps
 from django.core.management import call_command
 from django.test import TestCase, override_settings
 
+from projects.models import Project
+
 from .models import User
+
+# The migration of Stage 16c. Its name starts with a number, so it's loaded this way.
+roles_migration = importlib.import_module("accounts.migrations.0002_admin_and_user_roles")
 
 
 class RoleTests(TestCase):
     def test_a_superuser_is_always_an_admin(self):
-        boss = User.objects.create_superuser("boss", "boss@example.com", role="member")
+        boss = User.objects.create_superuser("boss", "boss@example.com", role="user")
         self.assertEqual(boss.role, "admin")
 
-    def test_only_admins_and_managers_can_manage(self):
-        self.assertTrue(User(role="admin").can_manage)
-        self.assertTrue(User(role="manager").can_manage)
-        self.assertFalse(User(role="member").can_manage)
+    def test_two_roles_admin_and_user(self):
+        self.assertEqual(User.Role.values, ["admin", "user"])
+        self.assertEqual(User().role, "user")  # new people are users
+        self.assertTrue(User(role="admin").is_admin)
+        self.assertFalse(User(role="user").is_admin)
+
+    def test_the_old_manager_and_member_roles_become_user(self):
+        # Like the data before Stage 16c
+        for username, role in [("boss", "admin"), ("omar", "manager"), ("sara", "member")]:
+            User.objects.create_user(username, role=role)
+        Project.objects.create(name="Firewall", manager=User.objects.get(username="omar"))
+
+        roles_migration.to_admin_and_user(apps, None)
+        roles = dict(User.objects.values_list("username", "role"))
+        self.assertEqual(roles, {"boss": "admin", "omar": "user", "sara": "user"})
+
+        roles_migration.back_to_manager_and_member(apps, None)  # going back
+        roles = dict(User.objects.values_list("username", "role"))
+        self.assertEqual(roles, {"boss": "admin", "omar": "manager", "sara": "member"})
 
     def test_name_shown_in_the_app(self):
         self.assertEqual(str(User(username="sara", first_name="Sara", last_name="Ben")), "Sara Ben")
         self.assertEqual(str(User(username="sara")), "sara")  # no name: the username
+
+
+class AdminPanelTests(TestCase):
+    def test_only_admins_open_the_admin_panel(self):
+        boss = User.objects.create_superuser("boss", "boss@example.com")
+        # A user given "Staff status" by mistake, without the Admin role
+        omar = User.objects.create_user("omar", "omar@example.com", is_staff=True)
+        self.client.force_login(omar)
+        self.assertRedirects(self.client.get("/admin/"), "/admin/login/?next=/admin/")
+        self.assertNotContains(self.client.get("/"), "Admin panel")
+        self.client.force_login(boss)
+        self.assertEqual(self.client.get("/admin/").status_code, 200)
+        self.assertContains(self.client.get("/"), "Admin panel")
 
 
 # Checking a password is slow on purpose (to slow down password guessing). These tests check

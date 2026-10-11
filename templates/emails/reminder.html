@@ -38,4 +38,4 @@
 </table>
 {% endblock %}
 
-{% block footer %}You get this email when tasks assigned to you are late or due soon{% if person.can_manage %}, or when tasks in projects you manage are late{% endif %}.{% endblock %}
+{% block footer %}You get this email when tasks assigned to you are late or due soon{% if manages_projects %}, or when tasks in projects you manage are late{% endif %}.{% endblock %}

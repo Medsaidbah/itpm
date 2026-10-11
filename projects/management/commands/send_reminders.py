@@ -1,7 +1,7 @@
 """python manage.py send_reminders
 
 Emails each person their overdue tasks and the tasks due soon.
-Managers also get the late tasks of the projects they manage.
+Project managers also get the late tasks of the projects they manage.
 People with nothing to be reminded of get no email.
 
 Run it once a day (on the server, a scheduled job will do it: Step 15). To test:

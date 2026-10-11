@@ -1,4 +1,5 @@
-"""Reports: Excel files to download, and a status report page made for printing."""
+"""Reports: Excel files to download, and a status report page made for printing.
+Everyone in a project's team can open its reports (they only read). Admins can open all of them."""
 from datetime import date
 
 from django.contrib.auth.decorators import login_required
@@ -10,8 +11,8 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill
 from openpyxl.utils import get_column_letter
 
-from .models import Project, Task
-from .views import filter_projects
+from .models import Task
+from .views import filter_projects, visible_projects
 
 HEADER_FONT = Font(bold=True, color="FFFFFF")
 HEADER_FILL = PatternFill("solid", fgColor="206BC4")  # the app's blue
@@ -82,7 +83,7 @@ def done_on(task):
 @login_required
 def project_tasks_excel(request, pk):
     """An Excel file with a summary of the project and all its tasks."""
-    project = get_object_or_404(Project.objects.with_task_counts().select_related("manager"), pk=pk)
+    project = get_object_or_404(visible_projects(request).with_task_counts().select_related("manager"), pk=pk)
     tasks = ordered_tasks(project)
     today = timezone.localdate()
 
@@ -165,7 +166,7 @@ def projects_excel(request):
 @login_required
 def project_report(request, pk):
     """A one-page status report of a project, laid out for printing or saving as a PDF."""
-    project = get_object_or_404(Project.objects.with_task_counts().select_related("manager"), pk=pk)
+    project = get_object_or_404(visible_projects(request).with_task_counts().select_related("manager"), pk=pk)
     tasks = ordered_tasks(project)
     today = timezone.localdate()
 

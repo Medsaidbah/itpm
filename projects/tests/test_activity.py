@@ -4,7 +4,7 @@ import re
 
 from django.utils.formats import date_format
 
-from projects.models import Comment, Task
+from projects.models import Comment, Project, Task
 
 from .base import TeamTestCase, days_from_today
 
@@ -49,6 +49,7 @@ class ActivityTests(TeamTestCase):
         self.assertNotIn("updated the project", text)
 
     def test_filters(self):
+        self.project.add_to_team(self.karim)
         other = Task.objects.create(project=self.project, title="Cabling")
         Comment.objects.create(task=other, author=self.karim, body="Cables ordered")
         Comment.objects.create(task=self.task, author=self.sara, body="Rack ready")
@@ -61,6 +62,16 @@ class ActivityTests(TeamTestCase):
         by_task = visible_text(self.client.get(f"/activity/?task={self.task.pk}"))
         self.assertIn("Rack ready", by_task)
         self.assertNotIn("Cables ordered", by_task)
+
+    def test_a_task_moved_from_another_project_keeps_its_old_values_secret(self):
+        wifi = Project.objects.create(name="Wi-Fi", manager=self.karim)
+        task = Task.objects.create(project=wifi, title="Secret plan")
+        task.project, task.title = self.project, "Plain plan"  # moved to Firewall (before Stage 16c)
+        task.save()
+        self.login(self.sara)
+        text = visible_text(self.client.get("/activity/"))
+        self.assertIn("updated the task Plain plan", text)
+        self.assertNotIn("Secret plan", text)
 
     def test_deleted_tasks_have_no_link(self):
         self.login(self.omar)

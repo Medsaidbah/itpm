@@ -37,7 +37,7 @@
               </div>
             </a>
             <div class="dropdown-menu dropdown-menu-end">
-              {% if user.is_staff %}
+              {% if user.is_staff and user.is_admin %}
               <a href="{% url 'admin:index' %}" class="dropdown-item"><i class="ti ti-settings me-2"></i>Admin panel</a>
               <div class="dropdown-divider"></div>
               {% endif %}
@@ -65,11 +65,9 @@
             <li class="nav-item {% block nav_activity %}{% endblock %}">
               <a class="nav-link" href="{% url 'activity' %}"><i class="ti ti-activity me-2"></i>Activity</a>
             </li>
-            {% if user.can_manage %}
             <li class="nav-item {% block nav_dashboard %}{% endblock %}">
               <a class="nav-link" href="{% url 'dashboard' %}"><i class="ti ti-chart-bar me-2"></i>Dashboard</a>
             </li>
-            {% endif %}
           </ul>
         </div>
       </div>

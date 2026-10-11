@@ -34,6 +34,23 @@ class ProjectQuerySet(models.QuerySet):
             task_overdue=Count("tasks", filter=late),
         )
 
+    def visible_to(self, user):
+        """The projects this person can see and open: all of them for admins;
+        for everyone else, the projects they manage or whose team they are in.
+        This is the only place the rule is written: every page, export and download uses it."""
+        if not user.is_authenticated:
+            return self.none()  # nobody logged in: nothing (the pages ask to log in first anyway)
+        if user.is_admin:
+            return self
+        in_team = ProjectMember.objects.filter(user=user).values("project")
+        return self.filter(Q(manager=user) | Q(pk__in=in_team))
+
+    def people(self):
+        """Everyone in the teams of these projects: their managers and their members."""
+        return get_user_model().objects.filter(
+            Q(pk__in=self.values("manager")) | Q(pk__in=ProjectMember.objects.filter(project__in=self).values("user"))
+        )
+
 
 class Project(models.Model):
     class Status(models.TextChoices):
@@ -59,12 +76,12 @@ class Project(models.Model):
     priority = models.CharField(max_length=20, choices=Priority.choices, default=Priority.MEDIUM)
     start_date = models.DateField(null=True, blank=True)
     end_date = models.DateField(null=True, blank=True)
-    # Only active admins and managers can be chosen as the project manager
+    # Anyone whose account is active can manage a project (only admins choose who)
     manager = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.PROTECT,
         related_name="managed_projects",
-        limit_choices_to={"role__in": ["admin", "manager"], "is_active": True},
+        limit_choices_to={"is_active": True},
     )
     # The team: the people who work on the project, besides its manager.
     # Each line of the team is a ProjectMember (below), which also remembers who added the person.
@@ -84,24 +101,48 @@ class Project(models.Model):
     # Records every change: what changed, who changed it, and when
     history = HistoricalRecords()
 
+    # Not saved in the database. The pages set saved_by to the person saving the project;
+    # after saving, kept_in_team is the previous manager when they were just kept in the team.
+    saved_by = None
+    kept_in_team = None
+
     class Meta:
         ordering = ["-created_at"]
 
     def __str__(self):
         return self.name
 
+    def save(self, *args, **kwargs):
+        # Who managed the project before this save (nobody for a new project)
+        previous_manager_id = (
+            Project.objects.filter(pk=self.pk).values_list("manager_id", flat=True).first() if self.pk else None
+        )
+        super().save(*args, **kwargs)
+
+        # A new manager: the previous one stays in the team, as a member, so they keep their access.
+        # It's done here so that every way of changing the manager does it (pages, admin panel...).
+        self.kept_in_team = None
+        if previous_manager_id and previous_manager_id != self.manager_id:
+            previous_manager = get_user_model().objects.get(pk=previous_manager_id)
+            if self.add_to_team(previous_manager, added_by=self.saved_by):
+                self.kept_in_team = previous_manager
+
     def get_absolute_url(self):
         """The address of this project's page."""
         return reverse("project_detail", args=[self.pk])
 
     def can_edit(self, user):
-        """Who may change this project: today, any admin or manager.
+        """Who may change this project, its tasks and its team: admins and the project's manager.
         This is the only place the rule is written, so it's easy to change later."""
-        return user.can_manage
+        return user.is_admin or user.pk == self.manager_id
 
     def can_manage_team(self, user):
-        """Who may add people to the team and remove them: admins and this project's manager."""
-        return user.is_admin or user.pk == self.manager_id
+        """Who may add people to the team and remove them: the same people who can edit the project."""
+        return self.can_edit(user)
+
+    def can_change_manager(self, user):
+        """Who may choose the project's manager: admins only."""
+        return user.is_admin
 
     def team(self):
         """Everyone in the team: the manager first, then the members by name."""
@@ -188,6 +229,14 @@ class ProjectMember(models.Model):
         return f"{self.user} in {self.project}"
 
 
+class TaskQuerySet(models.QuerySet):
+    def visible_to(self, user):
+        """The tasks of the projects this person can see (see ProjectQuerySet.visible_to)."""
+        if user.is_authenticated and user.is_admin:
+            return self
+        return self.filter(project__in=Project.objects.visible_to(user))
+
+
 class Task(models.Model):
     class Status(models.TextChoices):
         TODO = "todo", "To do"
@@ -226,7 +275,15 @@ class Task(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    # Adds visible_to() to Task.objects
+    objects = TaskQuerySet.as_manager()
+
     history = HistoricalRecords()
+
+    # Not saved in the database. The pages set saved_by to the person saving the task;
+    # after saving, joined_team says if the task's person was just put in the team (see save()).
+    saved_by = None
+    joined_team = False
 
     class Meta:
         ordering = ["position", "due_date", "id"]
@@ -271,6 +328,12 @@ class Task(models.Model):
         else:
             self.completed_at = None
         super().save(*args, **kwargs)
+
+        # The person an open task is given to is always in the project's team, so they can open it.
+        # This adds them when an admin gives them the task, or when a finished task is opened again.
+        self.joined_team = False
+        if self.assignee_id and self.status != self.Status.DONE:
+            self.joined_team = self.project.add_to_team(self.assignee, added_by=self.saved_by)
 
     @property
     def is_overdue(self):

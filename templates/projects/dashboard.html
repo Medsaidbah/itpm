@@ -7,7 +7,9 @@
 {% block content %}
 <div class="mb-4">
   <h2 class="page-title">Dashboard</h2>
-  <div class="text-secondary">The big picture across all active projects.</div>
+  <div class="text-secondary">
+    {% if user.is_admin %}The big picture across all active projects.{% else %}The big picture of the active projects you are part of.{% endif %}
+  </div>
 </div>
 
 {# Headline numbers #}

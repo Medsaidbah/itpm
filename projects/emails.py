@@ -61,7 +61,7 @@ class Section:
     tasks: list  # the tasks shown (at most MAX_PER_SECTION)
     count: int  # how many there are in total
     late: bool = False  # shown in red
-    show_assignee: bool = False  # for managers: who the task is assigned to
+    show_assignee: bool = False  # for project managers: who the task is assigned to
 
     @property
     def more(self):
@@ -84,7 +84,8 @@ def reminder_for(person, today):
     """Everything the daily reminder tells this person, ready for the email templates.
     "sections" is empty when there is nothing to remind them of."""
     open_tasks = (
-        Task.objects.filter(project__status__in=Project.ACTIVE_STATUSES, due_date__isnull=False)
+        Task.objects.visible_to(person)  # never a task the person can't open
+        .filter(project__status__in=Project.ACTIVE_STATUSES, due_date__isnull=False)
         .exclude(status=Task.Status.DONE)
         .select_related("project", "assignee")
         .order_by("due_date", "id")
@@ -92,7 +93,7 @@ def reminder_for(person, today):
     mine = open_tasks.filter(assignee=person)
     overdue = list(mine.filter(due_date__lt=today))
     due_soon = list(mine.filter(due_date__gte=today, due_date__lt=today + timedelta(days=DUE_SOON_DAYS)))
-    # For managers: late tasks in their projects that are someone else's (or nobody's)
+    # For project managers: late tasks in their projects that are someone else's (or nobody's)
     late_in_my_projects = list(
         open_tasks.filter(project__manager=person, due_date__lt=today).exclude(assignee=person)
     )
@@ -114,6 +115,7 @@ def reminder_for(person, today):
     return {
         "person": person,
         "today": today,
+        "manages_projects": person.managed_projects.exists(),  # for the last line of the email
         "sections": sections,
         "subject": ("Your tasks: " + ", ".join(summary)) if summary else "Your tasks: nothing urgent",
     }
@@ -122,9 +124,9 @@ def reminder_for(person, today):
 @login_required
 def reminder_preview(request):
     """Shows your reminder email as it would look today, to check its design.
-    ?text=1 shows the plain-text version. Admins and managers can add ?user=<number>."""
+    ?text=1 shows the plain-text version. Admins can add ?user=<number> to see someone else's."""
     person = request.user
-    if request.user.can_manage and request.GET.get("user", "").isdigit():
+    if request.user.is_admin and request.GET.get("user", "").isdigit():
         person = get_object_or_404(get_user_model(), pk=request.GET["user"])
     reminder = reminder_for(person, timezone.localdate())
     text, html = render_email("reminder", reminder)

@@ -93,7 +93,7 @@
         </form>
         {% else %}
         <span class="badge bg-{{ task.status_color }}-lt">{{ task.get_status_display }}</span>
-        <div class="text-secondary small mt-2">Only the person assigned to this task, managers and admins can change its status.</div>
+        <div class="text-secondary small mt-2">Only the person assigned to this task, the project's manager and admins can change its status.</div>
         {% endif %}
       </div>
     </div>
@@ -184,7 +184,7 @@
 </div>
 
 <div class="row row-cards mt-0">
-  {# Comments: everyone can comment. id="comments" lets the page jump here after sending. #}
+  {# Comments: everyone who can see the task can comment. id="comments" lets the page jump here after sending. #}
   <div class="col-lg-7">
     <div class="card h-100" id="comments">
       <div class="card-header">
@@ -227,7 +227,7 @@
     </div>
   </div>
 
-  {# Files: everyone can add files; they can only be downloaded by people who are logged in #}
+  {# Files: everyone who can see the task can add files, and only they can download them #}
   <div class="col-lg-5">
     <div class="card h-100" id="files">
       <div class="card-header">

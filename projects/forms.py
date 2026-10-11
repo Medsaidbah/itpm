@@ -49,6 +49,20 @@ class ProjectForm(BootstrapFormMixin, forms.ModelForm):
             "end_date": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
         }
 
+    def __init__(self, *args, user, **kwargs):
+        """user: the person filling in the form."""
+        super().__init__(*args, **kwargs)
+        manager = self.fields["manager"]
+        manager.queryset = manager.queryset.order_by("first_name", "last_name", "username")
+        if not self.instance.can_change_manager(user):
+            # Shown, but it can't be changed (Django ignores any other value sent for it).
+            # So the list only holds the current manager: there is nothing else to choose.
+            manager.disabled = True
+            manager.queryset = manager.queryset.filter(pk=self.instance.manager_id)
+            manager.help_text = "Only admins can change the manager."
+        else:
+            manager.help_text = "The manager can edit the project, its tasks and its team."
+
 
 class TaskForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:

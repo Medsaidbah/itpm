@@ -8,8 +8,8 @@
   <h2 class="page-title me-auto">Projects</h2>
   {# The export keeps the current search and filter: request.GET.urlencode repeats them in the address #}
   <a href="{% url 'projects_excel' %}?{{ request.GET.urlencode }}" class="btn"><i class="ti ti-file-spreadsheet me-2"></i>Export to Excel</a>
-  {# Only admins and managers see this button #}
-  {% if user.can_manage %}
+  {# Only admins create projects, so only they see this button #}
+  {% if user.is_admin %}
   <a href="{% url 'project_create' %}" class="btn btn-primary"><i class="ti ti-plus me-2"></i>New project</a>
   {% endif %}
 </div>
@@ -73,8 +73,10 @@
       </tbody>
     </table>
   </div>
-  {% else %}
+  {% elif has_projects %}
   <div class="card-body text-secondary">No projects found.</div>
+  {% else %}
+  <div class="card-body text-secondary">You aren't in any project's team yet. An admin or a project's manager can add you.</div>
   {% endif %}
 </div>
 {% endblock %}

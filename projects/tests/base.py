@@ -16,8 +16,9 @@ def days_from_today(days):
 
 class TeamTestCase(TestCase):
     """Each test in a class built on this one starts with:
-    - Amina (admin), Omar (manager), Sara and Karim (members)
-    - the project "Firewall", managed by Omar. Its team: Omar and Sara (Karim isn't in it)
+    - Amina (admin); Omar, Sara and Karim (users)
+    - the project "Firewall", managed by Omar. Its team: Omar and Sara. Karim isn't in it,
+      so he can't see it.
     - the task "Install the firewall" in it, assigned to Sara, due in 5 days.
     Whatever a test changes is undone after it, so tests can't disturb each other."""
 
@@ -25,8 +26,7 @@ class TeamTestCase(TestCase):
     def setUpTestData(cls):
         # No passwords: the tests log people in with force_login(), which is much faster
         cls.amina = User.objects.create_superuser("amina", "amina@example.com", first_name="Amina")
-        cls.omar = User.objects.create_user("omar", "omar@example.com", role="manager",
-                                            first_name="Omar", last_name="Ali")
+        cls.omar = User.objects.create_user("omar", "omar@example.com", first_name="Omar", last_name="Ali")
         cls.sara = User.objects.create_user("sara", "sara@example.com", first_name="Sara", last_name="Ben")
         cls.karim = User.objects.create_user("karim", "karim@example.com", first_name="Karim")
 

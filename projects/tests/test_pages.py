@@ -9,7 +9,7 @@ class ProjectListTests(TeamTestCase):
     def setUp(self):
         Project.objects.create(name="Old laptops", manager=self.omar, status="completed")
         Project.objects.create(name="Wi-Fi", manager=self.omar, status="planned")
-        self.login(self.sara)
+        self.login(self.omar)  # he manages the three projects
 
     def names(self, address):
         return sorted(project.name for project in self.client.get(address).context["projects"])
@@ -59,7 +59,7 @@ class MyTasksTests(TeamTestCase):
 
 
 class DashboardTests(TeamTestCase):
-    def test_numbers_and_workload(self):
+    def test_numbers_and_workload(self):  # Omar's projects: only Firewall
         Task.objects.create(project=self.project, title="Late", assignee=self.sara, due_date=days_from_today(-2))
         Task.objects.create(project=self.project, title="Nobody's", due_date=days_from_today(1))
         self.login(self.omar)

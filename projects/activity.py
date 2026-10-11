@@ -160,6 +160,8 @@ def task_event(version, tasks, projects, people):
             event.changes.append(("Due date", None, readable(version, "due_date", people, tasks)))
     elif version.history_type == "-":
         event.icon, event.color, event.action, event.url = "ti-trash", "red", "deleted the task", ""
+    elif version.previous and version.previous.project_id != version.project_id:
+        pass  # moved here from another project: its earlier values belong to that project, so they aren't shown
     elif version.previous:
         event.changes = changes_between(version.previous, version, TASK_FIELDS, people, tasks)
         if not event.changes:
@@ -233,8 +235,8 @@ def with_previous_id(versions):
     )
 
 
-def get_events(project=None, task=None, person=None, before=None, limit=PAGE_SIZE):
-    """The newest events that match the filters, newest first.
+def get_events(viewer, project=None, task=None, person=None, before=None, limit=PAGE_SIZE):
+    """The newest events that the viewer may see and that match the filters, newest first.
     Returns (events, older_than). older_than is the moment where the next page starts,
     or None when there is nothing older."""
 
@@ -245,7 +247,17 @@ def get_events(project=None, task=None, person=None, before=None, limit=PAGE_SIZ
     files = Attachment.objects.select_related("uploaded_by", "task__project")
     team_versions = ProjectMember.history.select_related("history_user")  # people added to a team or removed
 
-    # 2. The filters
+    # 2. Only what happened in the projects the viewer can see. Admins see everything,
+    #    even what happened in projects deleted since.
+    if not viewer.is_admin:
+        visible = Project.objects.visible_to(viewer).values("pk")
+        project_versions = project_versions.filter(id__in=visible)
+        task_versions = task_versions.filter(project_id__in=visible)
+        comments = comments.filter(task__project__in=visible)
+        files = files.filter(task__project__in=visible)
+        team_versions = team_versions.filter(project_id__in=visible)
+
+    # 3. The filters
     if project:
         project_versions = project_versions.filter(id=project.pk)
         task_versions = task_versions.filter(project_id=project.pk)
@@ -271,7 +283,7 @@ def get_events(project=None, task=None, person=None, before=None, limit=PAGE_SIZ
         files = files.filter(uploaded_at__lt=before)
         team_versions = team_versions.filter(history_date__lt=before)
 
-    # 3. The newest of each kind, all mixed together and sorted by date.
+    # 4. The newest of each kind, all mixed together and sorted by date.
     #    We take one more than a page, to find out if there is anything older.
     found = (
         [(v.history_date, "project", v) for v in project_versions.order_by("-history_date", "-history_id")[: limit + 1]]
@@ -284,7 +296,7 @@ def get_events(project=None, task=None, person=None, before=None, limit=PAGE_SIZ
     page = found[:limit]
     older_than = page[-1][0] if len(found) > limit else None
 
-    # 4. Load at once what the sentences need: the version saved just before each change
+    # 5. Load at once what the sentences need: the version saved just before each change
     #    (to see what changed), and the names of people, tasks and projects.
     page_project_versions = [item for _, kind, item in page if kind == "project"]
     page_task_versions = [item for _, kind, item in page if kind == "task"]
@@ -306,7 +318,7 @@ def get_events(project=None, task=None, person=None, before=None, limit=PAGE_SIZ
     tasks = Task.objects.in_bulk(task_ids)  # tasks deleted since then are missing
     projects = Project.objects.in_bulk(project_ids)
 
-    # 5. One sentence per event
+    # 6. One sentence per event
     events = []
     for _, kind, item in page:
         if kind == "project":
@@ -351,18 +363,22 @@ def group_by_day(events):
 
 @login_required
 def activity_feed(request):
-    """What happened, newest first. Everyone can see everything, like the projects.
+    """What happened, newest first, in the projects the person can see (admins: everything).
     ?project=, ?person= and ?task= in the address filter it; ?before= shows older events."""
+    projects = Project.objects.visible_to(request.user)
+    # The people in the filter: everyone for admins; the people in your teams for everyone else
+    people = get_user_model().objects.all() if request.user.is_admin else projects.people()
+
     project = person = task = None
     if request.GET.get("project", "").isdigit():
-        project = get_object_or_404(Project, pk=request.GET["project"])
+        project = get_object_or_404(projects, pk=request.GET["project"])
     if request.GET.get("person", "").isdigit():
-        person = get_object_or_404(get_user_model(), pk=request.GET["person"])
+        person = get_object_or_404(people, pk=request.GET["person"])
     if request.GET.get("task", "").isdigit():
-        task = get_object_or_404(Task, pk=request.GET["task"])
+        task = get_object_or_404(Task.objects.visible_to(request.user), pk=request.GET["task"])
     before = read_moment(request.GET.get("before", ""))
 
-    events, older_than = get_events(project=project, person=person, task=task, before=before)
+    events, older_than = get_events(request.user, project=project, person=person, task=task, before=before)
 
     today = timezone.localdate()
     context = {
@@ -377,7 +393,7 @@ def activity_feed(request):
         "task": task,
         # Don't repeat the project's name on every line when we only show one project
         "hide_project": bool(project or task),
-        "projects": Project.objects.order_by("name"),
-        "people": get_user_model().objects.order_by("first_name", "last_name", "username"),
+        "projects": projects.order_by("name"),
+        "people": people.order_by("first_name", "last_name", "username"),
     }
     return render(request, "projects/activity.html", context)

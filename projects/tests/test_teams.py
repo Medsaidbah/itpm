@@ -1,5 +1,5 @@
 """Project teams: who is in each team, how the existing data filled the teams (Stage 16a),
-and how the team is managed and used (Stage 16b)."""
+how the team is managed and used (Stage 16b), and why people join a team by themselves (Stage 16c)."""
 
 import importlib
 
@@ -12,8 +12,9 @@ from projects.models import Attachment, Comment, Project, ProjectMember, Task
 from .base import TeamTestCase
 from .test_activity import visible_text
 
-# The migration that filled the teams. Its name starts with a number, so it's loaded this way.
+# The migrations that filled the teams. Their names start with a number, so they're loaded this way.
 fill_teams_migration = importlib.import_module("projects.migrations.0003_fill_teams")
+rights_migration = importlib.import_module("projects.migrations.0004_project_level_rights")
 
 
 class TeamTests(TeamTestCase):
@@ -35,7 +36,7 @@ class TeamTests(TeamTestCase):
         self.assertEqual(list(self.sara.managed_projects.all()), [other])
 
     def test_project_page_shows_the_team_and_their_open_tasks(self):
-        self.login(self.karim)
+        self.login(self.sara)
         response = self.client.get(f"/projects/{self.project.pk}/")
         team = response.context["team"]
         self.assertEqual(team, [self.omar, self.sara])
@@ -92,9 +93,8 @@ class ManageTeamTests(TeamTestCase):
         self.assertEqual(list(self.project.members.all()), [self.sara])  # unchanged
 
     def test_who_sees_the_team_buttons(self):
-        lina = User.objects.create_user("lina", role="manager")  # a manager, but not of this project
         add_form = f'action="/projects/{self.project.pk}/team/add/"'
-        for person, sees_them in [(self.omar, True), (self.amina, True), (self.sara, False), (lina, False)]:
+        for person, sees_them in [(self.omar, True), (self.amina, True), (self.sara, False)]:
             with self.subTest(person=person.username):
                 self.login(person)
                 html = self.client.get(f"/projects/{self.project.pk}/").content.decode()
@@ -121,14 +121,14 @@ class ManageTeamTests(TeamTestCase):
         self.assertEqual(list(self.project.members.all()), [self.sara])  # nobody was added
 
     def test_others_cannot_change_the_team(self):
-        lina = User.objects.create_user("lina", role="manager")  # a manager, but not of this project
-        for person in (self.sara, self.karim, lina):
+        # Sara is in the team: refused (403). Karim isn't: for him the project doesn't exist (404).
+        for person, status in [(self.sara, 403), (self.karim, 404)]:
             with self.subTest(person=person.username):
                 self.login(person)
                 response = self.client.post(f"/projects/{self.project.pk}/team/add/", {"person": self.karim.pk})
-                self.assertEqual(response.status_code, 403)
+                self.assertEqual(response.status_code, status)
                 response = self.client.post(f"/projects/{self.project.pk}/team/{self.sara.pk}/remove/")
-                self.assertEqual(response.status_code, 403)
+                self.assertEqual(response.status_code, status)
         self.assertEqual(list(self.project.members.all()), [self.sara])  # unchanged
         # Opening the address (instead of sending the form) changes nothing either
         self.login(self.omar)
@@ -204,7 +204,7 @@ class AssignInsideTheTeamTests(TeamTestCase):
 
 class ManagerChangeTests(TeamTestCase):
     def setUp(self):
-        self.lina = User.objects.create_user("lina", "lina@example.com", role="manager", first_name="Lina")
+        self.lina = User.objects.create_user("lina", "lina@example.com", first_name="Lina")
 
     def change_manager(self, new_manager):
         data = {"name": "Firewall", "status": "in_progress", "priority": "medium", "manager": new_manager.pk}
@@ -217,11 +217,64 @@ class ManagerChangeTests(TeamTestCase):
         self.assertEqual(response.context["team"], [self.lina, self.omar, self.sara])
         self.assertEqual(self.project.memberships.get(user=self.omar).added_by, self.amina)
 
+    def test_every_change_of_manager_keeps_the_previous_one(self):
+        # Even without the pages, like "Revert" on the History page of the admin panel
+        self.project.manager = self.lina
+        self.project.save()
+        self.assertEqual(self.project.team(), [self.lina, self.omar, self.sara])
+        self.assertEqual(self.project.kept_in_team, self.omar)
+
     def test_a_member_who_becomes_the_manager_is_listed_once(self):
         self.project.add_to_team(self.lina)
         self.login(self.amina)
         response = self.change_manager(self.lina)
         self.assertEqual(response.context["team"], [self.lina, self.omar, self.sara])
+
+
+class OpenTaskPeopleTests(TeamTestCase):
+    """The person an open task is given to is always in the project's team, so they can open it."""
+
+    def test_reopening_a_finished_task_brings_its_person_back(self):
+        # Karim did a task here, then left the team
+        old = Task.objects.create(project=self.project, title="Old work", assignee=self.karim, status="done")
+        self.assertFalse(self.project.memberships.filter(user=self.karim).exists())
+
+        self.login(self.omar)
+        response = self.client.post(f"/tasks/{old.pk}/status/", {"status": "in_progress"}, follow=True)
+        self.assertContains(response, "Karim is now in the team of this project.")
+        self.assertEqual(self.project.memberships.get(user=self.karim).added_by, self.omar)
+        self.login(self.karim)
+        self.assertEqual(self.client.get(f"/tasks/{old.pk}/").status_code, 200)  # he can open it again
+
+    def test_the_migration_removes_links_between_two_projects(self):
+        # Links made in the admin panel before Stage 16c (update() skips the app's rules)
+        wifi = Project.objects.create(name="Wi-Fi", manager=self.karim)
+        secret = Task.objects.create(project=wifi, title="Secret")
+        sub = Task.objects.create(project=wifi, title="Sub", parent=secret)
+        same_project = Task.objects.create(project=self.project, title="Order")
+        self.task.depends_on.add(secret, same_project)
+        Task.objects.filter(pk=sub.pk).update(parent=self.task)  # its main task is in Firewall
+
+        rights_migration.remove_links_across_projects(apps, None)
+        self.assertEqual(list(self.task.depends_on.all()), [same_project])  # the link inside Firewall stays
+        sub.refresh_from_db()
+        self.assertIsNone(sub.parent)  # now a main task of Wi-Fi
+        self.assertTrue(Task.objects.filter(pk=secret.pk).exists())  # no task is deleted
+
+    def test_the_migration_puts_people_with_open_tasks_in_the_teams(self):
+        # Data from before Stage 16c: tasks given to people outside the team
+        # (update() writes straight into the database, like the old data)
+        lina = User.objects.create_user("lina", "lina@example.com")
+        open_task = Task.objects.create(project=self.project, title="Open")
+        finished = Task.objects.create(project=self.project, title="Finished", status="done")
+        Task.objects.filter(pk=open_task.pk).update(assignee=self.karim)
+        Task.objects.filter(pk=finished.pk).update(assignee=lina)
+        Task.objects.filter(pk=self.task.pk).update(assignee=self.omar)  # the manager
+
+        rights_migration.put_open_task_people_in_teams(apps, None)
+        self.assertEqual(self.project.team(), [self.omar, self.karim, self.sara])  # not Lina: her task is done
+        rights_migration.put_open_task_people_in_teams(apps, None)  # running it again adds nobody twice
+        self.assertEqual(self.project.memberships.count(), 2)
 
 
 class AdminPanelTests(TeamTestCase):
@@ -300,8 +353,37 @@ class AdminPanelTests(TeamTestCase):
         self.assertEqual(response.status_code, 302, response.content.decode()[:3000])
         self.assertEqual(self.project.memberships.get(user=lina).added_by, self.amina)
 
+    def test_a_task_stays_in_its_project(self):
+        wifi = Project.objects.create(name="Wi-Fi", manager=self.karim)
+        other = Task.objects.create(project=wifi, title="Order access points")
+        url = f"/admin/projects/task/{self.task.pk}/change/"
+        data = {"project": wifi.pk, "title": self.task.title, "status": "todo", "priority": "medium",
+                "assignee": self.sara.pk, "due_date": self.task.due_date, "position": 0,
+                "comments-TOTAL_FORMS": 0, "comments-INITIAL_FORMS": 0,
+                "attachments-TOTAL_FORMS": 0, "attachments-INITIAL_FORMS": 0}
+        self.login(self.amina)
+        self.assertEqual(self.client.post(url, data).status_code, 302)
+        self.task.refresh_from_db()
+        self.assertEqual(self.task.project, self.project)  # the project can't be changed
+
+        # A task only waits for tasks of its own project
+        response = self.client.post(url, data | {"depends_on": [other.pk]})
+        self.assertContains(response, "A task can only wait for tasks of its own project.")
+        self.assertFalse(self.task.depends_on.exists())
+
+    def test_the_previous_manager_added_twice_by_mistake(self):
+        # The admin changes the manager AND adds Omar to the team below, in the same save
+        lina = User.objects.create_user("lina", "lina@example.com", first_name="Lina")
+        response = self.save(self.admin_form(manager=lina.pk, **{
+            "memberships-TOTAL_FORMS": 2, "memberships-1-project": self.project.pk,
+            "memberships-1-user": self.omar.pk,
+        }))
+        self.assertEqual(response.status_code, 302)
+        self.project.refresh_from_db()
+        self.assertEqual(self.project.team(), [lina, self.omar, self.sara])
+
     def test_a_new_manager_keeps_the_previous_one_in_the_team(self):
-        lina = User.objects.create_user("lina", "lina@example.com", role="manager", first_name="Lina")
+        lina = User.objects.create_user("lina", "lina@example.com", first_name="Lina")
         response = self.save(self.admin_form(manager=lina.pk))
         self.assertEqual(response.status_code, 302)
         self.project.refresh_from_db()

@@ -129,7 +129,7 @@
       view_mode: "Week",
       view_mode_select: true,          // a list to switch between days, weeks, months...
       scroll_to: element.dataset.scrollTo,
-      readonly: element.dataset.canEdit !== "true",  // only admins and managers can move bars
+      readonly: element.dataset.canEdit !== "true",  // only the project's manager and admins can move bars
       readonly_progress: true,
       popup: function (popup) {
         var task = popup.task;
