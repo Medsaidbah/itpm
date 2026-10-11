@@ -9,6 +9,7 @@
 The server checks these rules itself: hiding a button is not enough."""
 
 import io
+import re
 import shutil
 import tempfile
 
@@ -209,7 +210,7 @@ class OnlyYourProjectsTests(TeamTestCase):
         response = self.client.get("/activity/")
         self.assertNotIn("Order access points", visible_text(response))
         self.assertEqual(list(response.context["projects"]), [self.project])
-        self.assertEqual(set(response.context["people"]), {self.omar, self.sara})  # her team
+        self.assertEqual(set(response.context["people"]), {self.omar, self.sara, self.amina})  # her team and the admins
         self.assertEqual(self.client.get(f"/activity/?project={self.wifi.pk}").status_code, 404)
         self.assertEqual(self.client.get(f"/activity/?task={self.order.pk}").status_code, 404)
         self.assertEqual(self.client.get(f"/activity/?person={self.karim.pk}").status_code, 404)
@@ -243,6 +244,80 @@ class OnlyYourProjectsTests(TeamTestCase):
         lina = User.objects.create_user("lina", "lina@example.com")
         self.login(lina)
         self.assertContains(self.client.get("/projects/"), "You aren't in any project's team yet.")
+
+
+class NoLeakTests(TeamTestCase):
+    """Follow every link of the app as one person, like a visitor clicking everywhere, and check
+    that nothing from a project they aren't part of shows anywhere: its name, its tasks, its
+    comments, its files. A new page is checked too, as soon as a link leads to it."""
+
+    SECRETS = ["Secret Wi-Fi", "Secret access points", "Secret comment", "secret-quote"]
+
+    def setUp(self):
+        media_folder = tempfile.mkdtemp()
+        settings_change = override_settings(MEDIA_ROOT=media_folder)
+        settings_change.enable()
+        self.addCleanup(settings_change.disable)
+        self.addCleanup(shutil.rmtree, media_folder, ignore_errors=True)
+
+        # Karim's project, with a team that doesn't include Sara
+        wifi = Project.objects.create(name="Secret Wi-Fi", manager=self.karim, status="in_progress")
+        task = Task.objects.create(project=wifi, title="Secret access points", assignee=self.karim,
+                                   due_date=days_from_today(-1))
+        Comment.objects.create(task=task, author=self.karim, body="Secret comment")
+        Attachment.objects.create(task=task, uploaded_by=self.karim,
+                                  file=SimpleUploadedFile("secret-quote.pdf", b"%PDF-1.4"))
+        # Sara's project has some of everything too, so the visit goes through every kind of page
+        Comment.objects.create(task=self.task, author=self.sara, body="Rack ready")
+        Attachment.objects.create(task=self.task, uploaded_by=self.sara,
+                                  file=SimpleUploadedFile("plan.pdf", b"%PDF-1.4"))
+
+    def visit_everything(self, person):
+        """Every page reachable from the home page by following links: {address: text}."""
+        self.login(person)
+        # The home page, and two lists that are opened by a form (not by a link)
+        pages, to_visit = {}, ["/", "/projects/?status=all", "/projects/export.xlsx?status=all"]
+        while to_visit and len(pages) < 400:
+            address = to_visit.pop()
+            if address in pages:
+                continue
+            response = self.client.get(address)
+            if response.streaming:  # a downloaded file
+                pages[address] = b"".join(response.streaming_content).decode("utf-8", "replace")
+                continue
+            if response.status_code != 200:
+                pages[address] = ""
+                continue
+            if "spreadsheetml" in response["Content-Type"]:  # an Excel file: read its cells
+                workbook = load_workbook(io.BytesIO(response.content))
+                pages[address] = " ".join(str(cell) for sheet in workbook
+                                          for row in sheet.iter_rows(values_only=True) for cell in row)
+                continue
+            pages[address] = text = response.content.decode()
+            for link in re.findall(r'href="(/[^"#]*)', text):
+                link = link.replace("&amp;", "&")
+                if not link.startswith(("/static/", "/logout/", "/admin/")):
+                    to_visit.append(link)
+        return pages
+
+    def test_nothing_from_another_project_shows_anywhere(self):
+        pages = self.visit_everything(self.sara)
+        # The visit really went everywhere: lists, the project's pages, the task, the files...
+        p, t = self.project.pk, self.task.pk
+        for address in ["/my-tasks/", "/dashboard/", "/activity/", "/reminders/preview/", f"/projects/{p}/board/",
+                        f"/projects/{p}/timeline/", f"/projects/{p}/report/", f"/projects/{p}/export.xlsx",
+                        f"/tasks/{t}/", f"/activity/?task={t}"]:
+            self.assertIn(address, pages)
+        self.assertTrue(any(address.startswith("/media/") for address in pages))
+        for address, text in pages.items():
+            for secret in self.SECRETS:
+                self.assertNotIn(secret, text, f"{address} shows {secret!r}")
+
+    def test_the_visit_would_notice(self):
+        # The same visit, by someone in Karim's project: then the secrets are found
+        pages = self.visit_everything(self.karim)
+        for secret in self.SECRETS:
+            self.assertTrue(any(secret in text for text in pages.values()), f"{secret!r} was never seen")
 
 
 class ProjectRightsTests(TeamTestCase):

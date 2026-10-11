@@ -13,7 +13,7 @@ from datetime import date, datetime, timedelta
 
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.db.models import OuterRef, Subquery
+from django.db.models import OuterRef, Q, Subquery
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.utils.dateparse import parse_datetime
@@ -366,8 +366,13 @@ def activity_feed(request):
     """What happened, newest first, in the projects the person can see (admins: everything).
     ?project=, ?person= and ?task= in the address filter it; ?before= shows older events."""
     projects = Project.objects.visible_to(request.user)
-    # The people in the filter: everyone for admins; the people in your teams for everyone else
-    people = get_user_model().objects.all() if request.user.is_admin else projects.people()
+    # The people in the filter: everyone for admins. For everyone else, the people who can act
+    # in their projects: the people in their teams, and the admins.
+    User = get_user_model()
+    if request.user.is_admin:
+        people = User.objects.all()
+    else:
+        people = User.objects.filter(Q(pk__in=projects.people().values("pk")) | Q(role=User.Role.ADMIN))
 
     project = person = task = None
     if request.GET.get("project", "").isdigit():

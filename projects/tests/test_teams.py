@@ -50,7 +50,7 @@ class FillTeamsMigrationTests(TeamTestCase):
     def test_people_involved_join_the_team(self):
         commenter = User.objects.create_user("lina", "lina@example.com")
         uploader = User.objects.create_user("ali", "ali@example.com")
-        editor = User.objects.create_user("moussa", "moussa@example.com", role="manager")
+        editor = User.objects.create_user("moussa", "moussa@example.com")
         outsider = User.objects.create_user("nobody", "nobody@example.com")
         admin_who_commented = User.objects.create_user("boss", "boss@example.com", role="admin")
 
