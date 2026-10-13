@@ -1,12 +1,12 @@
 {% extends "base.html" %}
-{% load people %}
+{% load i18n people %}
 
-{% block title %}My profile · IT Projects{% endblock %}
+{% block title %}{% translate "My profile" %} · IT Projects{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
   <div class="col-lg-8">
-    <h2 class="page-title mb-4">My profile</h2>
+    <h2 class="page-title mb-4">{% translate "My profile" %}</h2>
 
     {# Who I am: shown here, changed by an admin #}
     <div class="card mb-4">
@@ -16,24 +16,24 @@
           <div class="h2 mb-1">{{ user }}</div>
           <div class="text-secondary">{{ user.username }} · {{ user.get_role_display }}</div>
         </div>
-        <a href="{% url 'person_detail' user.pk %}" class="btn"><i class="ti ti-id me-2"></i>See my page</a>
+        <a href="{% url 'person_detail' user.pk %}" class="btn"><i class="ti ti-id me-2"></i>{% translate "See my page" %}</a>
       </div>
       <div class="card-body border-top">
         <div class="datagrid">
           <div class="datagrid-item">
-            <div class="datagrid-title">First name</div>
-            <div class="datagrid-content">{{ user.first_name|default:"Not set" }}</div>
+            <div class="datagrid-title">{% translate "First name" %}</div>
+            <div class="datagrid-content">{{ user.first_name|default:_("Not set") }}</div>
           </div>
           <div class="datagrid-item">
-            <div class="datagrid-title">Last name</div>
-            <div class="datagrid-content">{{ user.last_name|default:"Not set" }}</div>
+            <div class="datagrid-title">{% translate "Last name" %}</div>
+            <div class="datagrid-content">{{ user.last_name|default:_("Not set") }}</div>
           </div>
           <div class="datagrid-item">
-            <div class="datagrid-title">Email</div>
-            <div class="datagrid-content text-break">{{ user.email|default:"Not set" }}</div>
+            <div class="datagrid-title">{% translate "Email" %}</div>
+            <div class="datagrid-content text-break">{{ user.email|default:_("Not set") }}</div>
           </div>
         </div>
-        <div class="form-hint mt-3">An admin manages your names and your email. Ask an admin if they need to change.</div>
+        <div class="form-hint mt-3">{% translate "An admin manages your names and your email. Ask an admin if they need to change." %}</div>
       </div>
     </div>
 
@@ -41,16 +41,17 @@
     <form method="post" enctype="multipart/form-data" class="card">
       {% csrf_token %}
       <div class="card-header">
-        <h3 class="card-title">Phone and picture</h3>
+        <h3 class="card-title">{% translate "Phone, picture and language" %}</h3>
       </div>
       <div class="card-body">
         {% include "includes/form_field.html" with field=form.phone %}
         {% include "includes/form_field.html" with field=form.picture %}
         {% if user.picture %}{% include "includes/form_field.html" with field=form.remove_picture %}{% endif %}
+        {% include "includes/form_field.html" with field=form.language %}
       </div>
       <div class="card-footer d-flex flex-wrap gap-2">
-        <a href="{% url 'password_change' %}" class="btn me-auto"><i class="ti ti-key me-2"></i>Change my password</a>
-        <button type="submit" class="btn btn-primary">Save</button>
+        <a href="{% url 'password_change' %}" class="btn me-auto"><i class="ti ti-key me-2"></i>{% translate "Change my password" %}</a>
+        <button type="submit" class="btn btn-primary">{% translate "Save" %}</button>
       </div>
     </form>
   </div>

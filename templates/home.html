@@ -1,11 +1,12 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Home · IT Projects{% endblock %}
+{% block title %}{% translate "Home" %} · IT Projects{% endblock %}
 {% block nav_home %}active{% endblock %}
 
 {% block content %}
 <div class="mb-4">
-  <h2 class="page-title">Hello, {{ user.first_name|default:user.username }}</h2>
+  <h2 class="page-title">{% blocktranslate with name=user.first_name|default:user.username %}Hello, {{ name }}{% endblocktranslate %}</h2>
 </div>
 
 {# Three summary cards #}
@@ -14,7 +15,7 @@
     {# The whole card is a link to the project list #}
     <a href="{% url 'project_list' %}" class="card card-sm card-link">
       <div class="card-body">
-        <div class="subheader">Active projects</div>
+        <div class="subheader">{% translate "Active projects" %}</div>
         <div class="h1 mb-0">{{ active_projects }}</div>
       </div>
     </a>
@@ -22,7 +23,7 @@
   <div class="col-sm-4">
     <a href="{% url 'my_tasks' %}" class="card card-sm card-link">
       <div class="card-body">
-        <div class="subheader">My open tasks</div>
+        <div class="subheader">{% translate "My open tasks" %}</div>
         <div class="h1 mb-0">{{ open_tasks }}</div>
       </div>
     </a>
@@ -30,7 +31,7 @@
   <div class="col-sm-4">
     <a href="{% url 'my_tasks' %}#overdue" class="card card-sm card-link">
       <div class="card-body">
-        <div class="subheader">My overdue tasks</div>
+        <div class="subheader">{% translate "My overdue tasks" %}</div>
         <div class="h1 mb-0 {% if overdue_tasks %}text-danger{% endif %}">{{ overdue_tasks }}</div>
       </div>
     </a>
@@ -40,9 +41,9 @@
 {# The next tasks assigned to the person who is logged in #}
 <div class="card">
   <div class="card-header">
-    <h3 class="card-title">My next tasks</h3>
+    <h3 class="card-title">{% translate "My next tasks" %}</h3>
     <div class="card-actions">
-      <a href="{% url 'my_tasks' %}" class="btn btn-sm">See all my tasks</a>
+      <a href="{% url 'my_tasks' %}" class="btn btn-sm">{% translate "See all my tasks" %}</a>
     </div>
   </div>
   {% if next_tasks %}
@@ -50,26 +51,26 @@
     <table class="table card-table table-vcenter">
       <thead>
         <tr>
-          <th>Task</th>
-          <th>Project</th>
-          <th>Status</th>
-          <th>Due date</th>
+          <th>{% translate "Task" %}</th>
+          <th>{% translate "Project" %}</th>
+          <th>{% translate "Status" %}</th>
+          <th>{% translate "Due date" %}</th>
         </tr>
       </thead>
       <tbody>
         {% for task in next_tasks %}
         <tr>
-          <td><a href="{{ task.get_absolute_url }}">{{ task.title }}</a></td>
-          <td><a href="{{ task.project.get_absolute_url }}" class="text-secondary">{{ task.project }}</a></td>
+          <td><a href="{{ task.get_absolute_url }}"><bdi>{{ task.title }}</bdi></a></td>
+          <td><a href="{{ task.project.get_absolute_url }}" class="text-secondary"><bdi>{{ task.project }}</bdi></a></td>
           <td><span class="badge bg-{{ task.status_color }}-lt">{{ task.get_status_display }}</span></td>
-          <td {% if task.is_overdue %}class="text-danger"{% endif %}>{{ task.due_date|date:"d M Y"|default:"No date" }}</td>
+          <td {% if task.is_overdue %}class="text-danger"{% endif %}>{{ task.due_date|date:_("d M Y")|default:_("No date") }}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
   {% else %}
-  <div class="card-body text-secondary">You have no open tasks. Nice work!</div>
+  <div class="card-body text-secondary">{% translate "You have no open tasks. Nice work!" %}</div>
   {% endif %}
 </div>
 {% endblock %}

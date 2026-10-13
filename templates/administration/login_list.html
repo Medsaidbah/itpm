@@ -45,7 +45,7 @@
           </td>
           <td class="d-none d-md-table-cell">{{ group.ip_address|default:"—" }}</td>
           <td class="d-none d-md-table-cell">{{ group.failures }}</td>
-          <td class="d-none d-lg-table-cell text-secondary">{{ group.last_try|date:"d M Y, H:i" }}</td>
+          <td class="d-none d-lg-table-cell text-secondary">{{ group.last_try|date:_("d M Y, H:i") }}</td>
           <td>
             <div class="d-flex flex-wrap align-items-center gap-2">
             {% if group.locked %}

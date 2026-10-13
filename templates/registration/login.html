@@ -1,17 +1,18 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Log in · IT Projects{% endblock %}
+{% block title %}{% translate "Log in" %} · IT Projects{% endblock %}
 
 {% block content %}
 <div class="container-tight py-4">
   <div class="text-center mb-4">
     <h1 class="h2 mb-1">IT Projects</h1>
-    <div class="text-secondary">IT department project management</div>
+    <div class="text-secondary">{% translate "IT department project management" %}</div>
   </div>
 
   <div class="card card-md">
     <div class="card-body">
-      <h2 class="h3 text-center mb-4">Log in to your account</h2>
+      <h2 class="h3 text-center mb-4">{% translate "Log in to your account" %}</h2>
 
       {# Shown when the username or password is wrong #}
       {% if form.non_field_errors %}
@@ -26,20 +27,32 @@
         <input type="hidden" name="next" value="{{ next }}">
 
         <div class="mb-3">
-          <label class="form-label" for="id_username">Username</label>
+          <label class="form-label" for="id_username">{% translate "Username" %}</label>
           <input type="text" name="username" id="id_username" class="form-control"
                  value="{{ form.username.value|default:'' }}" autocomplete="username" required autofocus>
         </div>
 
         <div class="mb-3">
-          <label class="form-label" for="id_password">Password</label>
+          <label class="form-label" for="id_password">{% translate "Password" %}</label>
           <input type="password" name="password" id="id_password" class="form-control"
                  autocomplete="current-password" required>
         </div>
 
-        <button type="submit" class="btn btn-primary w-100">Log in</button>
+        <button type="submit" class="btn btn-primary w-100">{% translate "Log in" %}</button>
       </form>
     </div>
   </div>
+
+  {# The language switch: remembered on this computer. The first time someone logs in, it becomes their language. #}
+  <form method="post" action="{% url 'set_language' %}" class="d-flex justify-content-center flex-wrap gap-1 mt-3">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ request.get_full_path }}">
+    <i class="ti ti-language text-secondary align-self-center me-1" title="{% translate 'Language' %}"></i>
+    {% for code, name in LANGUAGES %}
+    <button type="submit" name="language" value="{{ code }}" lang="{{ code }}"
+            class="btn btn-sm {% if code == LANGUAGE_CODE %}btn-primary{% else %}btn-ghost-secondary{% endif %}"
+            {% if code == LANGUAGE_CODE %}aria-current="true"{% endif %}>{{ name }}</button>
+    {% endfor %}
+  </form>
 </div>
 {% endblock %}

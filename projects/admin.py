@@ -2,6 +2,8 @@ from django import forms
 from django.contrib import admin
 from django.core.exceptions import ValidationError
 from django.forms.models import BaseInlineFormSet
+from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
 from simple_history.admin import SimpleHistoryAdmin
 
 from .models import Attachment, Comment, Project, ProjectMember, Task
@@ -35,8 +37,10 @@ class TeamFormSet(BaseInlineFormSet):
             open_count = self.instance.open_tasks_of(person).count()
             if open_count:
                 raise ValidationError(
-                    f"{person} still has {open_count} open task(s) in this project. "
-                    f"Give them to someone else (or finish them) before removing {person} from the team."
+                    _(
+                        "%(person)s still has %(count)d open task(s) in this project. "
+                        "Give them to someone else (or finish them) before removing %(person)s from the team."
+                    ) % {"person": person, "count": open_count}
                 )
 
 
@@ -51,8 +55,8 @@ class ProjectMemberInline(admin.TabularInline):
     extra = 0
     fields = ["user", "added_at", "added_by"]
     readonly_fields = ["added_at", "added_by"]
-    verbose_name = "team member"
-    verbose_name_plural = "Team (besides the manager)"
+    verbose_name = gettext_lazy("team member")
+    verbose_name_plural = gettext_lazy("Team (besides the manager)")
 
 
 @admin.register(Project)
@@ -64,7 +68,7 @@ class ProjectAdmin(SimpleHistoryAdmin):
     search_fields = ["name", "description"]
     inlines = [ProjectMemberInline, TaskInline]
 
-    @admin.display(description="Progress")
+    @admin.display(description=gettext_lazy("Progress"))
     def progress_display(self, obj):
         return f"{obj.progress}%"
 
@@ -101,7 +105,7 @@ class TaskAdminForm(forms.ModelForm):
         project_id = project.pk if project else self.instance.project_id
         waits_for = cleaned_data.get("depends_on") or []
         if project_id and any(task.project_id != project_id for task in waits_for):
-            self.add_error("depends_on", "A task can only wait for tasks of its own project.")
+            self.add_error("depends_on", _("A task can only wait for tasks of its own project."))
         return cleaned_data
 
 
@@ -131,7 +135,7 @@ class TaskAdmin(SimpleHistoryAdmin):
     readonly_fields = ["completed_at", "created_at", "updated_at"]
     inlines = [CommentInline, AttachmentInline]
 
-    @admin.display(boolean=True, description="Overdue")
+    @admin.display(boolean=True, description=gettext_lazy("Overdue"))
     def overdue(self, obj):
         return obj.is_overdue
 

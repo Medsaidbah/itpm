@@ -136,6 +136,9 @@ class EveryAddressTests(TeamTestCase):
             # People: your own profile, and the pages and pictures of the people you share a project with
             ("profile", "get", "/profile/", None, (OK, OK, OK, OK, OK)),
             ("password_change", "get", "/profile/password/", None, (OK, OK, OK, OK, OK)),
+            # The language switch (Stage 17c): everybody may change their own language (it only sets their own choice)
+            ("set_language", "post", "/language/", {"language": "fr", "next": "/projects/"},
+             (MOVED, MOVED, MOVED, MOVED, MOVED)),
             ("person_detail", "get", f"/people/{self.sara.pk}/", None, (OK, OK, OK, OK, HIDDEN)),
             ("person_picture", "get", f"/people/{self.sara.pk}/picture/", None, (OK, OK, OK, OK, HIDDEN)),
             # Deleting a project: admins only. Like the other project pages, outsiders get "Page not found".

@@ -1,29 +1,38 @@
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.signals import user_logged_in
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
-from django.utils.translation import gettext_lazy
+from django.utils.translation import gettext, gettext_lazy
+
+from .middleware import chosen_language
 
 
 def validate_phone(value):
     """A phone number: digits, spaces and + - . ( ) only, with at least 6 digits."""
     allowed = set("0123456789 +-.()")
     if not set(value) <= allowed or sum(character.isdigit() for character in value) < 6:
-        raise ValidationError("Enter a phone number with digits, spaces and + - ( ) only, like +222 22 12 34 56.")
+        raise ValidationError(
+            gettext("Enter a phone number with digits, spaces and + - ( ) only, like +222 22 12 34 56.")
+        )
 
 
 class User(AbstractUser):
     # The role in the whole app. Being a project's manager or a member of its team
     # is decided project by project (Project.manager and the project's team).
     class Role(models.TextChoices):
-        ADMIN = "admin", "Admin"
-        USER = "user", "User"
+        ADMIN = "admin", gettext_lazy("Admin")
+        USER = "user", gettext_lazy("User")
 
     role = models.CharField(max_length=20, choices=Role.choices, default=Role.USER)
     phone = models.CharField(max_length=30, blank=True, validators=[validate_phone])
     # A small square JPEG made by the app (see pictures.py), never the uploaded file itself
     picture = models.ImageField(upload_to="people/", blank=True)
+    # The language of the person's pages and emails (Stage 17c): "en", "fr" or "ar".
+    # Empty until they choose one: then the first login saves the language of the login page.
+    language = models.CharField(max_length=10, choices=settings.LANGUAGES, blank=True)
 
     def __str__(self):
         return self.get_full_name() or self.username
@@ -32,6 +41,10 @@ class User(AbstractUser):
     def is_admin(self):
         # Admins can do everything, in every project
         return self.role == self.Role.ADMIN
+
+    def get_language(self):
+        """The language of this person's pages and emails: their choice, or English if they have none yet."""
+        return self.language or settings.LANGUAGE_CODE
 
     @property
     def initials(self):
@@ -67,6 +80,19 @@ def leaves_no_active_admin(person, role, is_active):
     if role == User.Role.ADMIN and is_active:
         return False
     return not User.objects.filter(role=User.Role.ADMIN, is_active=True).exclude(pk=person.pk).exists()
+
+
+@receiver(user_logged_in)
+def keep_the_login_page_language(sender, request, user, **kwargs):
+    """Someone who logs in without having chosen a language yet keeps the language of the login page
+    (the one chosen on this computer, or English): it is saved in their profile, for their emails too."""
+    if request is None:
+        return
+    language = chosen_language(request)
+    # "language=''" in the filter: the database itself says nothing is saved yet. A language that is already in
+    # the profile is never replaced (even if the copy of the person we were given is out of date).
+    if User.objects.filter(pk=user.pk, language="").update(language=language):
+        user.language = language
 
 
 @receiver(post_delete, sender=User)

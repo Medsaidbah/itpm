@@ -1,8 +1,8 @@
 {% extends "base.html" %}
 {% load static %}
-{% load people %}
+{% load i18n people %}
 
-{% block title %}Board · {{ project.name }} · IT Projects{% endblock %}
+{% block title %}{% translate "Board" %} · {{ project.name }} · IT Projects{% endblock %}
 {% block nav_projects %}active{% endblock %}
 
 {% block extra_head %}
@@ -18,18 +18,22 @@
 
 {% block content %}
 <div class="mb-3">
-  <a href="{{ project.get_absolute_url }}" class="text-secondary"><i class="ti ti-arrow-left me-1"></i>{{ project }}</a>
+  <a href="{{ project.get_absolute_url }}" class="text-secondary"><i class="ti ti-arrow-left me-1"></i><bdi>{{ project }}</bdi></a>
 </div>
 <div class="mb-4">
-  <h2 class="page-title">Board</h2>
+  <h2 class="page-title">{% translate "Board" %}</h2>
   <div class="text-secondary">
-    Drag a card to another column to change its status. You can move the tasks assigned to you;
-    the project's manager and admins can move every card.
+    {% blocktranslate trimmed %}
+      Drag a card to another column to change its status. You can move the tasks assigned to you;
+      the project's manager and admins can move every card.
+    {% endblocktranslate %}
   </div>
 </div>
 
-{# data-csrf: the security token the drag-and-drop script sends with each move #}
-<div class="board" id="board" data-csrf="{{ csrf_token }}">
+{# data-csrf: the security token the drag-and-drop script sends with each move. #}
+{# data-error: the message shown if a move fails, in the language of the page. #}
+<div class="board" id="board" data-csrf="{{ csrf_token }}"
+     data-error="{% translate "This card couldn't be moved. The page will reload." %}">
   {% for status, label, cards in columns %}
   <div class="board-column">
     <div class="d-flex align-items-center mb-2">
@@ -42,16 +46,16 @@
       <div class="card card-sm mb-2 board-card {% if task.movable %}movable{% else %}locked{% endif %}"
            data-id="{{ task.pk }}" data-move-url="{% url 'task_move' task.pk %}">
         <div class="card-body p-2">
-          {% if task.parent %}<div class="text-secondary small text-truncate">↳ {{ task.parent }}</div>{% endif %}
+          {% if task.parent %}<div class="text-secondary small text-truncate">{% if LANGUAGE_BIDI %}↲{% else %}↳{% endif %} <bdi>{{ task.parent }}</bdi></div>{% endif %}
           <div class="d-flex align-items-start gap-1">
-            {% if task.is_milestone %}<i class="ti ti-flag text-orange mt-1" title="Milestone"></i>{% endif %}
-            <a href="{{ task.get_absolute_url }}" class="text-reset fw-medium">{{ task.title }}</a>
+            {% if task.is_milestone %}<i class="ti ti-flag text-orange mt-1" title="{% translate 'Milestone' %}"></i>{% endif %}
+            <a href="{{ task.get_absolute_url }}" class="text-reset fw-medium"><bdi>{{ task.title }}</bdi></a>
             {# The lock is always there, but hidden when the task isn't waiting #}
-            <i class="ti ti-lock text-secondary ms-auto mt-1 board-lock {% if not task.waiting_for %}d-none{% endif %}" title="Waiting for other tasks"></i>
+            <i class="ti ti-lock text-secondary ms-auto mt-1 board-lock {% if not task.waiting_for %}d-none{% endif %}" title="{% translate 'Waiting for other tasks' %}"></i>
           </div>
           <div class="d-flex align-items-center gap-2 mt-2 small">
             <span class="badge bg-{{ task.priority_color }}-lt">{{ task.get_priority_display }}</span>
-            <span class="board-due {% if task.is_overdue %}text-danger{% else %}text-secondary{% endif %}">{{ task.due_date|date:"d M Y" }}</span>
+            <span class="board-due {% if task.is_overdue %}text-danger{% else %}text-secondary{% endif %}">{{ task.due_date|date:_("d M Y") }}</span>
             <span class="ms-auto">{% avatar task.assignee "xs" %}</span>
           </div>
         </div>
@@ -121,7 +125,7 @@
               refreshCounts();
             })
             .catch(function () {
-              alert("This card couldn't be moved. The page will reload.");
+              alert(board.dataset.error);
               location.reload();
             });
         },

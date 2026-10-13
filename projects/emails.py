@@ -4,6 +4,9 @@ While developing, settings.py prints the emails in the terminal instead of sendi
 (the "console" email backend). On the server, the real mail server goes in .env (Step 15).
 Each email has two versions, made from two templates in templates/emails/:
 a plain-text one (.txt) and a nicer HTML one (.html). Email programs show the one they can.
+
+Each email is written in the language saved in the profile of the person who gets it
+(Stage 17c), whatever the language of the person who caused it.
 """
 
 import logging
@@ -17,8 +20,10 @@ from django.core.mail import EmailMultiAlternatives
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
-from django.utils import timezone
+from django.utils import timezone, translation
 from django.utils.formats import date_format
+from django.utils.translation import gettext as _
+from django.utils.translation import ngettext, pgettext
 
 from .models import Project, Task
 
@@ -32,18 +37,20 @@ MAX_PER_SECTION = 20  # longer lists end with "...and 5 more"
 # ---------- Sending ----------
 
 
-def render_email(template, context):
-    """The plain-text and HTML versions of an email: emails/<template>.txt and .html"""
+def render_email(template, context, language=None):
+    """The plain-text and HTML versions of an email: emails/<template>.txt and .html,
+    written in the given language (the language of the person who gets the email)."""
     context = {**context, "site_url": settings.SITE_URL}
-    text = render_to_string(f"emails/{template}.txt", context)
-    html = render_to_string(f"emails/{template}.html", context)
+    with translation.override(language or translation.get_language()):
+        text = render_to_string(f"emails/{template}.txt", context)
+        html = render_to_string(f"emails/{template}.html", context)
     return text, html
 
 
-def send_email(to, subject, template, context):
+def send_email(to, subject, template, context, language=None):
     """Sends one email. If the mail server says no, this raises an error."""
-    subject = " ".join(subject.split())  # an email subject must be on one line
-    text, html = render_email(template, {**context, "subject": subject})
+    subject = " ".join(str(subject).split())  # an email subject must be on one line
+    text, html = render_email(template, {**context, "subject": subject}, language)
     # The sender is DEFAULT_FROM_EMAIL from settings.py
     message = EmailMultiAlternatives(subject, text, to=[to])
     message.attach_alternative(html, "text/html")
@@ -72,17 +79,23 @@ def describe_due_date(task, today):
     """Like "4 days late", "due today", "due tomorrow" or "due Sun 11 Oct"."""
     days = (task.due_date - today).days
     if days < 0:
-        return f"{-days} day{'s' if days < -1 else ''} late"
+        return ngettext("%(count)d day late", "%(count)d days late", -days) % {"count": -days}
     if days == 0:
-        return "due today"
+        return _("due today")
     if days == 1:
-        return "due tomorrow"
-    return f"due {date_format(task.due_date, 'D j M')}"
+        return _("due tomorrow")
+    return _("due %(date)s") % {"date": date_format(task.due_date, _("D j M"))}
 
 
 def reminder_for(person, today):
     """Everything the daily reminder tells this person, ready for the email templates.
-    "sections" is empty when there is nothing to remind them of."""
+    "sections" is empty when there is nothing to remind them of.
+    The texts are written in the language of the person."""
+    with translation.override(person.get_language()):
+        return _reminder_for(person, today)
+
+
+def _reminder_for(person, today):
     open_tasks = (
         Task.objects.visible_to(person)  # never a task the person can't open
         .filter(project__status__in=Project.ACTIVE_STATUSES, due_date__isnull=False)
@@ -101,23 +114,32 @@ def reminder_for(person, today):
     sections = []
     summary = []  # for the subject, like "2 overdue, 1 due soon"
     for title, tasks, late, show_assignee, short in [
-        ("Overdue", overdue, True, False, "overdue"),
-        (f"Due in the next {DUE_SOON_DAYS} days", due_soon, False, False, "due soon"),
-        ("Late in projects you manage", late_in_my_projects, True, True, "late in your projects"),
+        (_("Overdue"), overdue, True, False, _("%(count)d overdue")),
+        (
+            ngettext("Due in the next %(days)d day", "Due in the next %(days)d days", DUE_SOON_DAYS)
+            % {"days": DUE_SOON_DAYS},
+            due_soon, False, False, _("%(count)d due soon"),
+        ),
+        (_("Late in projects you manage"), late_in_my_projects, True, True, _("%(count)d late in your projects")),
     ]:
         if not tasks:
             continue
         for task in tasks:
             task.due_text = describe_due_date(task, today)
         sections.append(Section(title, tasks[:MAX_PER_SECTION], len(tasks), late, show_assignee))
-        summary.append(f"{len(tasks)} {short}")
+        summary.append(short % {"count": len(tasks)})
 
+    separator = pgettext("separator between items of a list", ", ")
     return {
         "person": person,
         "today": today,
         "manages_projects": person.managed_projects.exists(),  # for the last line of the email
         "sections": sections,
-        "subject": ("Your tasks: " + ", ".join(summary)) if summary else "Your tasks: nothing urgent",
+        "subject": (
+            _("Your tasks: %(summary)s") % {"summary": separator.join(summary)}
+            if summary
+            else _("Your tasks: nothing urgent")
+        ),
     }
 
 
@@ -129,7 +151,8 @@ def reminder_preview(request):
     if request.user.is_admin and request.GET.get("user", "").isdigit():
         person = get_object_or_404(get_user_model(), pk=request.GET["user"])
     reminder = reminder_for(person, timezone.localdate())
-    text, html = render_email("reminder", reminder)
+    # Shown the way the person will get it: in their language
+    text, html = render_email("reminder", reminder, person.get_language())
     if request.GET.get("text"):
         return HttpResponse(text, content_type="text/plain; charset=utf-8")
     return HttpResponse(html)
@@ -144,12 +167,16 @@ def email_new_assignee(task, assigned_by):
     person = task.assignee
     if not person.email:
         return True  # no address: there is nobody to write to, but nothing went wrong
+    language = person.get_language()  # the email is in the language of the person who gets the task
     try:
+        with translation.override(language):
+            subject = _("New task for you: %(title)s") % {"title": task.title}
         send_email(
             person.email,
-            f"New task for you: {task.title}",
+            subject,
             "assigned",
             {"task": task, "person": person, "assigned_by": assigned_by},
+            language,
         )
     except Exception:  # like a mail server that is down or refuses the email
         logger.exception("Couldn't send the new task email to %s", person.email)

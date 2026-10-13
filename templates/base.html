@@ -1,17 +1,34 @@
 {% load static %}
 {% load people %}
-{# i18n: {% translate "..." %} marks a text for the translations of Stage 17c #}
+{# i18n: {% translate "..." %} marks a text for translation (Stage 17c). The translations are in locale/. #}
 {% load i18n %}
+{% get_current_language as LANGUAGE_CODE %}
+{% get_current_language_bidi as LANGUAGE_BIDI %}
 <!doctype html>
-<html lang="en">
+{# dir="rtl": in Arabic the whole page is mirrored, from right to left #}
+<html lang="{{ LANGUAGE_CODE }}" dir="{% if LANGUAGE_BIDI %}rtl{% else %}ltr{% endif %}">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}IT Projects{% endblock %}</title>
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
   {# The design (Tabler) and its icons. The files are in static/vendor/, see the README.txt there. #}
+  {# Arabic uses Tabler's mirrored version (.rtl): what is on the left goes to the right. #}
+  {% if LANGUAGE_BIDI %}
+  <link rel="stylesheet" href="{% static 'vendor/tabler/tabler.rtl.min.css' %}">
+  {% else %}
   <link rel="stylesheet" href="{% static 'vendor/tabler/tabler.min.css' %}">
+  {% endif %}
   <link rel="stylesheet" href="{% static 'vendor/tabler-icons/tabler-icons.min.css' %}">
+  {% if LANGUAGE_BIDI %}
+  {# Arrows that mean "back" or "next" turn around too #}
+  <style>
+    [dir="rtl"] .ti-arrow-left, [dir="rtl"] .ti-arrow-right,
+    [dir="rtl"] .ti-chevron-left, [dir="rtl"] .ti-chevron-right { display: inline-block; transform: scaleX(-1); }
+    /* Phone numbers, emails and usernames are typed left to right, but sit at the right edge of their box */
+    [dir="rtl"] input[dir="ltr"] { text-align: right; }
+  </style>
+  {% endif %}
   {# A page can add its own styles here #}
   {% block extra_head %}{% endblock %}
 </head>
@@ -23,7 +40,7 @@
     <header class="navbar navbar-expand-md d-print-none">
       <div class="container-xl">
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-menu"
-                aria-controls="main-menu" aria-expanded="false" aria-label="Open menu">
+                aria-controls="main-menu" aria-expanded="false" aria-label="{% translate 'Open menu' %}">
           <span class="navbar-toggler-icon"></span>
         </button>
 
@@ -32,7 +49,7 @@
         {# User menu on the right #}
         <div class="navbar-nav flex-row order-md-last">
           <div class="nav-item dropdown">
-            <a href="#" class="nav-link d-flex lh-1 p-0 px-2" data-bs-toggle="dropdown" aria-label="Open user menu">
+            <a href="#" class="nav-link d-flex lh-1 p-0 px-2" data-bs-toggle="dropdown" aria-label="{% translate 'Open user menu' %}">
               {% avatar user %}
               <div class="d-none d-xl-block ps-2">
                 <div>{{ user }}</div>
@@ -40,7 +57,19 @@
               </div>
             </a>
             <div class="dropdown-menu dropdown-menu-end">
-              <a href="{% url 'profile' %}" class="dropdown-item"><i class="ti ti-user me-2"></i>My profile</a>
+              <a href="{% url 'profile' %}" class="dropdown-item"><i class="ti ti-user me-2"></i>{% translate "My profile" %}</a>
+              <div class="dropdown-divider"></div>
+              {# The language switch: the choice is saved in the profile, so emails use it too #}
+              <h6 class="dropdown-header">{% translate "Language" %}</h6>
+              <form method="post" action="{% url 'set_language' %}">
+                {% csrf_token %}
+                <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                {% for code, name in LANGUAGES %}
+                <button type="submit" name="language" value="{{ code }}" class="dropdown-item" lang="{{ code }}">
+                  <i class="ti {% if code == LANGUAGE_CODE %}ti-check{% else %}ti-world{% endif %} me-2"></i>{{ name }}
+                </button>
+                {% endfor %}
+              </form>
               <div class="dropdown-divider"></div>
               {% if user.is_staff and user.is_admin %}
               {# Django's own admin panel: a technical tool. The app's Administration is in the main menu. #}
@@ -50,7 +79,7 @@
               {# Since Django 5, logging out must be a small form (POST), not a plain link #}
               <form method="post" action="{% url 'logout' %}">
                 {% csrf_token %}
-                <button type="submit" class="dropdown-item"><i class="ti ti-logout me-2"></i>Log out</button>
+                <button type="submit" class="dropdown-item"><i class="ti ti-logout me-2"></i>{% translate "Log out" %}</button>
               </form>
             </div>
           </div>
@@ -60,19 +89,19 @@
         <div class="collapse navbar-collapse" id="main-menu">
           <ul class="navbar-nav">
             <li class="nav-item {% block nav_home %}{% endblock %}">
-              <a class="nav-link" href="{% url 'home' %}"><i class="ti ti-home me-2"></i>Home</a>
+              <a class="nav-link" href="{% url 'home' %}"><i class="ti ti-home me-2"></i>{% translate "Home" %}</a>
             </li>
             <li class="nav-item {% block nav_projects %}{% endblock %}">
-              <a class="nav-link" href="{% url 'project_list' %}"><i class="ti ti-briefcase me-2"></i>Projects</a>
+              <a class="nav-link" href="{% url 'project_list' %}"><i class="ti ti-briefcase me-2"></i>{% translate "Projects" %}</a>
             </li>
             <li class="nav-item {% block nav_my_tasks %}{% endblock %}">
-              <a class="nav-link" href="{% url 'my_tasks' %}"><i class="ti ti-checklist me-2"></i>My tasks</a>
+              <a class="nav-link" href="{% url 'my_tasks' %}"><i class="ti ti-checklist me-2"></i>{% translate "My tasks" %}</a>
             </li>
             <li class="nav-item {% block nav_activity %}{% endblock %}">
-              <a class="nav-link" href="{% url 'activity' %}"><i class="ti ti-activity me-2"></i>Activity</a>
+              <a class="nav-link" href="{% url 'activity' %}"><i class="ti ti-activity me-2"></i>{% translate "Activity" %}</a>
             </li>
             <li class="nav-item {% block nav_dashboard %}{% endblock %}">
-              <a class="nav-link" href="{% url 'dashboard' %}"><i class="ti ti-chart-bar me-2"></i>Dashboard</a>
+              <a class="nav-link" href="{% url 'dashboard' %}"><i class="ti ti-chart-bar me-2"></i>{% translate "Dashboard" %}</a>
             </li>
             {# Only admins see this item (and only they can open the pages behind it) #}
             {% if user.is_admin %}
@@ -94,7 +123,7 @@
           {% for message in messages %}
           <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible" role="alert">
             {{ message }}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="{% translate 'Close' %}"></button>
           </div>
           {% endfor %}
 

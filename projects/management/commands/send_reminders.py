@@ -24,6 +24,14 @@ class Command(BaseCommand):
         parser.add_argument("--user", help="Only this username (to test).")
 
     def handle(self, *args, **options):
+        # The subjects are written in each person's language (Arabic too). Some Windows terminals and log
+        # files can't show those letters: they would stop the command in the middle of the list.
+        # So the letters that can't be shown become "?" instead of causing an error.
+        for stream in (self.stdout, self.stderr):
+            reconfigure = getattr(stream, "reconfigure", None)
+            if reconfigure:
+                reconfigure(errors="replace")
+
         today = timezone.localdate()
         people = get_user_model().objects.filter(is_active=True).order_by("username")
         if options["user"]:
@@ -44,7 +52,7 @@ class Command(BaseCommand):
                 self.stdout.write(f'{person.username} <{person.email}>: would get "{subject}"')
                 continue
             try:
-                send_email(person.email, subject, "reminder", reminder)
+                send_email(person.email, subject, "reminder", reminder, person.get_language())
             except Exception as error:  # like a mail server that is down: say so, and go on with the others
                 failed += 1
                 self.stderr.write(f"{person.username}: the email couldn't be sent ({error})")

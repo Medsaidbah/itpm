@@ -1,19 +1,35 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {# Shown by django-axes after too many wrong passwords (see settings.py) #}
-{% block title %}Login locked · IT Projects{% endblock %}
+{% block title %}{% translate "Login locked" %} · IT Projects{% endblock %}
 
 {% block content %}
 <div class="empty">
   <div class="empty-header"><i class="ti ti-lock"></i></div>
-  <p class="empty-title">Too many wrong passwords</p>
+  <p class="empty-title">{% translate "Too many wrong passwords" %}</p>
   <p class="empty-subtitle text-secondary">
-    To protect the account{% if username %} "{{ username }}"{% endif %}, logging in is blocked for one hour
-    after {{ failure_limit }} wrong passwords in a row.<br>
-    Try again later, or ask an admin to unlock it now.
+    {% if username %}
+    {% blocktranslate trimmed with name=username count counter=failure_limit %}
+      To protect the account "{{ name }}", logging in is blocked for one hour
+      after {{ counter }} wrong password in a row.
+    {% plural %}
+      To protect the account "{{ name }}", logging in is blocked for one hour
+      after {{ counter }} wrong passwords in a row.
+    {% endblocktranslate %}
+    {% else %}
+    {% blocktranslate trimmed count counter=failure_limit %}
+      To protect the account, logging in is blocked for one hour
+      after {{ counter }} wrong password in a row.
+    {% plural %}
+      To protect the account, logging in is blocked for one hour
+      after {{ counter }} wrong passwords in a row.
+    {% endblocktranslate %}
+    {% endif %}<br>
+    {% translate "Try again later, or ask an admin to unlock it now." %}
   </p>
   <div class="empty-action">
-    <a href="{% url 'login' %}" class="btn"><i class="ti ti-arrow-left me-2"></i>Back to the login page</a>
+    <a href="{% url 'login' %}" class="btn"><i class="ti ti-arrow-left me-2"></i>{% translate "Back to the login page" %}</a>
   </div>
 </div>
 {% endblock %}

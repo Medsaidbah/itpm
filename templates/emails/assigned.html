@@ -1,16 +1,17 @@
 {% extends "emails/base.html" %}
+{% load i18n %}
 
 {% block content %}
-<p style="margin:0 0 16px;">Hello {{ person.first_name|default:person.username }},</p>
-<p style="margin:0 0 16px;">{{ assigned_by }} gave you a task in <strong>{{ task.project.name }}</strong>:</p>
+<p style="margin:0 0 16px;">{% blocktranslate with name=person.first_name|default:person.username %}Hello {{ name }},{% endblocktranslate %}</p>
+<p style="margin:0 0 16px;">{% blocktranslate with person=assigned_by project=task.project.name %}{{ person }} gave you a task in <strong>{{ project }}</strong>:{% endblocktranslate %}</p>
 
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="border:1px solid #e5e5e5; border-radius:4px;">
   <tr>
     <td style="padding:12px 16px;">
       <a href="{{ site_url }}{{ task.get_absolute_url }}" style="color:#066fd1; font-size:16px; font-weight:bold; text-decoration:none;">{{ task.title }}</a><br>
       <span style="font-size:13px; color:#737373;">
-        {% if task.due_date %}Due {{ task.due_date|date:"D j M Y" }}{% else %}No due date{% endif %}
-        · {{ task.get_priority_display }} priority{% if task.parent %} · Part of “{{ task.parent.title }}”{% endif %}
+        {% if task.due_date %}{% blocktranslate with date=task.due_date|date:_("D j M Y") %}Due {{ date }}{% endblocktranslate %}{% else %}{% translate "No due date" %}{% endif %}
+        · {% blocktranslate with priority=task.get_priority_display %}{{ priority }} priority{% endblocktranslate %}{% if task.parent %} · {% blocktranslate with title=task.parent.title %}Part of “{{ title }}”{% endblocktranslate %}{% endif %}
       </span>
       {% if task.description %}
       <p style="margin:8px 0 0; font-size:14px;">{{ task.description|truncatechars:300|linebreaksbr }}</p>
@@ -23,10 +24,10 @@
 <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-top:24px;">
   <tr>
     <td bgcolor="#066fd1" style="padding:10px 18px; border-radius:4px;">
-      <a href="{{ site_url }}{{ task.get_absolute_url }}" style="color:#ffffff; font-weight:bold; text-decoration:none;">Open the task</a>
+      <a href="{{ site_url }}{{ task.get_absolute_url }}" style="color:#ffffff; font-weight:bold; text-decoration:none;">{% translate "Open the task" %}</a>
     </td>
   </tr>
 </table>
 {% endblock %}
 
-{% block footer %}You get this email when someone assigns a task to you in IT Projects.{% endblock %}
+{% block footer %}{% translate "You get this email when someone assigns a task to you in IT Projects." %}{% endblock %}

@@ -11,7 +11,9 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.formats import date_format
 from django.utils.translation import gettext as _
+from django.utils.translation import ngettext, pgettext
 from django.views.decorators.http import require_POST
 
 from .activity import get_events
@@ -158,13 +160,13 @@ def project_detail(request, pk):
 @login_required
 def project_create(request):
     if not request.user.is_admin:
-        raise PermissionDenied("Only admins can create projects.")
+        raise PermissionDenied(_("Only admins can create projects."))
 
     if request.method == "POST":
         form = ProjectForm(request.POST, user=request.user)
         if form.is_valid():
             project = form.save()
-            messages.success(request, f'Project "{project.name}" created.')
+            messages.success(request, _('Project "%(name)s" created.') % {"name": project.name})
             return redirect(project)
     else:
         # Suggest the person creating the project as its manager
@@ -177,17 +179,18 @@ def project_create(request):
 def project_edit(request, pk):
     project = get_object_or_404(visible_projects(request), pk=pk)
     if not project.can_edit(request.user):
-        raise PermissionDenied("Only the project's manager and admins can edit this project.")
+        raise PermissionDenied(_("Only the project's manager and admins can edit this project."))
 
     if request.method == "POST":
         form = ProjectForm(request.POST, instance=project, user=request.user)
         if form.is_valid():
             project.saved_by = request.user
             form.save()
-            messages.success(request, "Changes saved.")
+            messages.success(request, _("Changes saved."))
             # A new manager: the previous one stays in the team, as a member (see Project.save)
             if project.kept_in_team:
-                messages.info(request, f"{project.kept_in_team} stays in the team, as a member.")
+                stays = _("%(person)s stays in the team, as a member.") % {"person": project.kept_in_team}
+                messages.info(request, stays)
             return redirect(project)
     else:
         form = ProjectForm(instance=project, user=request.user)
@@ -243,13 +246,13 @@ def project_delete(request, pk):
 def team_add(request, pk):
     project = get_object_or_404(visible_projects(request), pk=pk)
     if not project.can_manage_team(request.user):
-        raise PermissionDenied("Only the project's manager and admins can change its team.")
+        raise PermissionDenied(_("Only the project's manager and admins can change its team."))
 
     form = TeamMemberForm(request.POST, project=project)
     if form.is_valid():
         person = form.cleaned_data["person"]
         project.add_to_team(person, added_by=request.user)
-        messages.success(request, f"{person} is now in the team.")
+        messages.success(request, _("%(person)s is now in the team.") % {"person": person})
     else:
         messages.error(request, " ".join(form.errors["person"]))
     # Back to the top of the project page, where the message is shown (the team is just below)
@@ -261,26 +264,32 @@ def team_add(request, pk):
 def team_remove(request, pk, user_pk):
     project = get_object_or_404(visible_projects(request), pk=pk)
     if not project.can_manage_team(request.user):
-        raise PermissionDenied("Only the project's manager and admins can change its team.")
+        raise PermissionDenied(_("Only the project's manager and admins can change its team."))
     membership = get_object_or_404(ProjectMember.objects.select_related("user"), project=project, user_id=user_pk)
     person = membership.user
     if person.pk == project.manager_id:
-        messages.error(request, f"{person} is the project's manager: the manager is always in the team.")
+        messages.error(
+            request, _("%(person)s is the project's manager: the manager is always in the team.") % {"person": person}
+        )
         return redirect(project)
 
     # The person's open tasks must first go to someone else, so nobody is left with tasks
     # in a project they're not part of. Finished tasks don't count: they keep the person's name.
     open_count = project.open_tasks_of(person).count()
     if open_count:
-        them = "it" if open_count == 1 else "them"
         messages.error(
             request,
-            f"{person} still has {open_count} open task{'s' if open_count > 1 else ''} in this project. "
-            f"Give {them} to someone else (or finish {them}), then remove {person} from the team.",
+            ngettext(
+                "%(person)s still has %(count)d open task in this project. "
+                "Give it to someone else (or finish it), then remove %(person)s from the team.",
+                "%(person)s still has %(count)d open tasks in this project. "
+                "Give them to someone else (or finish them), then remove %(person)s from the team.",
+                open_count,
+            ) % {"person": person, "count": open_count},
         )
     else:
         membership.delete()  # recorded in the history, so the Activity page shows it
-        messages.success(request, f"{person} is no longer in the team.")
+        messages.success(request, _("%(person)s is no longer in the team.") % {"person": person})
     return redirect(project)
 
 
@@ -327,28 +336,30 @@ def tell_new_assignee(request, task, previous_assignee_id):
     if task.assignee_id in (None, previous_assignee_id, request.user.pk):
         return
     if not email_new_assignee(task, assigned_by=request.user):
-        messages.warning(request, f"The task is saved, but the email to {task.assignee} couldn't be sent.")
+        messages.warning(
+            request, _("The task is saved, but the email to %(person)s couldn't be sent.") % {"person": task.assignee}
+        )
 
 
 def tell_if_joined_team(request, task):
     """After a task is saved: say so if its person was just put in the project's team
     (when an admin gives a task to someone outside the team, or a finished task is opened again)."""
     if task.joined_team:
-        messages.info(request, f"{task.assignee} is now in the team of this project.")
+        messages.info(request, _("%(person)s is now in the team of this project.") % {"person": task.assignee})
 
 
 @login_required
 def task_create(request, project_pk):
     project = get_object_or_404(visible_projects(request), pk=project_pk)
     if not project.can_edit(request.user):
-        raise PermissionDenied("Only the project's manager and admins can add tasks.")
+        raise PermissionDenied(_("Only the project's manager and admins can add tasks."))
 
     if request.method == "POST":
         form = TaskForm(request.POST, project=project, user=request.user)
         if form.is_valid():
             form.instance.saved_by = request.user
             task = form.save()
-            messages.success(request, f'Task "{task.title}" created.')
+            messages.success(request, _('Task "%(title)s" created.') % {"title": task.title})
             tell_if_joined_team(request, task)
             tell_new_assignee(request, task, previous_assignee_id=None)
             return redirect(task)
@@ -363,7 +374,7 @@ def task_create(request, project_pk):
 def task_edit(request, pk):
     task = get_object_or_404(visible_tasks(request).select_related("project"), pk=pk)
     if not task.can_edit(request.user):
-        raise PermissionDenied("Only the project's manager and admins can edit tasks.")
+        raise PermissionDenied(_("Only the project's manager and admins can edit tasks."))
 
     if request.method == "POST":
         previous_assignee_id = task.assignee_id  # read it now: checking the form changes the task
@@ -371,7 +382,7 @@ def task_edit(request, pk):
         if form.is_valid():
             task.saved_by = request.user
             form.save()
-            messages.success(request, "Changes saved.")
+            messages.success(request, _("Changes saved."))
             tell_if_joined_team(request, task)
             tell_new_assignee(request, task, previous_assignee_id)
             return redirect(task)
@@ -389,17 +400,19 @@ def task_status(request, pk):
     task = get_object_or_404(visible_tasks(request).select_related("project"), pk=pk)
     if not task.can_update_status(request.user):
         raise PermissionDenied(
-            "Only the person assigned to this task, the project's manager and admins can change its status."
+            _("Only the person assigned to this task, the project's manager and admins can change its status.")
         )
 
     new_status = request.POST.get("status")
     if new_status not in Task.Status.values:
-        messages.error(request, "Unknown status.")
+        messages.error(request, _("Unknown status."))
     elif new_status != task.status:
         task.status = new_status
         task.saved_by = request.user
         task.save()
-        messages.success(request, f'"{task.title}" is now {task.get_status_display()}.')
+        messages.success(
+            request, _('"%(title)s" is now %(status)s.') % {"title": task.title, "status": task.get_status_display()}
+        )
         tell_if_joined_team(request, task)
 
     # A button can ask to come back to its own page (like My tasks) with a "next" field.
@@ -417,13 +430,13 @@ def task_delete(request, pk):
     """Shows a confirmation page first; the task is only deleted when that page is sent."""
     task = get_object_or_404(visible_tasks(request).select_related("project"), pk=pk)
     if not task.can_edit(request.user):
-        raise PermissionDenied("Only the project's manager and admins can delete tasks.")
+        raise PermissionDenied(_("Only the project's manager and admins can delete tasks."))
 
     if request.method == "POST":
         project = task.project
         title = task.title
         task.delete()  # its subtasks, comments and files are deleted with it
-        messages.success(request, f'Task "{title}" deleted.')
+        messages.success(request, _('Task "%(title)s" deleted.') % {"title": title})
         return redirect(project)
 
     return render(request, "projects/task_confirm_delete.html", {"task": task})
@@ -439,7 +452,7 @@ def comment_add(request, task_pk):
     task = get_object_or_404(visible_tasks(request), pk=task_pk)
     form = CommentForm(request.POST)
     if not form.is_valid():
-        messages.error(request, "Write something before sending a comment.")
+        messages.error(request, _("Write something before sending a comment."))
         return redirect(task)
     comment = form.save(commit=False)  # build the comment, but don't save it yet...
     comment.task = task  # ...because the task and the author come from the page, not the form
@@ -456,7 +469,7 @@ def comment_delete(request, pk):
         Comment.objects.filter(task__in=visible_tasks(request)).select_related("task__project"), pk=pk
     )
     if not comment.can_delete(request.user):
-        raise PermissionDenied("You can only delete your own comments.")
+        raise PermissionDenied(_("You can only delete your own comments."))
     comment.delete()
     return redirect(f"{comment.task.get_absolute_url()}#comments")
 
@@ -484,7 +497,7 @@ def attachment_delete(request, pk):
         Attachment.objects.filter(task__in=visible_tasks(request)).select_related("task__project"), pk=pk
     )
     if not attachment.can_delete(request.user):
-        raise PermissionDenied("You can only delete files you uploaded.")
+        raise PermissionDenied(_("You can only delete files you uploaded."))
     attachment.delete()  # the file on the disk is deleted too (see models.py)
     return redirect(f"{attachment.task.get_absolute_url()}#files")
 
@@ -497,7 +510,7 @@ def attachment_download(request, path):
     try:
         file = attachment.file.open("rb")
     except OSError:
-        raise Http404("This file is missing from the server.")
+        raise Http404(_("This file is missing from the server."))
     # as_attachment=True: the browser saves the file instead of opening it inside the app,
     # so an uploaded web page can't run inside our site
     return FileResponse(file, as_attachment=True, filename=attachment.filename)
@@ -534,10 +547,10 @@ def task_move(request, pk):
     and the new order of the cards in that column. The answer is JSON, not a page."""
     task = get_object_or_404(visible_tasks(request).select_related("project"), pk=pk)
     if not task.can_update_status(request.user):
-        return JsonResponse({"error": "You can only move tasks assigned to you."}, status=403)
+        return JsonResponse({"error": _("You can only move tasks assigned to you.")}, status=403)
     new_status = request.POST.get("status")
     if new_status not in Task.Status.values:
-        return JsonResponse({"error": "Unknown status."}, status=400)
+        return JsonResponse({"error": _("Unknown status.")}, status=400)
 
     if new_status != task.status:
         task.status = new_status
@@ -563,6 +576,26 @@ def task_move(request, pk):
 
 
 # ---------- Gantt chart (timeline) ----------
+
+
+def gantt_words():
+    """The words that the chart writes itself (always in English), in the language of the page.
+    The keys are the English words; the script puts the translations on the chart's buttons."""
+    # The first text of pgettext() tells translators what these short words are
+    return {
+        "Today": _("Today"),
+        "Mode": pgettext("timeline: the list of zoom levels", "Mode"),
+        "Hour": pgettext("timeline zoom level", "Hour"),
+        "Quarter Day": pgettext("timeline zoom level", "Quarter Day"),
+        "Half Day": pgettext("timeline zoom level", "Half Day"),
+        "Day": pgettext("timeline zoom level", "Day"),
+        "Week": pgettext("timeline zoom level", "Week"),
+        "Month": pgettext("timeline zoom level", "Month"),
+        "Year": pgettext("timeline zoom level", "Year"),
+        "open_task": _("Open task"),
+        "refused": _("The server refused the change."),
+        "not_saved": _("The new dates weren't saved. {error} The page will reload."),
+    }
 
 
 @login_required
@@ -602,8 +635,11 @@ def project_gantt(request, pk):
             "dependencies": ", ".join(str(d.pk) for d in task.depends_on.all() if d.pk in dated_ids),
             "custom_class": f"status-{task.status}",  # colors the bar (see the page's styles)
             "status": task.get_status_display(),
-            "assignee": str(task.assignee or "Unassigned"),
-            "dates": f"{start:%d %b %Y} → {end:%d %b %Y}",
+            "assignee": str(task.assignee or _("Unassigned")),
+            # The arrow points to the end date: to the left in Arabic, which reads right to left
+            "dates": _("%(start)s → %(end)s") % {
+                "start": date_format(start, _("d M Y")), "end": date_format(end, _("d M Y")),
+            },
             "url": task.get_absolute_url(),
             "dates_url": reverse("task_dates", args=[task.pk]),
         })
@@ -613,6 +649,7 @@ def project_gantt(request, pk):
     context = {
         "project": project,
         "chart_tasks": chart_tasks,
+        "chart_words": gantt_words(),
         "undated": undated,
         "can_edit": project.can_edit(request.user),
         # Open the chart on today if a task is running now, otherwise on the first task
@@ -627,12 +664,12 @@ def task_dates(request, pk):
     """After a bar is dragged or stretched, the chart sends the task's new dates here."""
     task = get_object_or_404(visible_tasks(request).select_related("project", "parent"), pk=pk)
     if not task.can_edit(request.user):
-        return JsonResponse({"error": "Only the project's manager and admins can change dates."}, status=403)
+        return JsonResponse({"error": _("Only the project's manager and admins can change dates.")}, status=403)
     try:
         task.start_date = date.fromisoformat(request.POST["start_date"])
         task.due_date = date.fromisoformat(request.POST["due_date"])
     except (KeyError, ValueError):
-        return JsonResponse({"error": "These dates aren't valid."}, status=400)
+        return JsonResponse({"error": _("These dates aren't valid.")}, status=400)
     try:
         task.clean()  # the same rules as the task form, like "the due date can't be before the start"
     except ValidationError as error:
@@ -679,10 +716,10 @@ def my_tasks(request):
     )
     context = {
         "sections": [
-            ("overdue", "Overdue", "ti-alert-triangle text-danger", sections["overdue"]),
-            ("this_week", "Due in the next 7 days", "ti-calendar-event", sections["this_week"]),
-            ("later", "Later", "ti-calendar", sections["later"]),
-            ("no_date", "No due date", "ti-calendar-off", sections["no_date"]),
+            ("overdue", _("Overdue"), "ti-alert-triangle text-danger", sections["overdue"]),
+            ("this_week", _("Due in the next 7 days"), "ti-calendar-event", sections["this_week"]),
+            ("later", _("Later"), "ti-calendar", sections["later"]),
+            ("no_date", _("No due date"), "ti-calendar-off", sections["no_date"]),
         ],
         "open_count": sum(len(tasks) for tasks in sections.values()),
         "recently_done": recently_done,
@@ -718,7 +755,7 @@ def dashboard(request):
     unassigned = [r for r in rows if not r["assignee"]]
     if unassigned:  # unassigned work goes last
         r = unassigned[0]
-        workload.append({"name": "Unassigned", "on_time": r["total"] - r["late"], "late": r["late"]})
+        workload.append({"name": _("Unassigned"), "on_time": r["total"] - r["late"], "late": r["late"]})
 
     # Tasks finished per week, for the last 8 weeks (weeks start on Monday)
     first_monday = today - timedelta(days=today.weekday(), weeks=7)
@@ -731,7 +768,7 @@ def dashboard(request):
     )
     per_week = {row["week"].date(): row["count"] for row in finished}
     weeks = [first_monday + timedelta(weeks=i) for i in range(8)]
-    done_per_week = [{"week": f"{week:%d %b}", "count": per_week.get(week, 0)} for week in weeks]
+    done_per_week = [{"week": date_format(week, _("d M")), "count": per_week.get(week, 0)} for week in weeks]
 
     # Active projects that are late or have overdue tasks, worst first
     needs_attention = [
@@ -750,11 +787,11 @@ def dashboard(request):
     context = {
         # The headline numbers; "warn" adds a warning icon when the number isn't zero
         "kpis": [
-            {"label": "Active projects", "value": active_projects.count()},
-            {"label": "Late projects", "value": active_projects.filter(end_date__lt=today).count(), "warn": True},
-            {"label": "Open tasks", "value": open_tasks.count()},
-            {"label": "Overdue tasks", "value": overdue_tasks.count(), "warn": True},
-            {"label": "Done in the last 30 days",
+            {"label": _("Active projects"), "value": active_projects.count()},
+            {"label": _("Late projects"), "value": active_projects.filter(end_date__lt=today).count(), "warn": True},
+            {"label": _("Open tasks"), "value": open_tasks.count()},
+            {"label": _("Overdue tasks"), "value": overdue_tasks.count(), "warn": True},
+            {"label": _("Done in the last 30 days"),
              "value": tasks.filter(completed_at__gte=timezone.now() - timedelta(days=30)).count()},
         ],
         "workload": workload,

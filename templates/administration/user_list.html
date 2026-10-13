@@ -80,7 +80,7 @@
           </td>
           <td class="d-none d-sm-table-cell">{{ person.project_count }}</td>
           <td class="d-none d-sm-table-cell">{{ person.open_task_count }}</td>
-          <td class="d-none d-lg-table-cell text-secondary">{{ person.last_login|date:"d M Y"|default:_("Never") }}</td>
+          <td class="d-none d-lg-table-cell text-secondary">{{ person.last_login|date:_("d M Y")|default:_("Never") }}</td>
         </tr>
         {% endfor %}
       </tbody>

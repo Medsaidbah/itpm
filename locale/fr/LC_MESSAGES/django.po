@@ -1,0 +1,2278 @@
+# IT Projects: French translation (Stage 17c).
+# The texts to translate come from the app; msgstr is what people read.
+msgid ""
+msgstr ""
+"Project-Id-Version: IT Projects\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-11 12:04+0000\n"
+"PO-Revision-Date: 2026-10-11 12:00+0000\n"
+"Last-Translator: IT Projects team\n"
+"Language-Team: French\n"
+"Language: fr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+#: accounts/admin.py
+msgid "IT Projects · Django admin (technical)"
+msgstr "IT Projects · Admin Django (technique)"
+
+#: accounts/admin.py
+msgid "Personal info"
+msgstr "Informations personnelles"
+
+#: accounts/admin.py
+msgid "Role in the app"
+msgstr "Rôle dans l'application"
+
+#: accounts/admin.py
+msgid "Personal info and role"
+msgstr "Informations personnelles et rôle"
+
+#: accounts/forms.py administration/forms.py
+#, python-format
+msgid "A JPG or PNG picture, up to %(size)s MB. It is cut to a square."
+msgstr "Une photo JPG ou PNG, jusqu'à %(size)s Mo. Elle est recadrée en carré."
+
+#: accounts/forms.py administration/forms.py
+msgid "Picture"
+msgstr "Photo"
+
+#: accounts/forms.py
+msgid "Remove my picture"
+msgstr "Supprimer ma photo"
+
+#: accounts/forms.py templates/base.html templates/registration/login.html
+msgid "Language"
+msgstr "Langue"
+
+#: accounts/forms.py
+msgid "The language of your pages and of the emails you get."
+msgstr "La langue de vos pages et des e-mails que vous recevez."
+
+#: accounts/forms.py administration/forms.py
+msgid "Phone number"
+msgstr "Numéro de téléphone"
+
+#: accounts/models.py
+msgid "Enter a phone number with digits, spaces and + - ( ) only, like +222 22 12 34 56."
+msgstr "Saisissez un numéro de téléphone avec uniquement des chiffres, des espaces et + - ( ), par exemple +222 22 12 34 56."
+
+#: accounts/models.py templates/accounts/person_detail.html
+msgid "Admin"
+msgstr "Administrateur"
+
+#: accounts/models.py
+msgid "User"
+msgstr "Utilisateur"
+
+#: accounts/models.py
+msgid "The app needs at least one active admin. Give the Admin role to someone else first."
+msgstr "L'application a besoin d'au moins un administrateur actif. Donnez d'abord le rôle Administrateur à quelqu'un d'autre."
+
+#: accounts/pictures.py
+#, python-format
+msgid "This picture is too big: pictures can be up to %(size)s MB."
+msgstr "Cette photo est trop volumineuse : les photos peuvent peser jusqu'à %(size)s Mo."
+
+#: accounts/pictures.py
+msgid "This file isn't a picture we can read. Use a JPG or PNG picture."
+msgstr "Ce fichier n'est pas une image lisible. Utilisez une photo JPG ou PNG."
+
+#: accounts/pictures.py
+msgid "Use a JPG, PNG, WEBP or GIF picture."
+msgstr "Utilisez une photo JPG, PNG, WEBP ou GIF."
+
+#: accounts/views.py
+msgid "Your profile is saved."
+msgstr "Votre profil est enregistré."
+
+#: accounts/views.py
+msgid "Your password is changed."
+msgstr "Votre mot de passe est modifié."
+
+#: accounts/views.py
+msgid "This picture is missing from the server."
+msgstr "Cette photo est introuvable sur le serveur."
+
+#: administration/forms.py templates/registration/login.html
+msgid "Username"
+msgstr "Nom d'utilisateur"
+
+#: administration/forms.py templates/administration/user_list.html
+msgid "Role"
+msgstr "Rôle"
+
+#: administration/forms.py
+msgid "What they type to log in. Letters, digits and @ . + - _ only."
+msgstr "Ce que la personne saisit pour se connecter. Lettres, chiffres et @ . + - _ uniquement."
+
+#: administration/forms.py
+msgid "Admins see and change everything, including this Administration section. Users see the projects they manage or whose team they are in."
+msgstr "Les administrateurs voient et modifient tout, y compris cette section Administration. Les utilisateurs voient les projets qu'ils gèrent ou dont ils font partie de l'équipe."
+
+#: administration/forms.py
+msgid "Another account already uses this email address."
+msgstr "Un autre compte utilise déjà cette adresse e-mail."
+
+#: administration/forms.py templates/administration/user_new.html
+msgid "First password"
+msgstr "Premier mot de passe"
+
+#: administration/forms.py
+msgid "Remove the picture"
+msgstr "Supprimer la photo"
+
+#: administration/forms.py
+msgid "You can't change your own role. Another admin can: this way the app always keeps an admin."
+msgstr "Vous ne pouvez pas changer votre propre rôle. Un autre administrateur peut le faire : ainsi l'application garde toujours un administrateur."
+
+#: administration/forms.py
+msgid "This account was made with the createsuperuser command, so it is always an admin."
+msgstr "Ce compte a été créé avec la commande createsuperuser : c'est donc toujours un administrateur."
+
+#: administration/forms.py projects/reports.py templates/administration/project_list.html templates/administration/task_list.html templates/administration/user_detail.html templates/home.html templates/projects/activity.html templates/projects/project_list.html
+msgid "Project"
+msgstr "Projet"
+
+#: administration/forms.py
+msgid "Choose a project."
+msgstr "Choisissez un projet."
+
+#: administration/forms.py
+msgid "This person can't be added to this project: they are in its team already."
+msgstr "Cette personne ne peut pas être ajoutée à ce projet : elle fait déjà partie de son équipe."
+
+#: administration/forms.py projects/views.py templates/administration/project_list.html templates/home.html templates/projects/project_list.html
+msgid "Active projects"
+msgstr "Projets actifs"
+
+#: administration/forms.py
+msgid "Finished projects"
+msgstr "Projets terminés"
+
+#: administration/forms.py
+msgid "Choose a project…"
+msgstr "Choisissez un projet…"
+
+#: administration/forms.py
+msgid "This account is deactivated. Reactivate it before adding the person to a project."
+msgstr "Ce compte est désactivé. Réactivez-le avant d'ajouter la personne à un projet."
+
+#: administration/views.py
+msgid "Only admins can open the Administration section."
+msgstr "Seuls les administrateurs peuvent ouvrir la section Administration."
+
+#: administration/views.py
+#, python-format
+msgid "The account of %(person)s is created. Give them their username and first password in person or by phone, not by email. They can change the password on their profile."
+msgstr "Le compte de %(person)s est créé. Donnez-lui son nom d'utilisateur et son premier mot de passe en main propre ou par téléphone, pas par e-mail. La personne peut changer son mot de passe dans son profil."
+
+#: administration/views.py projects/views.py
+msgid "Changes saved."
+msgstr "Modifications enregistrées."
+
+#: administration/views.py
+#, python-format
+msgid "The new password of %(person)s is saved. Give it to them in person or by phone, not by email. They can change it on their profile."
+msgstr "Le nouveau mot de passe de %(person)s est enregistré. Donnez-le en main propre ou par téléphone, pas par e-mail. La personne peut le changer dans son profil."
+
+#: administration/views.py
+msgid "You can't deactivate your own account. Another admin can."
+msgstr "Vous ne pouvez pas désactiver votre propre compte. Un autre administrateur peut le faire."
+
+#: administration/views.py
+msgid "This account is deactivated already."
+msgstr "Ce compte est déjà désactivé."
+
+#: administration/views.py
+#, python-format
+msgid "The account of %(person)s is deactivated: they can't log in anymore. Their projects, tasks and comments are kept."
+msgstr "Le compte de %(person)s est désactivé : la personne ne peut plus se connecter. Ses projets, tâches et commentaires sont conservés."
+
+#: administration/views.py
+#, python-format
+msgid "The account of %(person)s is active again: they can log in."
+msgstr "Le compte de %(person)s est de nouveau actif : la personne peut se connecter."
+
+#: administration/views.py
+#, python-format
+msgid "%(person)s is now in the team of %(project)s."
+msgstr "%(person)s fait maintenant partie de l'équipe de %(project)s."
+
+#: administration/views.py
+#, python-format
+msgid "%(person)s manages %(project)s, and the manager is always in the team. To take them out, first choose another manager on the project's Edit page."
+msgstr "%(person)s gère %(project)s, et le chef de projet fait toujours partie de l'équipe. Pour le retirer, choisissez d'abord un autre chef de projet sur la page Modifier du projet."
+
+#: administration/views.py
+#, python-format
+msgid "%(person)s still has %(count)d open task in %(project)s. Give it to someone else (or finish it) first."
+msgid_plural "%(person)s still has %(count)d open tasks in %(project)s. Give them to someone else (or finish them) first."
+msgstr[0] "%(person)s a encore %(count)d tâche ouverte dans %(project)s. Donnez-la à quelqu'un d'autre (ou terminez-la) d'abord."
+msgstr[1] "%(person)s a encore %(count)d tâches ouvertes dans %(project)s. Donnez-les à quelqu'un d'autre (ou terminez-les) d'abord."
+
+#: administration/views.py
+#, python-format
+msgid "%(person)s is no longer in the team of %(project)s."
+msgstr "%(person)s ne fait plus partie de l'équipe de %(project)s."
+
+#: administration/views.py
+msgid "This login couldn't be found."
+msgstr "Cette connexion est introuvable."
+
+#: administration/views.py
+#, python-format
+msgid "The login with the username %(username)s is unlocked."
+msgstr "La connexion avec le nom d'utilisateur %(username)s est déverrouillée."
+
+#: administration/views.py
+msgid "There was nothing to unlock: these wrong passwords don't count anymore."
+msgstr "Il n'y avait rien à déverrouiller : ces mots de passe erronés ne comptent plus."
+
+#: projects/activity.py projects/forms.py
+msgid "Name"
+msgstr "Nom"
+
+#: projects/activity.py projects/forms.py projects/reports.py templates/administration/project_list.html templates/administration/task_list.html templates/home.html templates/projects/project_detail.html templates/projects/project_list.html templates/projects/project_report.html templates/projects/task_detail.html
+msgid "Status"
+msgstr "Statut"
+
+#: projects/activity.py projects/forms.py projects/reports.py templates/projects/project_list.html
+msgid "Priority"
+msgstr "Priorité"
+
+#: projects/activity.py projects/forms.py projects/reports.py templates/accounts/person_detail.html templates/administration/project_list.html templates/administration/user_detail.html templates/projects/project_detail.html templates/projects/project_list.html templates/projects/project_report.html
+msgid "Manager"
+msgstr "Chef de projet"
+
+#: projects/activity.py projects/forms.py projects/reports.py templates/projects/project_detail.html templates/projects/task_detail.html
+msgid "Start date"
+msgstr "Date de début"
+
+#: projects/activity.py projects/forms.py projects/reports.py templates/projects/project_detail.html templates/projects/project_list.html
+msgid "End date"
+msgstr "Date de fin"
+
+#: projects/activity.py projects/forms.py templates/projects/project_detail.html templates/projects/project_report.html templates/projects/task_detail.html
+msgid "Description"
+msgstr "Description"
+
+#: projects/activity.py projects/forms.py
+msgid "Title"
+msgstr "Titre"
+
+#: projects/activity.py projects/forms.py projects/reports.py templates/administration/task_list.html templates/projects/dashboard.html templates/projects/project_detail.html templates/projects/project_report.html templates/projects/task_detail.html
+msgid "Assigned to"
+msgstr "Assignée à"
+
+#: projects/activity.py projects/forms.py projects/reports.py templates/administration/task_list.html templates/home.html templates/projects/project_detail.html templates/projects/project_report.html templates/projects/task_detail.html
+msgid "Due date"
+msgstr "Échéance"
+
+#: projects/activity.py projects/forms.py projects/reports.py
+msgid "Main task"
+msgstr "Tâche principale"
+
+#: projects/activity.py projects/reports.py templates/includes/task_row.html templates/projects/my_tasks.html templates/projects/project_board.html templates/projects/project_report.html templates/projects/task_detail.html
+msgid "Milestone"
+msgstr "Jalon"
+
+#: projects/activity.py
+msgid "just now"
+msgstr "à l'instant"
+
+#: projects/activity.py
+#, python-format
+msgid "%(num)d year"
+msgid_plural "%(num)d years"
+msgstr[0] "%(num)d an"
+msgstr[1] "%(num)d ans"
+
+#: projects/activity.py
+#, python-format
+msgid "%(num)d month"
+msgid_plural "%(num)d months"
+msgstr[0] "%(num)d mois"
+msgstr[1] "%(num)d mois"
+
+#: projects/activity.py
+#, python-format
+msgid "%(num)d week"
+msgid_plural "%(num)d weeks"
+msgstr[0] "%(num)d semaine"
+msgstr[1] "%(num)d semaines"
+
+#: projects/activity.py
+#, python-format
+msgid "%(num)d day"
+msgid_plural "%(num)d days"
+msgstr[0] "%(num)d jour"
+msgstr[1] "%(num)d jours"
+
+#: projects/activity.py
+#, python-format
+msgid "%(num)d hour"
+msgid_plural "%(num)d hours"
+msgstr[0] "%(num)d heure"
+msgstr[1] "%(num)d heures"
+
+#: projects/activity.py
+#, python-format
+msgid "%(num)d minute"
+msgid_plural "%(num)d minutes"
+msgstr[0] "%(num)d minute"
+msgstr[1] "%(num)d minutes"
+
+#: projects/activity.py templates/projects/task_detail.html
+#, python-format
+msgid "%(time)s ago"
+msgstr "il y a %(time)s"
+
+#: projects/activity.py projects/forms.py projects/reports.py projects/views.py templates/administration/task_list.html templates/emails/reminder.html templates/emails/reminder.txt templates/includes/avatar.html templates/includes/task_row.html templates/projects/dashboard.html templates/projects/project_report.html templates/projects/task_detail.html
+msgid "Unassigned"
+msgstr "Non assignée"
+
+#: projects/activity.py
+msgid "A deleted user"
+msgstr "Un utilisateur supprimé"
+
+#: projects/activity.py
+msgid "None (main task)"
+msgstr "Aucune (tâche principale)"
+
+#: projects/activity.py
+msgid "A deleted task"
+msgstr "Une tâche supprimée"
+
+#: projects/activity.py projects/reports.py
+msgid "Yes"
+msgstr "Oui"
+
+#: projects/activity.py
+msgid "No"
+msgstr "Non"
+
+#: projects/activity.py projects/tests/test_languages.py projects/views.py templates/accounts/person_detail.html templates/administration/task_list.html templates/administration/user_detail.html templates/administration/user_list.html templates/home.html templates/includes/task_row.html templates/projects/my_tasks.html templates/projects/project_board.html templates/projects/project_detail.html templates/projects/project_list.html templates/projects/project_report.html templates/projects/task_detail.html
+msgid "d M Y"
+msgstr "j N Y"
+
+#: projects/activity.py templates/accounts/person_detail.html templates/accounts/profile.html templates/projects/project_detail.html templates/projects/project_list.html templates/projects/project_report.html templates/projects/task_detail.html
+msgid "Not set"
+msgstr "Non défini"
+
+#: projects/activity.py
+msgid "changed"
+msgstr "modifiée"
+
+#: projects/activity.py
+msgid "updated the project"
+msgstr "a mis à jour le projet"
+
+#: projects/activity.py
+msgid "created the project"
+msgstr "a créé le projet"
+
+#: projects/activity.py
+msgid "deleted the project"
+msgstr "a supprimé le projet"
+
+#: projects/activity.py
+msgid "updated the task"
+msgstr "a mis à jour la tâche"
+
+#: projects/activity.py
+msgid "created the subtask"
+msgstr "a créé la sous-tâche"
+
+#: projects/activity.py
+msgid "created the task"
+msgstr "a créé la tâche"
+
+#: projects/activity.py
+msgid "deleted the task"
+msgstr "a supprimé la tâche"
+
+#: projects/activity.py
+msgid "a deleted user"
+msgstr "un utilisateur supprimé"
+
+#: projects/activity.py
+#, python-format
+msgid "added %(person)s to the team of"
+msgstr "a ajouté %(person)s à l'équipe de"
+
+#: projects/activity.py
+#, python-format
+msgid "removed %(person)s from the team of"
+msgstr "a retiré %(person)s de l'équipe de"
+
+#: projects/activity.py
+msgid "commented on"
+msgstr "a commenté"
+
+#: projects/activity.py
+msgid "added a file to"
+msgstr "a ajouté un fichier à"
+
+#: projects/admin.py
+#, python-format
+msgid "%(person)s still has %(count)d open task(s) in this project. Give them to someone else (or finish them) before removing %(person)s from the team."
+msgstr "%(person)s a encore %(count)d tâche(s) ouverte(s) dans ce projet. Donnez-les à quelqu'un d'autre (ou terminez-les) avant de retirer %(person)s de l'équipe."
+
+#: projects/admin.py
+msgid "team member"
+msgstr "membre de l'équipe"
+
+#: projects/admin.py
+msgid "Team (besides the manager)"
+msgstr "Équipe (en plus du chef de projet)"
+
+#: projects/admin.py templates/projects/project_detail.html templates/projects/project_list.html templates/projects/project_report.html
+msgid "Progress"
+msgstr "Avancement"
+
+#: projects/admin.py
+msgid "A task can only wait for tasks of its own project."
+msgstr "Une tâche ne peut attendre que des tâches de son propre projet."
+
+#: projects/admin.py projects/emails.py projects/views.py templates/projects/dashboard.html
+msgid "Overdue"
+msgstr "En retard"
+
+#: projects/emails.py projects/tests/test_languages.py
+#, python-format
+msgid "%(count)d day late"
+msgid_plural "%(count)d days late"
+msgstr[0] "%(count)d jour de retard"
+msgstr[1] "%(count)d jours de retard"
+
+#: projects/emails.py
+msgid "due today"
+msgstr "échéance aujourd'hui"
+
+#: projects/emails.py
+msgid "due tomorrow"
+msgstr "échéance demain"
+
+#: projects/emails.py
+#, python-format
+msgid "due %(date)s"
+msgstr "échéance le %(date)s"
+
+#: projects/emails.py
+msgid "D j M"
+msgstr "D j N"
+
+#: projects/emails.py
+#, python-format
+msgid "%(count)d overdue"
+msgstr "%(count)d en retard"
+
+#: projects/emails.py
+#, python-format
+msgid "Due in the next %(days)d day"
+msgid_plural "Due in the next %(days)d days"
+msgstr[0] "Échéance dans le prochain jour"
+msgstr[1] "Échéance dans les %(days)d prochains jours"
+
+#: projects/emails.py
+#, python-format
+msgid "%(count)d due soon"
+msgstr "%(count)d bientôt à échéance"
+
+#: projects/emails.py
+msgid "Late in projects you manage"
+msgstr "En retard dans les projets que vous gérez"
+
+#: projects/emails.py
+#, python-format
+msgid "%(count)d late in your projects"
+msgstr "%(count)d en retard dans vos projets"
+
+#: projects/emails.py
+msgctxt "separator between items of a list"
+msgid ", "
+msgstr ", "
+
+#: projects/emails.py
+#, python-format
+msgid "Your tasks: %(summary)s"
+msgstr "Vos tâches : %(summary)s"
+
+#: projects/emails.py
+msgid "Your tasks: nothing urgent"
+msgstr "Vos tâches : rien d'urgent"
+
+#: projects/emails.py
+#, python-format
+msgid "New task for you: %(title)s"
+msgstr "Nouvelle tâche pour vous : %(title)s"
+
+#: projects/forms.py
+msgid "Only admins can change the manager."
+msgstr "Seuls les administrateurs peuvent changer le chef de projet."
+
+#: projects/forms.py
+msgid "The manager can edit the project, its tasks and its team."
+msgstr "Le chef de projet peut modifier le projet, ses tâches et son équipe."
+
+#: projects/forms.py
+msgid "Type the project's name to confirm"
+msgstr "Saisissez le nom du projet pour confirmer"
+
+#: projects/forms.py
+msgid "Type the project's name to confirm."
+msgstr "Saisissez le nom du projet pour confirmer."
+
+#: projects/forms.py
+msgid "This isn't the project's name. Type it exactly as it is written above."
+msgstr "Ce n'est pas le nom du projet. Saisissez-le exactement comme il est écrit ci-dessus."
+
+#: projects/forms.py
+msgid "This task is a milestone"
+msgstr "Cette tâche est un jalon"
+
+#: projects/forms.py projects/reports.py templates/projects/task_detail.html
+msgid "Waits for"
+msgstr "Attend la fin de"
+
+#: projects/forms.py
+msgid "Pick a main task to make this a subtask of it."
+msgstr "Choisissez une tâche principale pour que celle-ci en devienne une sous-tâche."
+
+#: projects/forms.py
+msgid "Tick the tasks that must be done before this one can start."
+msgstr "Cochez les tâches qui doivent être terminées avant que celle-ci puisse commencer."
+
+#: projects/forms.py
+msgid "None (this is a main task)"
+msgstr "Aucune (c'est une tâche principale)"
+
+#: projects/forms.py
+msgid "Only people in this project's team are listed. People are added to the team on the project page."
+msgstr "Seules les personnes de l'équipe de ce projet sont listées. On ajoute des personnes à l'équipe sur la page du projet."
+
+#: projects/forms.py
+msgid "Choose someone in the project's team."
+msgstr "Choisissez quelqu'un de l'équipe du projet."
+
+#: projects/forms.py
+msgid "In the team"
+msgstr "Dans l'équipe"
+
+#: projects/forms.py
+msgid "Not in the team: they will join it"
+msgstr "Hors de l'équipe : ils la rejoindront"
+
+#: projects/forms.py
+msgid "As an admin, you can choose anyone. A person outside the team joins the team when you save."
+msgstr "En tant qu'administrateur, vous pouvez choisir n'importe qui. Une personne hors de l'équipe rejoint l'équipe à l'enregistrement."
+
+#: projects/forms.py
+#, python-format
+msgid "\"%(task)s\" already waits for this task, so this task can't wait for it."
+msgstr "« %(task)s » attend déjà cette tâche : cette tâche ne peut donc pas l'attendre."
+
+#: projects/forms.py
+msgid "Choose a person…"
+msgstr "Choisissez une personne…"
+
+#: projects/forms.py
+msgid "Choose a person to add to the team."
+msgstr "Choisissez une personne à ajouter à l'équipe."
+
+#: projects/forms.py
+msgid "This person can't be added: they are in the team already, or their account is deactivated."
+msgstr "Cette personne ne peut pas être ajoutée : elle est déjà dans l'équipe, ou son compte est désactivé."
+
+#: projects/forms.py
+msgid "Write a comment…"
+msgstr "Écrire un commentaire…"
+
+#: projects/forms.py templates/projects/task_detail.html
+msgid "Comment"
+msgstr "Commentaire"
+
+#: projects/forms.py templates/projects/task_detail.html
+msgid "File"
+msgstr "Fichier"
+
+#: projects/forms.py
+msgid "Choose a file before clicking Upload."
+msgstr "Choisissez un fichier avant de cliquer sur Téléverser."
+
+#: projects/forms.py
+#, python-format
+msgid "This file is too big: files can be up to %(size)s MB."
+msgstr "Ce fichier est trop volumineux : les fichiers peuvent peser jusqu'à %(size)s Mo."
+
+#: projects/models.py
+msgid "Low"
+msgstr "Basse"
+
+#: projects/models.py
+msgid "Medium"
+msgstr "Moyenne"
+
+#: projects/models.py
+msgid "High"
+msgstr "Haute"
+
+#: projects/models.py
+msgid "Critical"
+msgstr "Critique"
+
+#: projects/models.py
+msgid "Planned"
+msgstr "Planifié"
+
+#: projects/models.py templates/projects/project_gantt.html
+msgid "In progress"
+msgstr "En cours"
+
+#: projects/models.py
+msgid "On hold"
+msgstr "En attente"
+
+#: projects/models.py
+msgid "Completed"
+msgstr "Terminé"
+
+#: projects/models.py
+msgid "Cancelled"
+msgstr "Annulé"
+
+#: projects/models.py
+msgid "The end date can't be before the start date."
+msgstr "La date de fin ne peut pas être avant la date de début."
+
+#: projects/models.py
+#, python-format
+msgid "%(person)s in %(project)s"
+msgstr "%(person)s dans %(project)s"
+
+#: projects/models.py templates/projects/project_gantt.html
+msgid "To do"
+msgstr "À faire"
+
+#: projects/models.py templates/projects/project_gantt.html
+msgid "Blocked"
+msgstr "Bloqué"
+
+#: projects/models.py projects/reports.py templates/administration/task_list.html templates/projects/project_gantt.html
+msgid "Done"
+msgstr "Terminé"
+
+#: projects/models.py
+msgid "The due date can't be before the start date."
+msgstr "L'échéance ne peut pas être avant la date de début."
+
+#: projects/models.py
+msgid "A task can't be its own subtask."
+msgstr "Une tâche ne peut pas être sa propre sous-tâche."
+
+#: projects/models.py
+msgid "A subtask can't have its own subtasks."
+msgstr "Une sous-tâche ne peut pas avoir ses propres sous-tâches."
+
+#: projects/models.py
+msgid "A subtask must be in the same project as its main task."
+msgstr "Une sous-tâche doit être dans le même projet que sa tâche principale."
+
+#: projects/models.py
+msgid "This task has its own subtasks, so it can't become a subtask."
+msgstr "Cette tâche a ses propres sous-tâches : elle ne peut donc pas devenir une sous-tâche."
+
+#: projects/models.py
+#, python-format
+msgid "Comment by %(person)s on %(task)s"
+msgstr "Commentaire de %(person)s sur %(task)s"
+
+#: projects/reports.py
+msgid "Summary"
+msgstr "Résumé"
+
+#: projects/reports.py
+msgid "Item"
+msgstr "Élément"
+
+#: projects/reports.py
+msgid "Value"
+msgstr "Valeur"
+
+#: projects/reports.py
+msgid "Progress (%)"
+msgstr "Avancement (%)"
+
+#: projects/reports.py templates/administration/base.html templates/administration/home.html templates/administration/task_list.html templates/projects/project_detail.html
+msgid "Tasks"
+msgstr "Tâches"
+
+#: projects/reports.py templates/projects/dashboard.html
+msgid "Tasks done"
+msgstr "Tâches terminées"
+
+#: projects/reports.py projects/views.py templates/projects/project_detail.html templates/projects/project_report.html
+msgid "Overdue tasks"
+msgstr "Tâches en retard"
+
+#: projects/reports.py
+msgid "Exported on"
+msgstr "Exporté le"
+
+#: projects/reports.py
+msgid "Exported by"
+msgstr "Exporté par"
+
+#: projects/reports.py templates/administration/task_list.html templates/home.html templates/projects/dashboard.html templates/projects/project_detail.html templates/projects/project_report.html templates/projects/task_detail.html
+msgid "Task"
+msgstr "Tâche"
+
+#: projects/reports.py templates/projects/task_detail.html
+msgid "Done on"
+msgstr "Terminée le"
+
+#: projects/reports.py templates/administration/task_list.html templates/projects/dashboard.html templates/projects/project_detail.html templates/projects/project_report.html templates/projects/task_detail.html
+msgid "Late"
+msgstr "En retard"
+
+#: projects/reports.py templates/accounts/person_detail.html templates/administration/base.html templates/administration/home.html templates/administration/project_list.html templates/administration/user_detail.html templates/administration/user_list.html templates/base.html templates/projects/project_list.html
+msgid "Projects"
+msgstr "Projets"
+
+#: projects/views.py
+msgid "Only admins can create projects."
+msgstr "Seuls les administrateurs peuvent créer des projets."
+
+#: projects/views.py
+#, python-format
+msgid "Project \"%(name)s\" created."
+msgstr "Projet « %(name)s » créé."
+
+#: projects/views.py
+msgid "Only the project's manager and admins can edit this project."
+msgstr "Seuls le chef de projet et les administrateurs peuvent modifier ce projet."
+
+#: projects/views.py
+#, python-format
+msgid "%(person)s stays in the team, as a member."
+msgstr "%(person)s reste dans l'équipe, comme membre."
+
+#: projects/views.py
+msgid "Only admins can delete projects."
+msgstr "Seuls les administrateurs peuvent supprimer des projets."
+
+#: projects/views.py
+#, python-format
+msgid "Project \"%(name)s\" deleted."
+msgstr "Projet « %(name)s » supprimé."
+
+#: projects/views.py
+msgid "Only the project's manager and admins can change its team."
+msgstr "Seuls le chef de projet et les administrateurs peuvent modifier son équipe."
+
+#: projects/views.py
+#, python-format
+msgid "%(person)s is now in the team."
+msgstr "%(person)s fait maintenant partie de l'équipe."
+
+#: projects/views.py
+#, python-format
+msgid "%(person)s is the project's manager: the manager is always in the team."
+msgstr "%(person)s est le chef de projet : le chef de projet fait toujours partie de l'équipe."
+
+#: projects/views.py
+#, python-format
+msgid "%(person)s still has %(count)d open task in this project. Give it to someone else (or finish it), then remove %(person)s from the team."
+msgid_plural "%(person)s still has %(count)d open tasks in this project. Give them to someone else (or finish them), then remove %(person)s from the team."
+msgstr[0] "%(person)s a encore %(count)d tâche ouverte dans ce projet. Donnez-la à quelqu'un d'autre (ou terminez-la), puis retirez %(person)s de l'équipe."
+msgstr[1] "%(person)s a encore %(count)d tâches ouvertes dans ce projet. Donnez-les à quelqu'un d'autre (ou terminez-les), puis retirez %(person)s de l'équipe."
+
+#: projects/views.py
+#, python-format
+msgid "%(person)s is no longer in the team."
+msgstr "%(person)s ne fait plus partie de l'équipe."
+
+#: projects/views.py
+#, python-format
+msgid "The task is saved, but the email to %(person)s couldn't be sent."
+msgstr "La tâche est enregistrée, mais l'e-mail à %(person)s n'a pas pu être envoyé."
+
+#: projects/views.py
+#, python-format
+msgid "%(person)s is now in the team of this project."
+msgstr "%(person)s fait maintenant partie de l'équipe de ce projet."
+
+#: projects/views.py
+msgid "Only the project's manager and admins can add tasks."
+msgstr "Seuls le chef de projet et les administrateurs peuvent ajouter des tâches."
+
+#: projects/views.py
+#, python-format
+msgid "Task \"%(title)s\" created."
+msgstr "Tâche « %(title)s » créée."
+
+#: projects/views.py
+msgid "Only the project's manager and admins can edit tasks."
+msgstr "Seuls le chef de projet et les administrateurs peuvent modifier les tâches."
+
+#: projects/views.py templates/projects/task_detail.html
+msgid "Only the person assigned to this task, the project's manager and admins can change its status."
+msgstr "Seuls la personne assignée à cette tâche, le chef de projet et les administrateurs peuvent changer son statut."
+
+#: projects/views.py
+msgid "Unknown status."
+msgstr "Statut inconnu."
+
+#: projects/views.py
+#, python-format
+msgid "\"%(title)s\" is now %(status)s."
+msgstr "Le statut de « %(title)s » est maintenant : %(status)s."
+
+#: projects/views.py
+msgid "Only the project's manager and admins can delete tasks."
+msgstr "Seuls le chef de projet et les administrateurs peuvent supprimer des tâches."
+
+#: projects/views.py
+#, python-format
+msgid "Task \"%(title)s\" deleted."
+msgstr "Tâche « %(title)s » supprimée."
+
+#: projects/views.py
+msgid "Write something before sending a comment."
+msgstr "Écrivez quelque chose avant d'envoyer un commentaire."
+
+#: projects/views.py
+msgid "You can only delete your own comments."
+msgstr "Vous ne pouvez supprimer que vos propres commentaires."
+
+#: projects/views.py
+msgid "You can only delete files you uploaded."
+msgstr "Vous ne pouvez supprimer que les fichiers que vous avez téléversés."
+
+#: projects/views.py
+msgid "This file is missing from the server."
+msgstr "Ce fichier est introuvable sur le serveur."
+
+#: projects/views.py
+msgid "You can only move tasks assigned to you."
+msgstr "Vous ne pouvez déplacer que les tâches qui vous sont assignées."
+
+#: projects/views.py templates/projects/activity.html
+msgid "Today"
+msgstr "Aujourd'hui"
+
+#: projects/views.py
+msgctxt "timeline: the list of zoom levels"
+msgid "Mode"
+msgstr "Affichage"
+
+#: projects/views.py
+msgctxt "timeline zoom level"
+msgid "Hour"
+msgstr "Heure"
+
+#: projects/views.py
+msgctxt "timeline zoom level"
+msgid "Quarter Day"
+msgstr "Quart de jour"
+
+#: projects/views.py
+msgctxt "timeline zoom level"
+msgid "Half Day"
+msgstr "Demi-journée"
+
+#: projects/views.py
+msgctxt "timeline zoom level"
+msgid "Day"
+msgstr "Jour"
+
+#: projects/views.py
+msgctxt "timeline zoom level"
+msgid "Week"
+msgstr "Semaine"
+
+#: projects/views.py
+msgctxt "timeline zoom level"
+msgid "Month"
+msgstr "Mois"
+
+#: projects/views.py
+msgctxt "timeline zoom level"
+msgid "Year"
+msgstr "Année"
+
+#: projects/views.py
+msgid "Open task"
+msgstr "Ouvrir la tâche"
+
+#: projects/views.py
+msgid "The server refused the change."
+msgstr "Le serveur a refusé la modification."
+
+#: projects/views.py
+#, python-brace-format
+msgid "The new dates weren't saved. {error} The page will reload."
+msgstr "Les nouvelles dates n'ont pas été enregistrées. {error} La page va se recharger."
+
+#: projects/views.py
+#, python-format
+msgid "%(start)s → %(end)s"
+msgstr "%(start)s → %(end)s"
+
+#: projects/views.py
+msgid "Only the project's manager and admins can change dates."
+msgstr "Seuls le chef de projet et les administrateurs peuvent modifier les dates."
+
+#: projects/views.py
+msgid "These dates aren't valid."
+msgstr "Ces dates ne sont pas valides."
+
+#: projects/views.py
+msgid "Due in the next 7 days"
+msgstr "Échéance dans les 7 prochains jours"
+
+#: projects/views.py
+msgid "Later"
+msgstr "Plus tard"
+
+#: projects/views.py templates/emails/assigned.html templates/emails/assigned.txt
+msgid "No due date"
+msgstr "Sans échéance"
+
+#: projects/views.py templates/projects/my_tasks.html
+msgid "d M"
+msgstr "j N"
+
+#: projects/views.py
+msgid "Late projects"
+msgstr "Projets en retard"
+
+#: projects/views.py templates/accounts/person_detail.html templates/administration/user_detail.html templates/administration/user_list.html
+msgid "Open tasks"
+msgstr "Tâches ouvertes"
+
+#: projects/views.py
+msgid "Done in the last 30 days"
+msgstr "Terminées ces 30 derniers jours"
+
+#: templates/403.html
+msgid "No access"
+msgstr "Accès refusé"
+
+#: templates/403.html
+msgid "You don't have permission to do this"
+msgstr "Vous n'avez pas la permission de faire cela"
+
+#: templates/403.html
+msgid "Ask an admin if you think you need access."
+msgstr "Demandez à un administrateur si vous pensez avoir besoin d'un accès."
+
+#: templates/403.html templates/404.html templates/500.html
+msgid "Back to home"
+msgstr "Retour à l'accueil"
+
+#: templates/404.html
+msgid "Page not found"
+msgstr "Page introuvable"
+
+#: templates/404.html
+msgid "This page doesn't exist"
+msgstr "Cette page n'existe pas"
+
+#: templates/404.html
+msgid "The address may be wrong, or what it showed was deleted."
+msgstr "L'adresse est peut-être incorrecte, ou ce qu'elle affichait a été supprimé."
+
+#: templates/500.html
+msgid "Something went wrong"
+msgstr "Une erreur s'est produite"
+
+#: templates/500.html
+msgid "Something went wrong on our side"
+msgstr "Une erreur s'est produite de notre côté"
+
+#: templates/500.html
+msgid "The problem was written in the server's log. Please try again in a moment."
+msgstr "Le problème a été enregistré dans le journal du serveur. Veuillez réessayer dans un instant."
+
+#: templates/accounts/password_change.html templates/accounts/profile.html templates/administration/user_detail.html
+msgid "Change my password"
+msgstr "Changer mon mot de passe"
+
+#: templates/accounts/password_change.html templates/accounts/profile.html templates/base.html
+msgid "My profile"
+msgstr "Mon profil"
+
+#: templates/accounts/password_change.html templates/administration/user_deactivate.html templates/administration/user_new.html templates/administration/user_password.html templates/projects/project_confirm_delete.html templates/projects/project_form.html templates/projects/task_confirm_delete.html templates/projects/task_form.html
+msgid "Cancel"
+msgstr "Annuler"
+
+#: templates/accounts/person_detail.html templates/administration/project_list.html templates/administration/task_list.html templates/projects/project_detail.html
+msgid "Account deactivated"
+msgstr "Compte désactivé"
+
+#: templates/accounts/person_detail.html
+msgid "Edit my profile"
+msgstr "Modifier mon profil"
+
+#: templates/accounts/person_detail.html
+msgid "Manage the account"
+msgstr "Gérer le compte"
+
+#: templates/accounts/person_detail.html templates/accounts/profile.html templates/administration/user_list.html
+msgid "Email"
+msgstr "E-mail"
+
+#: templates/accounts/person_detail.html
+msgid "Phone"
+msgstr "Téléphone"
+
+#: templates/accounts/person_detail.html
+msgid "Only the projects you are part of"
+msgstr "Uniquement les projets dont vous faites partie"
+
+#: templates/accounts/person_detail.html templates/administration/user_detail.html templates/projects/project_detail.html
+msgid "Member"
+msgstr "Membre"
+
+#: templates/accounts/person_detail.html
+msgid "No projects to show."
+msgstr "Aucun projet à afficher."
+
+#: templates/accounts/person_detail.html templates/administration/task_list.html templates/administration/user_detail.html templates/home.html templates/includes/task_row.html templates/projects/project_report.html
+msgid "No date"
+msgstr "Aucune date"
+
+#: templates/accounts/person_detail.html
+msgid "No open tasks to show."
+msgstr "Aucune tâche ouverte à afficher."
+
+#: templates/accounts/profile.html
+msgid "See my page"
+msgstr "Voir ma page"
+
+#: templates/accounts/profile.html
+msgid "First name"
+msgstr "Prénom"
+
+#: templates/accounts/profile.html
+msgid "Last name"
+msgstr "Nom de famille"
+
+#: templates/accounts/profile.html
+msgid "An admin manages your names and your email. Ask an admin if they need to change."
+msgstr "Un administrateur gère votre nom et votre e-mail. Demandez-lui si vous devez les faire modifier."
+
+#: templates/accounts/profile.html
+msgid "Phone, picture and language"
+msgstr "Téléphone, photo et langue"
+
+#: templates/accounts/profile.html
+msgid "Save"
+msgstr "Enregistrer"
+
+#: templates/administration/base.html templates/administration/home.html templates/administration/login_list.html templates/administration/project_list.html templates/administration/task_list.html templates/administration/user_deactivate.html templates/administration/user_detail.html templates/administration/user_list.html templates/administration/user_new.html templates/administration/user_password.html templates/base.html
+msgid "Administration"
+msgstr "Administration"
+
+#: templates/administration/base.html templates/administration/home.html
+msgid "Overview"
+msgstr "Vue d'ensemble"
+
+#: templates/administration/base.html templates/administration/home.html templates/administration/user_deactivate.html templates/administration/user_detail.html templates/administration/user_list.html templates/administration/user_new.html templates/administration/user_password.html
+msgid "Users"
+msgstr "Utilisateurs"
+
+#: templates/administration/base.html templates/administration/home.html templates/administration/login_list.html
+msgid "Locked logins"
+msgstr "Connexions verrouillées"
+
+#: templates/administration/home.html
+msgid "As an admin, you see every project. You edit any project, task or team from its own page, and you manage the accounts here."
+msgstr "En tant qu'administrateur, vous voyez tous les projets. Vous modifiez un projet, une tâche ou une équipe depuis sa propre page, et vous gérez les comptes ici."
+
+#: templates/administration/home.html
+msgid "active account"
+msgid_plural "active accounts"
+msgstr[0] "compte actif"
+msgstr[1] "comptes actifs"
+
+#: templates/administration/home.html
+#, python-format
+msgid "%(counter)s admin"
+msgid_plural "%(counter)s admins"
+msgstr[0] "%(counter)s administrateur"
+msgstr[1] "%(counter)s administrateurs"
+
+#: templates/administration/home.html
+#, python-format
+msgid "%(counter)s deactivated"
+msgid_plural "%(counter)s deactivated"
+msgstr[0] "%(counter)s désactivé"
+msgstr[1] "%(counter)s désactivés"
+
+#: templates/administration/home.html
+#, python-format
+msgid "%(counter)s account has no name or no email"
+msgid_plural "%(counter)s accounts have no name or no email"
+msgstr[0] "%(counter)s compte sans nom ou sans e-mail"
+msgstr[1] "%(counter)s comptes sans nom ou sans e-mail"
+
+#: templates/administration/home.html
+msgid "Manage users"
+msgstr "Gérer les utilisateurs"
+
+#: templates/administration/home.html templates/administration/user_list.html templates/administration/user_new.html
+msgid "New user"
+msgstr "Nouvel utilisateur"
+
+#: templates/administration/home.html
+msgid "active project"
+msgid_plural "active projects"
+msgstr[0] "projet actif"
+msgstr[1] "projets actifs"
+
+#: templates/administration/home.html
+#, python-format
+msgid "%(counter)s finished"
+msgid_plural "%(counter)s finished"
+msgstr[0] "%(counter)s terminé"
+msgstr[1] "%(counter)s terminés"
+
+#: templates/administration/home.html templates/administration/project_list.html
+msgid "Projects and teams"
+msgstr "Projets et équipes"
+
+#: templates/administration/home.html templates/administration/project_list.html templates/projects/project_form.html templates/projects/project_list.html
+msgid "New project"
+msgstr "Nouveau projet"
+
+#: templates/administration/home.html
+msgid "open task"
+msgid_plural "open tasks"
+msgstr[0] "tâche ouverte"
+msgstr[1] "tâches ouvertes"
+
+#: templates/administration/home.html templates/administration/project_list.html
+#, python-format
+msgid "%(counter)s late"
+msgid_plural "%(counter)s late"
+msgstr[0] "%(counter)s en retard"
+msgstr[1] "%(counter)s en retard"
+
+#: templates/administration/home.html templates/administration/task_list.html templates/projects/project_report.html
+msgid "All tasks"
+msgstr "Toutes les tâches"
+
+#: templates/administration/home.html
+msgid "Logins locked after too many wrong passwords. You can unlock them."
+msgstr "Connexions verrouillées après trop de mots de passe erronés. Vous pouvez les déverrouiller."
+
+#: templates/administration/home.html
+msgid "See the locked logins"
+msgstr "Voir les connexions verrouillées"
+
+#: templates/administration/home.html templates/base.html
+msgid "Django admin (technical)"
+msgstr "Admin Django (technique)"
+
+#: templates/administration/home.html
+msgid "Django's own admin panel, for technical work only. Everything else is done in the app's pages."
+msgstr "Le panneau d'administration propre à Django, réservé au travail technique. Tout le reste se fait dans les pages de l'application."
+
+#: templates/administration/home.html
+msgid "Open the Django admin"
+msgstr "Ouvrir l'admin Django"
+
+#: templates/administration/login_list.html
+#, python-format
+msgid "After %(limit)s wrong passwords in a row, logging in with that username from that internet address (IP) is locked for %(counter)s hour."
+msgid_plural "After %(limit)s wrong passwords in a row, logging in with that username from that internet address (IP) is locked for %(counter)s hours."
+msgstr[0] "Après %(limit)s mots de passe erronés d'affilée, la connexion avec ce nom d'utilisateur depuis cette adresse internet (IP) est verrouillée pendant %(counter)s heure."
+msgstr[1] "Après %(limit)s mots de passe erronés d'affilée, la connexion avec ce nom d'utilisateur depuis cette adresse internet (IP) est verrouillée pendant %(counter)s heures."
+
+#: templates/administration/login_list.html
+#, python-format
+msgid "After %(limit)s wrong passwords in a row, logging in with that username from that internet address (IP) is locked for %(counter)s minute."
+msgid_plural "After %(limit)s wrong passwords in a row, logging in with that username from that internet address (IP) is locked for %(counter)s minutes."
+msgstr[0] "Après %(limit)s mots de passe erronés d'affilée, la connexion avec ce nom d'utilisateur depuis cette adresse internet (IP) est verrouillée pendant %(counter)s minute."
+msgstr[1] "Après %(limit)s mots de passe erronés d'affilée, la connexion avec ce nom d'utilisateur depuis cette adresse internet (IP) est verrouillée pendant %(counter)s minutes."
+
+#: templates/administration/login_list.html
+msgid "Unlock it if the person remembers their password; if they forgot it, set a new password on their page instead (that unlocks it too)."
+msgstr "Déverrouillez-la si la personne se souvient de son mot de passe ; si elle l'a oublié, définissez plutôt un nouveau mot de passe sur sa page (cela la déverrouille aussi)."
+
+#: templates/administration/login_list.html
+msgid "Username typed"
+msgstr "Nom d'utilisateur saisi"
+
+#: templates/administration/login_list.html
+msgid "Internet address (IP)"
+msgstr "Adresse internet (IP)"
+
+#: templates/administration/login_list.html
+msgid "Wrong passwords"
+msgstr "Mots de passe erronés"
+
+#: templates/administration/login_list.html
+msgid "Last try"
+msgstr "Dernier essai"
+
+#: templates/administration/login_list.html templates/administration/user_detail.html
+msgid "Login"
+msgstr "Connexion"
+
+#: templates/administration/login_list.html
+msgid "No account has this username"
+msgstr "Aucun compte n'a ce nom d'utilisateur"
+
+#: templates/administration/login_list.html templates/administration/user_detail.html
+#, python-format
+msgid "%(counter)s wrong password from %(address)s"
+msgid_plural "%(counter)s wrong passwords from %(address)s"
+msgstr[0] "%(counter)s mot de passe erroné depuis %(address)s"
+msgstr[1] "%(counter)s mots de passe erronés depuis %(address)s"
+
+#: templates/administration/login_list.html templates/administration/user_detail.html templates/includes/activity_item.html templates/projects/project_report.html templates/projects/task_detail.html
+msgid "d M Y, H:i"
+msgstr "j N Y, H:i"
+
+#: templates/administration/login_list.html templates/administration/user_detail.html
+#, python-format
+msgid "Locked until %(time)s"
+msgstr "Verrouillée jusqu'à %(time)s"
+
+#: templates/administration/login_list.html
+msgid "Not locked"
+msgstr "Non verrouillée"
+
+#: templates/administration/login_list.html
+msgid "Unlock"
+msgstr "Déverrouiller"
+
+#: templates/administration/login_list.html
+msgid "Forget"
+msgstr "Oublier"
+
+#: templates/administration/login_list.html
+msgid "No wrong passwords lately: no login is locked."
+msgstr "Aucun mot de passe erroné récemment : aucune connexion n'est verrouillée."
+
+#: templates/administration/project_list.html templates/projects/project_list.html
+msgid "Search by name…"
+msgstr "Rechercher par nom…"
+
+#: templates/administration/project_list.html templates/projects/project_list.html
+msgid "Search by name"
+msgstr "Rechercher par nom"
+
+#: templates/administration/project_list.html templates/projects/project_list.html
+msgid "Show"
+msgstr "Afficher"
+
+#: templates/administration/project_list.html templates/administration/task_list.html templates/projects/activity.html templates/projects/project_detail.html templates/projects/project_list.html
+msgid "All projects"
+msgstr "Tous les projets"
+
+#: templates/administration/project_list.html templates/administration/task_list.html templates/administration/user_list.html templates/projects/project_list.html
+msgid "Search"
+msgstr "Rechercher"
+
+#: templates/administration/project_list.html templates/projects/project_detail.html
+msgid "Team"
+msgstr "Équipe"
+
+#: templates/administration/project_list.html templates/administration/user_detail.html templates/projects/project_detail.html
+#, python-format
+msgid "%(counter)s open task"
+msgid_plural "%(counter)s open tasks"
+msgstr[0] "%(counter)s tâche ouverte"
+msgstr[1] "%(counter)s tâches ouvertes"
+
+#: templates/administration/project_list.html
+msgid "Only the manager"
+msgstr "Uniquement le chef de projet"
+
+#: templates/administration/project_list.html templates/projects/project_detail.html templates/projects/task_detail.html
+msgid "Edit"
+msgstr "Modifier"
+
+#: templates/administration/project_list.html templates/projects/task_detail.html
+msgid "Delete"
+msgstr "Supprimer"
+
+#: templates/administration/project_list.html
+msgid "No project matches this search."
+msgstr "Aucun projet ne correspond à cette recherche."
+
+#: templates/administration/project_list.html
+msgid "There are no projects yet."
+msgstr "Il n'y a pas encore de projets."
+
+#: templates/administration/task_list.html
+msgid "Words of the title…"
+msgstr "Mots du titre…"
+
+#: templates/administration/task_list.html
+msgid "Open"
+msgstr "Ouvertes"
+
+#: templates/administration/task_list.html templates/projects/activity.html
+msgid "Everyone"
+msgstr "Tout le monde"
+
+#: templates/administration/task_list.html
+#, python-format
+msgid "%(counter)s task"
+msgid_plural "%(counter)s tasks"
+msgstr[0] "%(counter)s tâche"
+msgstr[1] "%(counter)s tâches"
+
+#: templates/administration/task_list.html
+#, python-format
+msgid "Page %(number)s of %(total)s"
+msgstr "Page %(number)s sur %(total)s"
+
+#: templates/administration/task_list.html
+msgid "Previous"
+msgstr "Précédent"
+
+#: templates/administration/task_list.html
+msgid "Next"
+msgstr "Suivant"
+
+#: templates/administration/task_list.html
+msgid "No task matches these filters."
+msgstr "Aucune tâche ne correspond à ces filtres."
+
+#: templates/administration/task_list.html
+msgid "There are no open tasks."
+msgstr "Il n'y a aucune tâche ouverte."
+
+#: templates/administration/user_deactivate.html templates/administration/user_detail.html
+msgid "Deactivate"
+msgstr "Désactiver"
+
+#: templates/administration/user_deactivate.html
+#, python-format
+msgid "Deactivate the account of %(person)s?"
+msgstr "Désactiver le compte de %(person)s ?"
+
+#: templates/administration/user_deactivate.html
+msgid "They can't log in anymore: they are logged out at their next click."
+msgstr "La personne ne peut plus se connecter : elle est déconnectée à son prochain clic."
+
+#: templates/administration/user_deactivate.html
+msgid "They get no more reminder emails, and nobody can give them new tasks."
+msgstr "Elle ne reçoit plus d'e-mails de rappel, et personne ne peut lui assigner de nouvelles tâches."
+
+#: templates/administration/user_deactivate.html
+msgid "Nothing is deleted: their projects, tasks, comments and files stay, with their name."
+msgstr "Rien n'est supprimé : ses projets, tâches, commentaires et fichiers restent, avec son nom."
+
+#: templates/administration/user_deactivate.html
+msgid "You can reactivate the account at any time."
+msgstr "Vous pouvez réactiver le compte à tout moment."
+
+#: templates/administration/user_deactivate.html
+msgid "They manage these active projects. Only admins can edit a project whose manager is deactivated, so choose a new manager on each project's Edit page:"
+msgstr "La personne gère ces projets actifs. Seuls les administrateurs peuvent modifier un projet dont le chef est désactivé ; choisissez donc un nouveau chef de projet sur la page Modifier de chaque projet :"
+
+#: templates/administration/user_deactivate.html
+#, python-format
+msgid "They still have %(counter)s open task. It stays theirs until someone gives it to another person:"
+msgid_plural "They still have %(counter)s open tasks. They stay theirs until someone gives them to another person:"
+msgstr[0] "La personne a encore %(counter)s tâche ouverte. Elle reste la sienne tant que personne ne la donne à une autre personne :"
+msgstr[1] "La personne a encore %(counter)s tâches ouvertes. Elles restent les siennes tant que personne ne les donne à une autre personne :"
+
+#: templates/administration/user_deactivate.html
+msgid "Deactivate the account"
+msgstr "Désactiver le compte"
+
+#: templates/administration/user_detail.html templates/administration/user_new.html
+msgid "All users"
+msgstr "Tous les utilisateurs"
+
+#: templates/administration/user_detail.html
+msgid "This account is deactivated."
+msgstr "Ce compte est désactivé."
+
+#: templates/administration/user_detail.html
+#, python-format
+msgid "%(person)s can't log in. Their projects, tasks and comments are kept."
+msgstr "%(person)s ne peut pas se connecter. Ses projets, tâches et commentaires sont conservés."
+
+#: templates/administration/user_detail.html
+msgid "Reactivate"
+msgstr "Réactiver"
+
+#: templates/administration/user_detail.html
+#, python-format
+msgid "last login %(date)s"
+msgstr "dernière connexion %(date)s"
+
+#: templates/administration/user_detail.html
+msgid "never logged in"
+msgstr "jamais connecté"
+
+#: templates/administration/user_detail.html templates/administration/user_list.html
+msgid "Deactivated"
+msgstr "Désactivé"
+
+#: templates/administration/user_detail.html
+msgid "You"
+msgstr "Vous"
+
+#: templates/administration/user_detail.html
+msgid "My page"
+msgstr "Ma page"
+
+#: templates/administration/user_detail.html
+msgid "Their page"
+msgstr "Sa page"
+
+#: templates/administration/user_detail.html templates/administration/user_password.html
+msgid "Set a new password"
+msgstr "Définir un nouveau mot de passe"
+
+#: templates/administration/user_detail.html
+msgid "Account details"
+msgstr "Détails du compte"
+
+#: templates/administration/user_detail.html templates/projects/project_form.html templates/projects/task_form.html
+msgid "Save changes"
+msgstr "Enregistrer les modifications"
+
+#: templates/administration/user_detail.html
+#, python-format
+msgid "Take %(person)s out of the team of %(project)s?"
+msgstr "Retirer %(person)s de l'équipe de %(project)s ?"
+
+#: templates/administration/user_detail.html
+msgid "Take out of the team"
+msgstr "Retirer de l'équipe"
+
+#: templates/administration/user_detail.html
+msgid "Not in any project's team."
+msgstr "Dans l'équipe d'aucun projet."
+
+#: templates/administration/user_detail.html
+msgid "Reactivate the account to add this person to projects."
+msgstr "Réactivez le compte pour ajouter cette personne à des projets."
+
+#: templates/administration/user_detail.html templates/projects/project_detail.html
+msgid "Add to the team"
+msgstr "Ajouter à l'équipe"
+
+#: templates/administration/user_detail.html
+msgid "In the team of every project already."
+msgstr "Déjà dans l'équipe de tous les projets."
+
+#: templates/administration/user_detail.html
+msgid "No open tasks."
+msgstr "Aucune tâche ouverte."
+
+#: templates/administration/user_detail.html
+msgid "See my reminder email"
+msgstr "Voir mon e-mail de rappel"
+
+#: templates/administration/user_detail.html
+msgid "See the reminder email they get"
+msgstr "Voir l'e-mail de rappel que la personne reçoit"
+
+#: templates/administration/user_detail.html
+msgid "Unlock and forget the wrong passwords"
+msgstr "Déverrouiller et oublier les mots de passe erronés"
+
+#: templates/administration/user_list.html
+msgid "Name, username, email or phone…"
+msgstr "Nom, nom d'utilisateur, e-mail ou téléphone…"
+
+#: templates/administration/user_list.html
+msgid "Accounts"
+msgstr "Comptes"
+
+#: templates/administration/user_list.html
+msgid "Active accounts"
+msgstr "Comptes actifs"
+
+#: templates/administration/user_list.html
+msgid "Deactivated accounts"
+msgstr "Comptes désactivés"
+
+#: templates/administration/user_list.html
+msgid "All accounts"
+msgstr "Tous les comptes"
+
+#: templates/administration/user_list.html
+msgid "All roles"
+msgstr "Tous les rôles"
+
+#: templates/administration/user_list.html
+msgid "These accounts have no first name, no last name or no email. Open each one to complete it."
+msgstr "Ces comptes n'ont pas de prénom, pas de nom ou pas d'e-mail. Ouvrez-les un par un pour les compléter."
+
+#: templates/administration/user_list.html
+msgid "Show every account"
+msgstr "Afficher tous les comptes"
+
+#: templates/administration/user_list.html templates/projects/activity.html templates/projects/dashboard.html
+msgid "Person"
+msgstr "Personne"
+
+#: templates/administration/user_list.html
+msgid "Last login"
+msgstr "Dernière connexion"
+
+#: templates/administration/user_list.html templates/registration/locked_out.html
+msgid "Login locked"
+msgstr "Connexion verrouillée"
+
+#: templates/administration/user_list.html
+msgid "Missing details"
+msgstr "Informations manquantes"
+
+#: templates/administration/user_list.html
+msgid "Never"
+msgstr "Jamais"
+
+#: templates/administration/user_list.html
+msgid "No account matches this search."
+msgstr "Aucun compte ne correspond à cette recherche."
+
+#: templates/administration/user_list.html
+msgid "There are no accounts yet."
+msgstr "Il n'y a pas encore de comptes."
+
+#: templates/administration/user_new.html
+msgid "Choose a first password and give it to the person in person or by phone, not by email. They can change it on their profile."
+msgstr "Choisissez un premier mot de passe et donnez-le à la personne en main propre ou par téléphone, pas par e-mail. Elle pourra le changer dans son profil."
+
+#: templates/administration/user_new.html
+msgid "Create the account"
+msgstr "Créer le compte"
+
+#: templates/administration/user_password.html
+#, python-format
+msgid "A new password for %(person)s"
+msgstr "Un nouveau mot de passe pour %(person)s"
+
+#: templates/administration/user_password.html
+msgid "Use this when someone forgot their password. Their old password stops working, they are logged out everywhere, and a login locked after wrong passwords is unlocked."
+msgstr "À utiliser quand quelqu'un a oublié son mot de passe. L'ancien mot de passe ne fonctionne plus, la personne est déconnectée partout, et une connexion verrouillée après des mots de passe erronés est déverrouillée."
+
+#: templates/administration/user_password.html
+msgid "Give the new password to the person in person or by phone, not by email. They can change it on their profile."
+msgstr "Donnez le nouveau mot de passe à la personne en main propre ou par téléphone, pas par e-mail. Elle pourra le changer dans son profil."
+
+#: templates/administration/user_password.html
+msgid "Save the new password"
+msgstr "Enregistrer le nouveau mot de passe"
+
+#: templates/base.html
+msgid "Open menu"
+msgstr "Ouvrir le menu"
+
+#: templates/base.html
+msgid "Open user menu"
+msgstr "Ouvrir le menu utilisateur"
+
+#: templates/base.html
+msgid "Log out"
+msgstr "Se déconnecter"
+
+#: templates/base.html templates/home.html
+msgid "Home"
+msgstr "Accueil"
+
+#: templates/base.html templates/projects/my_tasks.html
+msgid "My tasks"
+msgstr "Mes tâches"
+
+#: templates/base.html templates/projects/activity.html
+msgid "Activity"
+msgstr "Activité"
+
+#: templates/base.html templates/projects/dashboard.html
+msgid "Dashboard"
+msgstr "Tableau de bord"
+
+#: templates/base.html
+msgid "Close"
+msgstr "Fermer"
+
+#: templates/emails/assigned.html templates/emails/assigned.txt templates/emails/reminder.html templates/emails/reminder.txt
+#, python-format
+msgid "Hello %(name)s,"
+msgstr "Bonjour %(name)s,"
+
+#: templates/emails/assigned.html
+#, python-format
+msgid "%(person)s gave you a task in <strong>%(project)s</strong>:"
+msgstr "%(person)s vous a confié une tâche dans <strong>%(project)s</strong> :"
+
+#: templates/emails/assigned.html templates/emails/assigned.txt
+msgid "D j M Y"
+msgstr "D j N Y"
+
+#: templates/emails/assigned.html templates/emails/assigned.txt
+#, python-format
+msgid "Due %(date)s"
+msgstr "Échéance : %(date)s"
+
+#: templates/emails/assigned.html templates/emails/assigned.txt templates/projects/project_detail.html templates/projects/project_report.html templates/projects/task_detail.html
+#, python-format
+msgid "%(priority)s priority"
+msgstr "Priorité %(priority)s"
+
+#: templates/emails/assigned.html
+#, python-format
+msgid "Part of “%(title)s”"
+msgstr "Fait partie de « %(title)s »"
+
+#: templates/emails/assigned.html
+msgid "Open the task"
+msgstr "Ouvrir la tâche"
+
+#: templates/emails/assigned.html
+msgid "You get this email when someone assigns a task to you in IT Projects."
+msgstr "Vous recevez cet e-mail quand quelqu'un vous assigne une tâche dans IT Projects."
+
+#: templates/emails/assigned.txt
+#, python-format
+msgid "%(person)s gave you a task in \"%(project)s\":"
+msgstr "%(person)s vous a confié une tâche dans « %(project)s » :"
+
+#: templates/emails/assigned.txt
+#, python-format
+msgid "Part of \"%(title)s\""
+msgstr "Fait partie de « %(title)s »"
+
+#: templates/emails/assigned.txt
+#, python-format
+#| msgid "Open the task"
+msgid "Open the task: %(link)s"
+msgstr "Ouvrir la tâche : %(link)s"
+
+#: templates/emails/reminder.html templates/emails/reminder.txt
+#, python-format
+msgid "These tasks need your attention today, %(day)s."
+msgstr "Ces tâches demandent votre attention aujourd'hui, %(day)s."
+
+#: templates/emails/reminder.html
+#, python-format
+msgid "…and %(counter)s more"
+msgid_plural "…and %(counter)s more"
+msgstr[0] "…et %(counter)s de plus"
+msgstr[1] "…et %(counter)s de plus"
+
+#: templates/emails/reminder.html templates/emails/reminder.txt
+msgid "Nothing needs your attention today."
+msgstr "Rien ne demande votre attention aujourd'hui."
+
+#: templates/emails/reminder.html
+msgid "Open my tasks"
+msgstr "Ouvrir mes tâches"
+
+#: templates/emails/reminder.html
+msgid "You get this email when tasks assigned to you are late or due soon, or when tasks in projects you manage are late."
+msgstr "Vous recevez cet e-mail quand des tâches qui vous sont assignées sont en retard ou bientôt à échéance, ou quand des tâches de projets que vous gérez sont en retard."
+
+#: templates/emails/reminder.html
+msgid "You get this email when tasks assigned to you are late or due soon."
+msgstr "Vous recevez cet e-mail quand des tâches qui vous sont assignées sont en retard ou bientôt à échéance."
+
+#: templates/emails/reminder.txt
+#, python-format
+msgid "...and %(counter)s more"
+msgid_plural "...and %(counter)s more"
+msgstr[0] "...et %(counter)s de plus"
+msgstr[1] "...et %(counter)s de plus"
+
+#: templates/emails/reminder.txt
+#, python-format
+#| msgid "Open my tasks"
+msgid "Open my tasks: %(link)s"
+msgstr "Ouvrir mes tâches : %(link)s"
+
+#: templates/home.html
+#, python-format
+msgid "Hello, %(name)s"
+msgstr "Bonjour, %(name)s"
+
+#: templates/home.html
+msgid "My open tasks"
+msgstr "Mes tâches ouvertes"
+
+#: templates/home.html
+msgid "My overdue tasks"
+msgstr "Mes tâches en retard"
+
+#: templates/home.html
+msgid "My next tasks"
+msgstr "Mes prochaines tâches"
+
+#: templates/home.html
+msgid "See all my tasks"
+msgstr "Voir toutes mes tâches"
+
+#: templates/home.html templates/projects/my_tasks.html
+msgid "You have no open tasks. Nice work!"
+msgstr "Vous n'avez aucune tâche ouverte. Bon travail !"
+
+#: templates/includes/activity_item.html
+msgid "Someone"
+msgstr "Quelqu'un"
+
+#: templates/includes/activity_item.html
+msgctxt "in a project"
+msgid "in"
+msgstr "dans"
+
+#: templates/includes/activity_item.html
+#, python-format
+msgid "%(label)s:"
+msgstr "%(label)s :"
+
+#: templates/includes/form_field.html
+msgid "Nothing to choose yet."
+msgstr "Rien à choisir pour l'instant."
+
+#: templates/includes/task_row.html templates/projects/my_tasks.html templates/projects/project_board.html
+msgid "Waiting for other tasks"
+msgstr "En attente d'autres tâches"
+
+#: templates/projects/activity.html templates/projects/task_detail.html
+msgid "History"
+msgstr "Historique"
+
+#: templates/projects/activity.html
+msgid "History of the task"
+msgstr "Historique de la tâche"
+
+#: templates/projects/activity.html
+msgid "All activity"
+msgstr "Toute l'activité"
+
+#: templates/projects/activity.html
+msgid "Yesterday"
+msgstr "Hier"
+
+#: templates/projects/activity.html
+msgid "Nothing older to show."
+msgstr "Rien de plus ancien à afficher."
+
+#: templates/projects/activity.html
+msgid "Nothing to show for this choice yet."
+msgstr "Rien à afficher pour ce choix pour l'instant."
+
+#: templates/projects/activity.html
+msgid "Nothing has happened yet."
+msgstr "Il ne s'est encore rien passé."
+
+#: templates/projects/activity.html
+msgid "Back to the newest"
+msgstr "Retour aux plus récents"
+
+#: templates/projects/activity.html
+msgid "Show older activity"
+msgstr "Afficher l'activité plus ancienne"
+
+#: templates/projects/dashboard.html
+msgid "The big picture across all active projects."
+msgstr "Vue d'ensemble de tous les projets actifs."
+
+#: templates/projects/dashboard.html
+msgid "The big picture of the active projects you are part of."
+msgstr "Vue d'ensemble des projets actifs dont vous faites partie."
+
+#: templates/projects/dashboard.html
+msgid "Workload"
+msgstr "Charge de travail"
+
+#: templates/projects/dashboard.html
+msgid "Open tasks per person, in active projects"
+msgstr "Tâches ouvertes par personne, dans les projets actifs"
+
+#: templates/projects/dashboard.html
+msgid "Open tasks per person"
+msgstr "Tâches ouvertes par personne"
+
+#: templates/projects/dashboard.html
+msgid "On time"
+msgstr "Dans les délais"
+
+#: templates/projects/dashboard.html
+msgid "Show as a table"
+msgstr "Afficher sous forme de tableau"
+
+#: templates/projects/dashboard.html
+msgid "No open tasks right now."
+msgstr "Aucune tâche ouverte pour le moment."
+
+#: templates/projects/dashboard.html
+msgid "Tasks done per week"
+msgstr "Tâches terminées par semaine"
+
+#: templates/projects/dashboard.html
+msgid "The last 8 weeks, each starting on Monday"
+msgstr "Les 8 dernières semaines, chacune commençant le lundi"
+
+#: templates/projects/dashboard.html
+msgid "Week of"
+msgstr "Semaine du"
+
+#: templates/projects/dashboard.html
+msgid "Most overdue tasks"
+msgstr "Tâches les plus en retard"
+
+#: templates/projects/dashboard.html templates/projects/project_report.html
+msgid "Late by"
+msgstr "Retard de"
+
+#: templates/projects/dashboard.html templates/projects/project_report.html
+#, python-format
+msgid "%(counter)s day"
+msgid_plural "%(counter)s days"
+msgstr[0] "%(counter)s jour"
+msgstr[1] "%(counter)s jours"
+
+#: templates/projects/dashboard.html
+msgid "No overdue tasks."
+msgstr "Aucune tâche en retard."
+
+#: templates/projects/dashboard.html
+msgid "Projects that need attention"
+msgstr "Projets qui demandent de l'attention"
+
+#: templates/projects/dashboard.html
+#, python-format
+msgid "%(counter)s overdue task"
+msgid_plural "%(counter)s overdue tasks"
+msgstr[0] "%(counter)s tâche en retard"
+msgstr[1] "%(counter)s tâches en retard"
+
+#: templates/projects/dashboard.html templates/projects/project_detail.html templates/projects/project_list.html templates/projects/project_report.html
+#, python-format
+msgid "%(percent)s%% done"
+msgstr "%(percent)s %% terminé"
+
+#: templates/projects/dashboard.html
+msgid "Every active project is on time."
+msgstr "Tous les projets actifs sont dans les délais."
+
+#: templates/projects/my_tasks.html
+#, python-format
+msgid "%(counter)s open task assigned to you, in active projects."
+msgid_plural "%(counter)s open tasks assigned to you, in active projects."
+msgstr[0] "%(counter)s tâche ouverte vous est assignée, dans les projets actifs."
+msgstr[1] "%(counter)s tâches ouvertes vous sont assignées, dans les projets actifs."
+
+#: templates/projects/my_tasks.html
+msgid "My reminder email"
+msgstr "Mon e-mail de rappel"
+
+#: templates/projects/my_tasks.html
+msgid "Mark as done"
+msgstr "Marquer comme terminée"
+
+#: templates/projects/my_tasks.html
+#, python-format
+msgid "Mark %(title)s as done"
+msgstr "Marquer %(title)s comme terminée"
+
+#: templates/projects/my_tasks.html
+msgid "Done in the last 14 days"
+msgstr "Terminées ces 14 derniers jours"
+
+#: templates/projects/project_board.html templates/projects/project_detail.html
+msgid "Board"
+msgstr "Tableau"
+
+#: templates/projects/project_board.html
+msgid "Drag a card to another column to change its status. You can move the tasks assigned to you; the project's manager and admins can move every card."
+msgstr "Faites glisser une carte vers une autre colonne pour changer son statut. Vous pouvez déplacer les tâches qui vous sont assignées ; le chef de projet et les administrateurs peuvent déplacer toutes les cartes."
+
+#: templates/projects/project_board.html
+msgid "This card couldn't be moved. The page will reload."
+msgstr "Cette carte n'a pas pu être déplacée. La page va se recharger."
+
+#: templates/projects/project_confirm_delete.html templates/projects/project_form.html
+msgid "Delete project"
+msgstr "Supprimer le projet"
+
+#: templates/projects/project_confirm_delete.html
+msgid "Delete this project?"
+msgstr "Supprimer ce projet ?"
+
+#: templates/projects/project_confirm_delete.html
+#, python-format
+msgid "You're about to delete the project <strong>%(name)s</strong> and everything in it:"
+msgstr "Vous êtes sur le point de supprimer le projet <strong>%(name)s</strong> et tout ce qu'il contient :"
+
+#: templates/projects/project_confirm_delete.html
+#, python-format
+msgid "%(counter)s task, subtasks included"
+msgid_plural "%(counter)s tasks, subtasks included"
+msgstr[0] "%(counter)s tâche, sous-tâches comprises"
+msgstr[1] "%(counter)s tâches, sous-tâches comprises"
+
+#: templates/projects/project_confirm_delete.html
+#, python-format
+msgid "%(counter)s comment"
+msgid_plural "%(counter)s comments"
+msgstr[0] "%(counter)s commentaire"
+msgstr[1] "%(counter)s commentaires"
+
+#: templates/projects/project_confirm_delete.html
+#, python-format
+msgid "%(counter)s file"
+msgid_plural "%(counter)s files"
+msgstr[0] "%(counter)s fichier"
+msgstr[1] "%(counter)s fichiers"
+
+#: templates/projects/project_confirm_delete.html
+#, python-format
+msgid "its team of %(counter)s person (the person keeps their account)"
+msgid_plural "its team of %(counter)s people (the people keep their accounts)"
+msgstr[0] "son équipe de %(counter)s personne (la personne garde son compte)"
+msgstr[1] "son équipe de %(counter)s personnes (les personnes gardent leur compte)"
+
+#: templates/projects/project_confirm_delete.html
+msgid "This can't be undone."
+msgstr "Cette action est irréversible."
+
+#: templates/projects/project_confirm_delete.html
+msgid "To stop a project without losing anything, set its status to Cancelled or Completed instead: it then leaves the list of active projects, and everything in it stays."
+msgstr "Pour arrêter un projet sans rien perdre, passez plutôt son statut à Annulé ou Terminé : il quitte alors la liste des projets actifs, et tout ce qu'il contient reste."
+
+#: templates/projects/project_confirm_delete.html
+msgid "Project name:"
+msgstr "Nom du projet :"
+
+#: templates/projects/project_detail.html templates/projects/project_gantt.html
+msgid "Timeline"
+msgstr "Chronologie"
+
+#: templates/projects/project_detail.html
+msgid "Reports"
+msgstr "Rapports"
+
+#: templates/projects/project_detail.html
+msgid "Status report to print"
+msgstr "Rapport d'état à imprimer"
+
+#: templates/projects/project_detail.html templates/projects/project_report.html
+msgid "Tasks to Excel"
+msgstr "Tâches vers Excel"
+
+#: templates/projects/project_detail.html templates/projects/project_report.html
+#, python-format
+msgid "%(done)s of %(counter)s task done"
+msgid_plural "%(done)s of %(counter)s tasks done"
+msgstr[0] "%(done)s sur %(counter)s tâche terminée"
+msgstr[1] "%(done)s sur %(counter)s tâches terminées"
+
+#: templates/projects/project_detail.html
+#, python-format
+msgid "Remove %(person)s from the team?"
+msgstr "Retirer %(person)s de l'équipe ?"
+
+#: templates/projects/project_detail.html
+msgid "Remove from the team"
+msgstr "Retirer de l'équipe"
+
+#: templates/projects/project_detail.html
+#, python-format
+msgid "Remove %(person)s from the team"
+msgstr "Retirer %(person)s de l'équipe"
+
+#: templates/projects/project_detail.html
+msgid "Person to add to the team"
+msgstr "Personne à ajouter à l'équipe"
+
+#: templates/projects/project_detail.html
+msgid "Everyone is in the team already."
+msgstr "Tout le monde est déjà dans l'équipe."
+
+#: templates/projects/project_detail.html
+msgid "Add task"
+msgstr "Ajouter une tâche"
+
+#: templates/projects/project_detail.html templates/projects/project_report.html
+msgid "This project has no tasks yet."
+msgstr "Ce projet n'a pas encore de tâches."
+
+#: templates/projects/project_detail.html
+msgid "Recent activity"
+msgstr "Activité récente"
+
+#: templates/projects/project_detail.html
+msgid "See all"
+msgstr "Tout voir"
+
+#: templates/projects/project_detail.html
+msgid "Nothing has happened in this project yet."
+msgstr "Il ne s'est encore rien passé dans ce projet."
+
+#: templates/projects/project_form.html
+msgid "Edit project"
+msgstr "Modifier le projet"
+
+#: templates/projects/project_form.html
+msgid "Create project"
+msgstr "Créer le projet"
+
+#: templates/projects/project_gantt.html
+msgid "Each bar runs from a task's start date to its due date, and arrows point from a task to the tasks waiting for it."
+msgstr "Chaque barre va de la date de début d'une tâche à son échéance, et les flèches vont d'une tâche vers les tâches qui l'attendent."
+
+#: templates/projects/project_gantt.html
+msgid "Click a bar to see the task."
+msgstr "Cliquez sur une barre pour voir la tâche."
+
+#: templates/projects/project_gantt.html
+msgid "Drag a bar to move a task, or drag its ends to change its dates. Tasks that wait for it move along with it."
+msgstr "Faites glisser une barre pour déplacer une tâche, ou glissez ses extrémités pour changer ses dates. Les tâches qui l'attendent se déplacent avec elle."
+
+#: templates/projects/project_gantt.html
+msgid "milestone"
+msgstr "jalon"
+
+#: templates/projects/project_gantt.html
+msgid "subtask"
+msgstr "sous-tâche"
+
+#: templates/projects/project_gantt.html
+msgid "No task has a date yet. Give tasks a start date or a due date to see them here."
+msgstr "Aucune tâche n'a encore de date. Donnez aux tâches une date de début ou une échéance pour les voir ici."
+
+#: templates/projects/project_gantt.html
+msgid "Not on the timeline"
+msgstr "Pas sur la chronologie"
+
+#: templates/projects/project_gantt.html
+msgid "These tasks have no start date and no due date yet:"
+msgstr "Ces tâches n'ont encore ni date de début ni échéance :"
+
+#: templates/projects/project_list.html
+msgid "Export to Excel"
+msgstr "Exporter vers Excel"
+
+#: templates/projects/project_list.html
+msgid "No projects found."
+msgstr "Aucun projet trouvé."
+
+#: templates/projects/project_list.html
+msgid "You aren't in any project's team yet. An admin or a project's manager can add you."
+msgstr "Vous ne faites encore partie de l'équipe d'aucun projet. Un administrateur ou un chef de projet peut vous ajouter."
+
+#: templates/projects/project_report.html
+msgid "Status report"
+msgstr "Rapport d'état"
+
+#: templates/projects/project_report.html
+msgid "Print or save as PDF"
+msgstr "Imprimer ou enregistrer en PDF"
+
+#: templates/projects/project_report.html
+msgid "Project status report"
+msgstr "Rapport d'état du projet"
+
+#: templates/projects/project_report.html
+msgid "Dates"
+msgstr "Dates"
+
+#: templates/projects/project_report.html
+#, python-format
+msgid "%(label)s: %(count)s"
+msgstr "%(label)s : %(count)s"
+
+#: templates/projects/project_report.html
+msgid "Milestones"
+msgstr "Jalons"
+
+#: templates/projects/project_report.html
+msgid "Start"
+msgstr "Début"
+
+#: templates/projects/project_report.html
+msgid "Due"
+msgstr "Échéance"
+
+#: templates/projects/project_report.html
+#, python-format
+msgid "Report made on %(date)s by %(person)s"
+msgstr "Rapport établi le %(date)s par %(person)s"
+
+#: templates/projects/task_confirm_delete.html
+msgid "Delete task"
+msgstr "Supprimer la tâche"
+
+#: templates/projects/task_confirm_delete.html
+msgid "Delete this task?"
+msgstr "Supprimer cette tâche ?"
+
+#: templates/projects/task_confirm_delete.html
+#, python-format
+msgid "You're about to delete <strong>%(title)s</strong> from the project <strong>%(project)s</strong>."
+msgstr "Vous êtes sur le point de supprimer <strong>%(title)s</strong> du projet <strong>%(project)s</strong>."
+
+#: templates/projects/task_confirm_delete.html
+#, python-format
+msgid "Its %(counter)s subtask will be deleted too."
+msgid_plural "Its %(counter)s subtasks will be deleted too."
+msgstr[0] "Sa sous-tâche sera aussi supprimée."
+msgstr[1] "Ses %(counter)s sous-tâches seront aussi supprimées."
+
+#: templates/projects/task_confirm_delete.html
+msgid "Its comments and files go with it, and this can't be undone. To stop a task without losing it, you can mark it Done instead."
+msgstr "Ses commentaires et ses fichiers sont supprimés avec elle, et cette action est irréversible. Pour arrêter une tâche sans la perdre, vous pouvez la marquer Terminé à la place."
+
+#: templates/projects/task_detail.html
+msgid "Subtask"
+msgstr "Sous-tâche"
+
+#: templates/projects/task_detail.html
+msgid "This task waits for"
+msgstr "Cette tâche attend"
+
+#: templates/projects/task_detail.html
+msgid "which isn't done yet."
+msgid_plural "which aren't done yet."
+msgstr[0] "qui n'est pas encore terminée."
+msgstr[1] "qui ne sont pas encore terminées."
+
+#: templates/projects/task_detail.html
+msgid "Subtasks"
+msgstr "Sous-tâches"
+
+#: templates/projects/task_detail.html
+msgid "Add subtask"
+msgstr "Ajouter une sous-tâche"
+
+#: templates/projects/task_detail.html
+msgid "No subtasks."
+msgstr "Aucune sous-tâche."
+
+#: templates/projects/task_detail.html
+msgid "Tasks that must be done before this one"
+msgstr "Tâches à terminer avant celle-ci"
+
+#: templates/projects/task_detail.html
+msgid "Nothing. This task can start any time."
+msgstr "Rien. Cette tâche peut commencer à tout moment."
+
+#: templates/projects/task_detail.html
+msgid "Needed by"
+msgstr "Requise par"
+
+#: templates/projects/task_detail.html
+msgid "Tasks that wait for this one"
+msgstr "Tâches qui attendent celle-ci"
+
+#: templates/projects/task_detail.html
+msgid "No other task waits for this one."
+msgstr "Aucune autre tâche n'attend celle-ci."
+
+#: templates/projects/task_detail.html
+msgid "Comments"
+msgstr "Commentaires"
+
+#: templates/projects/task_detail.html
+msgid "Delete this comment?"
+msgstr "Supprimer ce commentaire ?"
+
+#: templates/projects/task_detail.html
+msgid "Delete comment"
+msgstr "Supprimer le commentaire"
+
+#: templates/projects/task_detail.html
+msgid "No comments yet."
+msgstr "Aucun commentaire pour l'instant."
+
+#: templates/projects/task_detail.html
+msgid "Add comment"
+msgstr "Ajouter un commentaire"
+
+#: templates/projects/task_detail.html
+msgid "Files"
+msgstr "Fichiers"
+
+#: templates/projects/task_detail.html
+msgid "File missing"
+msgstr "Fichier manquant"
+
+#: templates/projects/task_detail.html
+msgid "Delete this file?"
+msgstr "Supprimer ce fichier ?"
+
+#: templates/projects/task_detail.html
+msgid "Delete file"
+msgstr "Supprimer le fichier"
+
+#: templates/projects/task_detail.html
+msgid "Upload"
+msgstr "Téléverser"
+
+#: templates/projects/task_detail.html
+#, python-format
+msgid "Up to %(size)s MB per file."
+msgstr "Jusqu'à %(size)s Mo par fichier."
+
+#: templates/projects/task_form.html
+msgid "Edit task"
+msgstr "Modifier la tâche"
+
+#: templates/projects/task_form.html
+msgid "New task"
+msgstr "Nouvelle tâche"
+
+#: templates/projects/task_form.html
+msgid "Create task"
+msgstr "Créer la tâche"
+
+#: templates/registration/locked_out.html
+msgid "Too many wrong passwords"
+msgstr "Trop de mots de passe erronés"
+
+#: templates/registration/locked_out.html
+#, python-format
+msgid "To protect the account \"%(name)s\", logging in is blocked for one hour after %(counter)s wrong password in a row."
+msgid_plural "To protect the account \"%(name)s\", logging in is blocked for one hour after %(counter)s wrong passwords in a row."
+msgstr[0] "Pour protéger le compte « %(name)s », la connexion est bloquée pendant une heure après %(counter)s mot de passe erroné d'affilée."
+msgstr[1] "Pour protéger le compte « %(name)s », la connexion est bloquée pendant une heure après %(counter)s mots de passe erronés d'affilée."
+
+#: templates/registration/locked_out.html
+#, python-format
+msgid "To protect the account, logging in is blocked for one hour after %(counter)s wrong password in a row."
+msgid_plural "To protect the account, logging in is blocked for one hour after %(counter)s wrong passwords in a row."
+msgstr[0] "Pour protéger le compte, la connexion est bloquée pendant une heure après %(counter)s mot de passe erroné d'affilée."
+msgstr[1] "Pour protéger le compte, la connexion est bloquée pendant une heure après %(counter)s mots de passe erronés d'affilée."
+
+#: templates/registration/locked_out.html
+msgid "Try again later, or ask an admin to unlock it now."
+msgstr "Réessayez plus tard, ou demandez à un administrateur de la déverrouiller maintenant."
+
+#: templates/registration/locked_out.html
+msgid "Back to the login page"
+msgstr "Retour à la page de connexion"
+
+#: templates/registration/login.html
+msgid "Log in"
+msgstr "Se connecter"
+
+#: templates/registration/login.html
+msgid "IT department project management"
+msgstr "Gestion de projets du service informatique"
+
+#: templates/registration/login.html
+msgid "Log in to your account"
+msgstr "Connectez-vous à votre compte"
+
+#: templates/registration/login.html
+msgid "Password"
+msgstr "Mot de passe"

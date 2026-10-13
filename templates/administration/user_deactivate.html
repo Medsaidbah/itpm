@@ -24,7 +24,7 @@
           <div class="mb-1">{% translate "They manage these active projects. Only admins can edit a project whose manager is deactivated, so choose a new manager on each project's Edit page:" %}</div>
           <ul class="mb-0">
             {% for project in managed_projects %}
-            <li><a href="{% url 'project_edit' project.pk %}">{{ project.name }}</a></li>
+            <li><a href="{% url 'project_edit' project.pk %}"><bdi>{{ project.name }}</bdi></a></li>
             {% endfor %}
           </ul>
         </div>
@@ -37,7 +37,7 @@
           </div>
           <ul class="mb-0">
             {% for task in open_tasks %}
-            <li><a href="{{ task.get_absolute_url }}">{{ task.title }}</a> <span class="text-secondary">· {{ task.project }}</span></li>
+            <li><a href="{{ task.get_absolute_url }}"><bdi>{{ task.title }}</bdi></a> <span class="text-secondary">· {{ task.project }}</span></li>
             {% endfor %}
           </ul>
         </div>

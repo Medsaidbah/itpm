@@ -52,6 +52,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "accounts.middleware.LanguageMiddleware",  # the language of each page (needs to know who is logged in)
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "simple_history.middleware.HistoryRequestMiddleware",
@@ -68,6 +69,7 @@ TEMPLATES = [
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.request",
+                "django.template.context_processors.i18n",  # LANGUAGES, LANGUAGE_CODE and LANGUAGE_BIDI
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
             ],
@@ -126,7 +128,22 @@ AXES_LOCKOUT_TEMPLATE = "registration/locked_out.html"
 
 # ---------- Language and time ----------
 
-LANGUAGE_CODE = "en-us"
+# The languages of the app (Stage 17c). Each person chooses theirs (user menu, or the login page);
+# the choice is saved in their profile, so their emails are in that language too.
+# The names are written in their own language, so everyone recognizes theirs.
+LANGUAGE_CODE = "en"  # the language when nothing else is chosen
+LANGUAGES = [
+    ("en", "English"),
+    ("fr", "Français"),
+    ("ar", "العربية"),  # written right to left: the whole page is mirrored
+]
+# The translations: locale/fr/ and locale/ar/ (the .po files are the texts, the .mo files what Django reads)
+LOCALE_PATHS = [BASE_DIR / "locale"]
+# The login page remembers the last language chosen on this computer for a year
+LANGUAGE_COOKIE_AGE = 365 * 24 * 60 * 60
+LANGUAGE_COOKIE_HTTPONLY = True
+LANGUAGE_COOKIE_SAMESITE = "Lax"
+
 TIME_ZONE = "Africa/Nouakchott"
 USE_I18N = True
 USE_TZ = True
@@ -163,6 +180,7 @@ if HTTPS:
     SECURE_SSL_REDIRECT = True  # an http:// address is sent to https://
     SESSION_COOKIE_SECURE = True  # the login cookie only travels encrypted
     CSRF_COOKIE_SECURE = True
+    LANGUAGE_COOKIE_SECURE = True
     CSRF_TRUSTED_ORIGINS = [f"https://{host}" for host in ALLOWED_HOSTS]
     # Browsers remember to use only https for this site. Start small (1 hour);
     # when everything works, put HSTS_SECONDS=31536000 (one year) in .env.
@@ -174,7 +192,7 @@ SILENCED_SYSTEM_CHECKS = ["security.W005", "security.W021"]
 
 
 # ---------- Logs ----------
-# Errors are written in the terminal (on the server, the service saves them in a log file).
+# Errors are written in the terminal (on the server, the service saves them in logs\itpm-web.err.log).
 # By default Django only shows server errors when DEBUG is on: this shows them always.
 
 LOGGING = {
@@ -183,6 +201,9 @@ LOGGING = {
     "handlers": {"console": {"class": "logging.StreamHandler"}},
     "root": {"handlers": ["console"], "level": "WARNING"},
     "loggers": {
+        # Django's own messages, written once (without this, some appeared twice)
+        "django": {"handlers": ["console"], "level": "INFO", "propagate": False},
+        # Errors of the pages (code 500), with their details. "Page not found" isn't written.
         "django.request": {"handlers": ["console"], "level": "ERROR", "propagate": False},
     },
 }

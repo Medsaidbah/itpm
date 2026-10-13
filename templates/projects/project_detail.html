@@ -1,36 +1,36 @@
 {% extends "base.html" %}
-{% load people %}
+{% load i18n people %}
 
 {% block title %}{{ project.name }} · IT Projects{% endblock %}
 {% block nav_projects %}active{% endblock %}
 
 {% block content %}
 <div class="mb-3">
-  <a href="{% url 'project_list' %}" class="text-secondary"><i class="ti ti-arrow-left me-1"></i>All projects</a>
+  <a href="{% url 'project_list' %}" class="text-secondary"><i class="ti ti-arrow-left me-1"></i>{% translate "All projects" %}</a>
 </div>
 
 {# Title, badges and buttons #}
 <div class="d-flex flex-wrap align-items-start gap-2 mb-4">
   <div class="me-auto">
-    <h2 class="page-title mb-2">{{ project.name }}</h2>
+    <h2 class="page-title mb-2"><bdi>{{ project.name }}</bdi></h2>
     <span class="badge bg-{{ project.status_color }}-lt">{{ project.get_status_display }}</span>
-    <span class="badge bg-{{ project.priority_color }}-lt">{{ project.get_priority_display }} priority</span>
-    {% if project.is_overdue %}<span class="badge bg-red-lt">Late</span>{% endif %}
+    <span class="badge bg-{{ project.priority_color }}-lt">{% blocktranslate with priority=project.get_priority_display %}{{ priority }} priority{% endblocktranslate %}</span>
+    {% if project.is_overdue %}<span class="badge bg-red-lt">{% translate "Late" %}</span>{% endif %}
   </div>
-  <a href="{% url 'project_board' project.pk %}" class="btn"><i class="ti ti-layout-kanban me-2"></i>Board</a>
-  <a href="{% url 'project_gantt' project.pk %}" class="btn"><i class="ti ti-timeline me-2"></i>Timeline</a>
+  <a href="{% url 'project_board' project.pk %}" class="btn"><i class="ti ti-layout-kanban me-2"></i>{% translate "Board" %}</a>
+  <a href="{% url 'project_gantt' project.pk %}" class="btn"><i class="ti ti-timeline me-2"></i>{% translate "Timeline" %}</a>
   {# A button that opens a small menu (Bootstrap's "dropdown") #}
   <div class="dropdown">
     <button type="button" class="btn dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-      <i class="ti ti-file-analytics me-2"></i>Reports
+      <i class="ti ti-file-analytics me-2"></i>{% translate "Reports" %}
     </button>
     <div class="dropdown-menu dropdown-menu-end">
-      <a class="dropdown-item" href="{% url 'project_report' project.pk %}"><i class="ti ti-printer me-2"></i>Status report to print</a>
-      <a class="dropdown-item" href="{% url 'project_tasks_excel' project.pk %}"><i class="ti ti-file-spreadsheet me-2"></i>Tasks to Excel</a>
+      <a class="dropdown-item" href="{% url 'project_report' project.pk %}"><i class="ti ti-printer me-2"></i>{% translate "Status report to print" %}</a>
+      <a class="dropdown-item" href="{% url 'project_tasks_excel' project.pk %}"><i class="ti ti-file-spreadsheet me-2"></i>{% translate "Tasks to Excel" %}</a>
     </div>
   </div>
   {% if can_edit %}
-  <a href="{% url 'project_edit' project.pk %}" class="btn btn-primary"><i class="ti ti-pencil me-2"></i>Edit</a>
+  <a href="{% url 'project_edit' project.pk %}" class="btn btn-primary"><i class="ti ti-pencil me-2"></i>{% translate "Edit" %}</a>
   {% endif %}
 </div>
 
@@ -41,26 +41,26 @@
       <div class="card-body">
         <div class="datagrid">
           <div class="datagrid-item">
-            <div class="datagrid-title">Manager</div>
+            <div class="datagrid-title">{% translate "Manager" %}</div>
             <div class="datagrid-content">{{ project.manager }}</div>
           </div>
           <div class="datagrid-item">
-            <div class="datagrid-title">Start date</div>
-            <div class="datagrid-content">{{ project.start_date|date:"d M Y"|default:"Not set" }}</div>
+            <div class="datagrid-title">{% translate "Start date" %}</div>
+            <div class="datagrid-content">{{ project.start_date|date:_("d M Y")|default:_("Not set") }}</div>
           </div>
           <div class="datagrid-item">
-            <div class="datagrid-title">End date</div>
-            <div class="datagrid-content {% if project.is_overdue %}text-danger{% endif %}">{{ project.end_date|date:"d M Y"|default:"Not set" }}</div>
+            <div class="datagrid-title">{% translate "End date" %}</div>
+            <div class="datagrid-content {% if project.is_overdue %}text-danger{% endif %}">{{ project.end_date|date:_("d M Y")|default:_("Not set") }}</div>
           </div>
           <div class="datagrid-item">
-            <div class="datagrid-title">Overdue tasks</div>
+            <div class="datagrid-title">{% translate "Overdue tasks" %}</div>
             <div class="datagrid-content {% if project.task_overdue %}text-danger{% endif %}">{{ project.task_overdue }}</div>
           </div>
         </div>
         {% if project.description %}
-        <div class="datagrid-title mt-4">Description</div>
+        <div class="datagrid-title mt-4">{% translate "Description" %}</div>
         {# linebreaksbr keeps the line breaks people typed #}
-        <div>{{ project.description|linebreaksbr }}</div>
+        <div dir="auto">{{ project.description|linebreaksbr }}</div>
         {% endif %}
       </div>
     </div>
@@ -70,14 +70,14 @@
   <div class="col-md-4">
     <div class="card h-100">
       <div class="card-body">
-        <div class="subheader">Progress</div>
+        <div class="subheader">{% translate "Progress" %}</div>
         <div class="h1 mb-2">{{ project.progress }}%</div>
         <div class="progress progress-sm mb-2">
           <div class="progress-bar" style="width: {{ project.progress }}%" role="progressbar"
                aria-valuenow="{{ project.progress }}" aria-valuemin="0" aria-valuemax="100"
-               aria-label="{{ project.progress }}% done"></div>
+               aria-label="{% blocktranslate with percent=project.progress %}{{ percent }}% done{% endblocktranslate %}"></div>
         </div>
-        <div class="text-secondary">{{ project.task_done }} of {{ project.task_total }} tasks done</div>
+        <div class="text-secondary">{% blocktranslate with done=project.task_done count counter=project.task_total %}{{ done }} of {{ counter }} task done{% plural %}{{ done }} of {{ counter }} tasks done{% endblocktranslate %}</div>
       </div>
     </div>
   </div>
@@ -86,7 +86,7 @@
 {# The team: the manager and the members. The manager and admins add and remove people here. #}
 <div class="card mb-4" id="team">
   <div class="card-header">
-    <h3 class="card-title">Team <span class="badge bg-secondary-lt ms-1">{{ team|length }}</span></h3>
+    <h3 class="card-title">{% translate "Team" %} <span class="badge bg-secondary-lt ms-1">{{ team|length }}</span></h3>
   </div>
   <div class="card-body">
     <div class="d-flex flex-wrap gap-4">
@@ -94,19 +94,20 @@
       <div class="d-flex align-items-center gap-2">
         {% avatar person %}
         <div>
-          <div>{% person_link person "text-reset" %}{% if not person.is_active %} <span class="badge bg-secondary-lt">Account deactivated</span>{% endif %}</div>
+          <div>{% person_link person "text-reset" %}{% if not person.is_active %} <span class="badge bg-secondary-lt">{% translate "Account deactivated" %}</span>{% endif %}</div>
           <div class="small text-secondary">
-            {% if person.pk == project.manager_id %}Manager{% else %}Member{% endif %}
-            {% if person.open_tasks %}· {{ person.open_tasks }} open task{{ person.open_tasks|pluralize }}{% endif %}
+            {% if person.pk == project.manager_id %}{% translate "Manager" %}{% else %}{% translate "Member" %}{% endif %}
+            {% if person.open_tasks %}· {% blocktranslate count counter=person.open_tasks %}{{ counter }} open task{% plural %}{{ counter }} open tasks{% endblocktranslate %}{% endif %}
           </div>
         </div>
         {% if can_manage_team and person.pk != project.manager_id %}
-        {# escapejs: a name with a quote in it can't break the question #}
+        {# The question is kept in data-confirm, where any name (even with a quote) is written safely #}
+        {% blocktranslate asvar question with person=person %}Remove {{ person }} from the team?{% endblocktranslate %}
         <form method="post" action="{% url 'team_remove' project.pk person.pk %}"
-              onsubmit="return confirm('Remove {{ person|escapejs }} from the team?');">
+              data-confirm="{{ question }}" onsubmit="return confirm(this.dataset.confirm);">
           {% csrf_token %}
-          <button type="submit" class="btn btn-sm btn-ghost-secondary btn-icon" title="Remove from the team"
-                  aria-label="Remove {{ person }} from the team"><i class="ti ti-x"></i></button>
+          <button type="submit" class="btn btn-sm btn-ghost-secondary btn-icon" title="{% translate 'Remove from the team' %}"
+                  aria-label="{% blocktranslate with person=person %}Remove {{ person }} from the team{% endblocktranslate %}"><i class="ti ti-x"></i></button>
         </form>
         {% endif %}
       </div>
@@ -118,12 +119,12 @@
     {% if people_to_add %}
     <form method="post" action="{% url 'team_add' project.pk %}" class="d-flex flex-wrap gap-2">
       {% csrf_token %}
-      <label class="visually-hidden" for="{{ team_form.person.id_for_label }}">Person to add to the team</label>
+      <label class="visually-hidden" for="{{ team_form.person.id_for_label }}">{% translate "Person to add to the team" %}</label>
       <div class="flex-fill" style="max-width: 22rem">{{ team_form.person }}</div>
-      <button type="submit" class="btn"><i class="ti ti-user-plus me-2"></i>Add to the team</button>
+      <button type="submit" class="btn"><i class="ti ti-user-plus me-2"></i>{% translate "Add to the team" %}</button>
     </form>
     {% else %}
-    <div class="text-secondary">Everyone is in the team already.</div>
+    <div class="text-secondary">{% translate "Everyone is in the team already." %}</div>
     {% endif %}
   </div>
   {% endif %}
@@ -132,10 +133,10 @@
 {# Tasks, with subtasks under their main task #}
 <div class="card">
   <div class="card-header">
-    <h3 class="card-title">Tasks</h3>
+    <h3 class="card-title">{% translate "Tasks" %}</h3>
     {% if can_edit %}
     <div class="card-actions">
-      <a href="{% url 'task_create' project.pk %}" class="btn btn-primary btn-sm"><i class="ti ti-plus me-1"></i>Add task</a>
+      <a href="{% url 'task_create' project.pk %}" class="btn btn-primary btn-sm"><i class="ti ti-plus me-1"></i>{% translate "Add task" %}</a>
     </div>
     {% endif %}
   </div>
@@ -144,10 +145,10 @@
     <table class="table card-table table-vcenter">
       <thead>
         <tr>
-          <th>Task</th>
-          <th>Status</th>
-          <th class="d-none d-sm-table-cell">Assigned to</th>
-          <th>Due date</th>
+          <th>{% translate "Task" %}</th>
+          <th>{% translate "Status" %}</th>
+          <th class="d-none d-sm-table-cell">{% translate "Assigned to" %}</th>
+          <th>{% translate "Due date" %}</th>
         </tr>
       </thead>
       <tbody>
@@ -161,16 +162,16 @@
     </table>
   </div>
   {% else %}
-  <div class="card-body text-secondary">This project has no tasks yet.</div>
+  <div class="card-body text-secondary">{% translate "This project has no tasks yet." %}</div>
   {% endif %}
 </div>
 
 {# What happened lately in this project. "See all" opens the Activity page for this project. #}
 <div class="card mt-4">
   <div class="card-header">
-    <h3 class="card-title">Recent activity</h3>
+    <h3 class="card-title">{% translate "Recent activity" %}</h3>
     <div class="card-actions">
-      <a href="{% url 'activity' %}?project={{ project.pk }}" class="btn btn-sm">See all</a>
+      <a href="{% url 'activity' %}?project={{ project.pk }}" class="btn btn-sm">{% translate "See all" %}</a>
     </div>
   </div>
   {% if recent_activity %}
@@ -180,7 +181,7 @@
     {% endfor %}
   </div>
   {% else %}
-  <div class="card-body text-secondary">Nothing has happened in this project yet.</div>
+  <div class="card-body text-secondary">{% translate "Nothing has happened in this project yet." %}</div>
   {% endif %}
 </div>
 {% endblock %}

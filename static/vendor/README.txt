@@ -9,6 +9,8 @@ frappe-gantt/   frappe-gantt            1.2.2    MIT      https://github.com/fra
 chartjs/        chart.js                4.5.1    MIT      https://github.com/chartjs/Chart.js
 
 The license of each library is in its folder (Tabler's is at the top of its .css and .js files).
+tabler/tabler.rtl.min.css (and its .map) is the same design mirrored for right-to-left languages: the app
+uses it when the page is in Arabic (Stage 17c). It comes from the same npm package (dist/css/) and is unchanged.
 The .map files only help browser developer tools; they are kept because the main files mention them.
 
 To update a library: download the new version from https://www.npmjs.com/ (or

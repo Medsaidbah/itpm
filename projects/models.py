@@ -9,14 +9,16 @@ from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
 from simple_history.models import HistoricalRecords
 
 
 class Priority(models.TextChoices):
-    LOW = "low", "Low"
-    MEDIUM = "medium", "Medium"
-    HIGH = "high", "High"
-    CRITICAL = "critical", "Critical"
+    LOW = "low", gettext_lazy("Low")
+    MEDIUM = "medium", gettext_lazy("Medium")
+    HIGH = "high", gettext_lazy("High")
+    CRITICAL = "critical", gettext_lazy("Critical")
 
 
 # Badge colors shown on the pages (these are Tabler color names)
@@ -54,11 +56,11 @@ class ProjectQuerySet(models.QuerySet):
 
 class Project(models.Model):
     class Status(models.TextChoices):
-        PLANNED = "planned", "Planned"
-        IN_PROGRESS = "in_progress", "In progress"
-        ON_HOLD = "on_hold", "On hold"
-        COMPLETED = "completed", "Completed"
-        CANCELLED = "cancelled", "Cancelled"
+        PLANNED = "planned", gettext_lazy("Planned")
+        IN_PROGRESS = "in_progress", gettext_lazy("In progress")
+        ON_HOLD = "on_hold", gettext_lazy("On hold")
+        COMPLETED = "completed", gettext_lazy("Completed")
+        CANCELLED = "cancelled", gettext_lazy("Cancelled")
 
     # Projects that aren't finished yet
     ACTIVE_STATUSES = [Status.PLANNED, Status.IN_PROGRESS, Status.ON_HOLD]
@@ -172,7 +174,7 @@ class Project(models.Model):
 
     def clean(self):
         if self.start_date and self.end_date and self.end_date < self.start_date:
-            raise ValidationError({"end_date": "The end date can't be before the start date."})
+            raise ValidationError({"end_date": _("The end date can't be before the start date.")})
 
     @property
     def progress(self):
@@ -226,7 +228,7 @@ class ProjectMember(models.Model):
         constraints = [models.UniqueConstraint(fields=["project", "user"], name="unique_project_member")]
 
     def __str__(self):
-        return f"{self.user} in {self.project}"
+        return _("%(person)s in %(project)s") % {"person": self.user, "project": self.project}
 
 
 def people_visible_to(user):
@@ -251,10 +253,10 @@ class TaskQuerySet(models.QuerySet):
 
 class Task(models.Model):
     class Status(models.TextChoices):
-        TODO = "todo", "To do"
-        IN_PROGRESS = "in_progress", "In progress"
-        BLOCKED = "blocked", "Blocked"
-        DONE = "done", "Done"
+        TODO = "todo", gettext_lazy("To do")
+        IN_PROGRESS = "in_progress", gettext_lazy("In progress")
+        BLOCKED = "blocked", gettext_lazy("Blocked")
+        DONE = "done", gettext_lazy("Done")
 
     STATUS_COLORS = {"todo": "secondary", "in_progress": "blue", "blocked": "red", "done": "green"}
 
@@ -317,19 +319,19 @@ class Task(models.Model):
 
     def clean(self):
         if self.start_date and self.due_date and self.due_date < self.start_date:
-            raise ValidationError({"due_date": "The due date can't be before the start date."})
+            raise ValidationError({"due_date": _("The due date can't be before the start date.")})
         if self.parent:
             if self.parent_id == self.pk:
-                raise ValidationError({"parent": "A task can't be its own subtask."})
+                raise ValidationError({"parent": _("A task can't be its own subtask.")})
             if self.parent.parent_id:
-                raise ValidationError({"parent": "A subtask can't have its own subtasks."})
+                raise ValidationError({"parent": _("A subtask can't have its own subtasks.")})
             if self.parent.project_id != self.project_id:
                 raise ValidationError(
-                    {"parent": "A subtask must be in the same project as its main task."}
+                    {"parent": _("A subtask must be in the same project as its main task.")}
                 )
             if self.pk and self.subtasks.exists():
                 raise ValidationError(
-                    {"parent": "This task has its own subtasks, so it can't become a subtask."}
+                    {"parent": _("This task has its own subtasks, so it can't become a subtask.")}
                 )
 
     def save(self, *args, **kwargs):
@@ -395,7 +397,7 @@ class Comment(models.Model):
         ordering = ["created_at"]
 
     def __str__(self):
-        return f"Comment by {self.author} on {self.task}"
+        return _("Comment by %(person)s on %(task)s") % {"person": self.author, "task": self.task}
 
     def can_delete(self, user):
         """The author can delete a comment, and so can anyone who can edit the task."""

@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth import get_user_model
 from django.db.models import Q
+from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
 from .models import Attachment, Comment, Project, Task
@@ -43,6 +44,15 @@ class ProjectForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:
         model = Project
         fields = ["name", "description", "status", "priority", "manager", "start_date", "end_date"]
+        labels = {
+            "name": _("Name"),
+            "description": _("Description"),
+            "status": _("Status"),
+            "priority": _("Priority"),
+            "manager": _("Manager"),
+            "start_date": _("Start date"),
+            "end_date": _("End date"),
+        }
         widgets = {
             "description": forms.Textarea(attrs={"rows": 4}),
             # type="date" shows the browser's date picker, which needs dates as year-month-day
@@ -60,9 +70,9 @@ class ProjectForm(BootstrapFormMixin, forms.ModelForm):
             # So the list only holds the current manager: there is nothing else to choose.
             manager.disabled = True
             manager.queryset = manager.queryset.filter(pk=self.instance.manager_id)
-            manager.help_text = "Only admins can change the manager."
+            manager.help_text = _("Only admins can change the manager.")
         else:
-            manager.help_text = "The manager can edit the project, its tasks and its team."
+            manager.help_text = _("The manager can edit the project, its tasks and its team.")
 
 
 class ProjectDeleteForm(BootstrapFormMixin, forms.Form):
@@ -101,14 +111,20 @@ class TaskForm(BootstrapFormMixin, forms.ModelForm):
             "depends_on": forms.CheckboxSelectMultiple,
         }
         labels = {
-            "assignee": "Assigned to",
-            "parent": "Main task",
-            "is_milestone": "This task is a milestone",
-            "depends_on": "Waits for",
+            "title": _("Title"),
+            "description": _("Description"),
+            "status": _("Status"),
+            "priority": _("Priority"),
+            "assignee": _("Assigned to"),
+            "start_date": _("Start date"),
+            "due_date": _("Due date"),
+            "parent": _("Main task"),
+            "is_milestone": _("This task is a milestone"),
+            "depends_on": _("Waits for"),
         }
         help_texts = {
-            "parent": "Pick a main task to make this a subtask of it.",
-            "depends_on": "Tick the tasks that must be done before this one can start.",
+            "parent": _("Pick a main task to make this a subtask of it."),
+            "depends_on": _("Tick the tasks that must be done before this one can start."),
         }
 
     def __init__(self, *args, project, user, **kwargs):
@@ -123,7 +139,7 @@ class TaskForm(BootstrapFormMixin, forms.ModelForm):
             others = others.exclude(pk=self.instance.pk)
 
         self.fields["parent"].queryset = others.filter(parent__isnull=True)
-        self.fields["parent"].empty_label = "None (this is a main task)"
+        self.fields["parent"].empty_label = _("None (this is a main task)")
         self.fields["depends_on"].queryset = others
         # Show subtasks as "Main task › Subtask", so tasks with the same name can be told apart
         self.fields["depends_on"].label_from_instance = (
@@ -138,7 +154,7 @@ class TaskForm(BootstrapFormMixin, forms.ModelForm):
           so that saving the task never takes it away from them;
         - admins can choose anyone: a person outside the team joins it when the task is saved."""
         field = self.fields["assignee"]
-        field.empty_label = "Unassigned"
+        field.empty_label = _("Unassigned")
         people = get_user_model().objects.filter(is_active=True).order_by("first_name", "last_name", "username")
 
         if not user.is_admin:
@@ -146,10 +162,10 @@ class TaskForm(BootstrapFormMixin, forms.ModelForm):
             if self.instance.assignee_id:
                 allowed |= Q(pk=self.instance.assignee_id)
             field.queryset = people.filter(allowed)
-            field.help_text = (
+            field.help_text = _(
                 "Only people in this project's team are listed. People are added to the team on the project page."
             )
-            field.error_messages["invalid_choice"] = "Choose someone in the project's team."
+            field.error_messages["invalid_choice"] = _("Choose someone in the project's team.")
             return
 
         # Admins: everyone, in two groups in the list: the team first, then the others
@@ -157,9 +173,11 @@ class TaskForm(BootstrapFormMixin, forms.ModelForm):
         team = set(project.team_queryset().values_list("pk", flat=True))
         in_team = [(person.pk, str(person)) for person in people if person.pk in team]
         others = [(person.pk, str(person)) for person in people if person.pk not in team]
-        groups = [("In the team", in_team), ("Not in the team: they will join it", others)]
+        groups = [(_("In the team"), in_team), (_("Not in the team: they will join it"), others)]
         field.choices = [("", field.empty_label)] + [(label, options) for label, options in groups if options]
-        field.help_text = "As an admin, you can choose anyone. A person outside the team joins the team when you save."
+        field.help_text = _(
+            "As an admin, you can choose anyone. A person outside the team joins the team when you save."
+        )
 
     def clean_depends_on(self):
         chosen = self.cleaned_data["depends_on"]
@@ -168,7 +186,8 @@ class TaskForm(BootstrapFormMixin, forms.ModelForm):
             for task in chosen:
                 if task.waits_for(self.instance):
                     raise forms.ValidationError(
-                        f'"{task}" already waits for this task, so this task can\'t wait for it.'
+                        gettext('"%(task)s" already waits for this task, so this task can\'t wait for it.')
+                        % {"task": task}
                     )
         return chosen
 
@@ -178,10 +197,10 @@ class TeamMemberForm(BootstrapFormMixin, forms.Form):
 
     person = forms.ModelChoiceField(
         queryset=None,  # set below, for each project
-        empty_label="Choose a person…",
+        empty_label=_("Choose a person…"),
         error_messages={
-            "required": "Choose a person to add to the team.",
-            "invalid_choice": (
+            "required": _("Choose a person to add to the team."),
+            "invalid_choice": _(
                 "This person can't be added: they are in the team already, or their account is deactivated."
             ),
         },
@@ -201,18 +220,21 @@ class CommentForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:
         model = Comment
         fields = ["body"]
-        widgets = {"body": forms.Textarea(attrs={"rows": 3, "placeholder": "Write a comment…"})}
-        labels = {"body": "Comment"}
+        widgets = {"body": forms.Textarea(attrs={"rows": 3, "placeholder": _("Write a comment…")})}
+        labels = {"body": _("Comment")}
 
 
 class AttachmentForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:
         model = Attachment
         fields = ["file"]
-        error_messages = {"file": {"required": "Choose a file before clicking Upload."}}
+        labels = {"file": _("File")}
+        error_messages = {"file": {"required": _("Choose a file before clicking Upload.")}}
 
     def clean_file(self):
         file = self.cleaned_data["file"]
         if file.size > MAX_UPLOAD_MB * 1024 * 1024:
-            raise forms.ValidationError(f"This file is too big: files can be up to {MAX_UPLOAD_MB} MB.")
+            raise forms.ValidationError(
+                gettext("This file is too big: files can be up to %(size)s MB.") % {"size": MAX_UPLOAD_MB}
+            )
         return file

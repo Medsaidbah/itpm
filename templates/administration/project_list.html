@@ -45,7 +45,7 @@
         {% for project in projects %}
         <tr>
           <td class="text-break">
-            <a href="{{ project.get_absolute_url }}">{{ project.name }}</a>
+            <a href="{{ project.get_absolute_url }}"><bdi>{{ project.name }}</bdi></a>
             <div class="small text-secondary">
               {# On phones, the status and the manager go here #}
               <span class="d-sm-none">{{ project.get_status_display }} ·</span>

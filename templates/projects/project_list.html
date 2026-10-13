@@ -1,17 +1,17 @@
 {% extends "base.html" %}
-{% load people %}
+{% load i18n people %}
 
-{% block title %}Projects · IT Projects{% endblock %}
+{% block title %}{% translate "Projects" %} · IT Projects{% endblock %}
 {% block nav_projects %}active{% endblock %}
 
 {% block content %}
 <div class="d-flex flex-wrap align-items-center gap-2 mb-4">
-  <h2 class="page-title me-auto">Projects</h2>
+  <h2 class="page-title me-auto">{% translate "Projects" %}</h2>
   {# The export keeps the current search and filter: request.GET.urlencode repeats them in the address #}
-  <a href="{% url 'projects_excel' %}?{{ request.GET.urlencode }}" class="btn"><i class="ti ti-file-spreadsheet me-2"></i>Export to Excel</a>
+  <a href="{% url 'projects_excel' %}?{{ request.GET.urlencode }}" class="btn"><i class="ti ti-file-spreadsheet me-2"></i>{% translate "Export to Excel" %}</a>
   {# Only admins create projects, so only they see this button #}
   {% if user.is_admin %}
-  <a href="{% url 'project_create' %}" class="btn btn-primary"><i class="ti ti-plus me-2"></i>New project</a>
+  <a href="{% url 'project_create' %}" class="btn btn-primary"><i class="ti ti-plus me-2"></i>{% translate "New project" %}</a>
   {% endif %}
 </div>
 
@@ -19,20 +19,20 @@
 <form method="get" class="row g-2 mb-3">
   <div class="col-sm-6 col-md-5">
     <input type="search" name="q" value="{{ query }}" class="form-control"
-           placeholder="Search by name…" aria-label="Search by name">
+           placeholder="{% translate 'Search by name…' %}" aria-label="{% translate 'Search by name' %}">
   </div>
   <div class="col-sm-4 col-md-3">
     {# Picking a status sends the form straight away #}
-    <select name="status" class="form-select" aria-label="Show" onchange="this.form.submit()">
-      <option value="active" {% if status == "active" %}selected{% endif %}>Active projects</option>
-      <option value="all" {% if status == "all" %}selected{% endif %}>All projects</option>
+    <select name="status" class="form-select" aria-label="{% translate 'Show' %}" onchange="this.form.submit()">
+      <option value="active" {% if status == "active" %}selected{% endif %}>{% translate "Active projects" %}</option>
+      <option value="all" {% if status == "all" %}selected{% endif %}>{% translate "All projects" %}</option>
       {% for value, label in status_choices %}
       <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
     </select>
   </div>
   <div class="col-auto">
-    <button type="submit" class="btn"><i class="ti ti-search me-2"></i>Search</button>
+    <button type="submit" class="btn"><i class="ti ti-search me-2"></i>{% translate "Search" %}</button>
   </div>
 </form>
 
@@ -43,30 +43,30 @@
       {# d-none d-md-table-cell: this column is hidden on phones and shown on wider screens #}
       <thead>
         <tr>
-          <th>Project</th>
-          <th>Status</th>
-          <th class="d-none d-md-table-cell">Priority</th>
-          <th class="d-none d-md-table-cell">Manager</th>
-          <th class="d-none d-sm-table-cell">End date</th>
-          <th class="w-25">Progress</th>
+          <th>{% translate "Project" %}</th>
+          <th>{% translate "Status" %}</th>
+          <th class="d-none d-md-table-cell">{% translate "Priority" %}</th>
+          <th class="d-none d-md-table-cell">{% translate "Manager" %}</th>
+          <th class="d-none d-sm-table-cell">{% translate "End date" %}</th>
+          <th class="w-25">{% translate "Progress" %}</th>
         </tr>
       </thead>
       <tbody>
         {% for project in projects %}
         <tr>
-          <td><a href="{{ project.get_absolute_url }}">{{ project.name }}</a></td>
+          <td><a href="{{ project.get_absolute_url }}"><bdi>{{ project.name }}</bdi></a></td>
           <td><span class="badge bg-{{ project.status_color }}-lt">{{ project.get_status_display }}</span></td>
           <td class="d-none d-md-table-cell"><span class="badge bg-{{ project.priority_color }}-lt">{{ project.get_priority_display }}</span></td>
           <td class="d-none d-md-table-cell">
             <span class="d-inline-flex align-items-center gap-2">{% avatar project.manager "xs" %}{{ project.manager }}</span>
           </td>
-          <td class="d-none d-sm-table-cell {% if project.is_overdue %}text-danger{% endif %}">{{ project.end_date|date:"d M Y"|default:"Not set" }}</td>
+          <td class="d-none d-sm-table-cell {% if project.is_overdue %}text-danger{% endif %}">{{ project.end_date|date:_("d M Y")|default:_("Not set") }}</td>
           <td>
             <div class="d-flex align-items-center gap-2">
               <div class="progress progress-sm flex-fill">
                 <div class="progress-bar" style="width: {{ project.progress }}%" role="progressbar"
                      aria-valuenow="{{ project.progress }}" aria-valuemin="0" aria-valuemax="100"
-                     aria-label="{{ project.progress }}% done"></div>
+                     aria-label="{% blocktranslate with percent=project.progress %}{{ percent }}% done{% endblocktranslate %}"></div>
               </div>
               <span class="text-secondary small">{{ project.progress }}%</span>
             </div>
@@ -77,9 +77,9 @@
     </table>
   </div>
   {% elif has_projects %}
-  <div class="card-body text-secondary">No projects found.</div>
+  <div class="card-body text-secondary">{% translate "No projects found." %}</div>
   {% else %}
-  <div class="card-body text-secondary">You aren't in any project's team yet. An admin or a project's manager can add you.</div>
+  <div class="card-body text-secondary">{% translate "You aren't in any project's team yet. An admin or a project's manager can add you." %}</div>
   {% endif %}
 </div>
 {% endblock %}

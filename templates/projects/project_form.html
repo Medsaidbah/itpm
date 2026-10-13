@@ -2,13 +2,13 @@
 {% load i18n %}
 
 {# The same page is used to create a project and to edit one #}
-{% block title %}{% if project %}Edit project{% else %}New project{% endif %} · IT Projects{% endblock %}
+{% block title %}{% if project %}{% translate "Edit project" %}{% else %}{% translate "New project" %}{% endif %} · IT Projects{% endblock %}
 {% block nav_projects %}active{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
   <div class="col-lg-8">
-    <h2 class="page-title mb-4">{% if project %}Edit project{% else %}New project{% endif %}</h2>
+    <h2 class="page-title mb-4">{% if project %}{% translate "Edit project" %}{% else %}{% translate "New project" %}{% endif %}</h2>
 
     <form method="post" class="card">
       {% csrf_token %}
@@ -37,8 +37,8 @@
         {% if project and user.is_admin %}
         <a href="{% url 'project_delete' project.pk %}" class="btn btn-outline-danger me-auto"><i class="ti ti-trash me-2"></i>{% translate "Delete project" %}</a>
         {% endif %}
-        <a href="{% if project %}{{ project.get_absolute_url }}{% else %}{% url 'project_list' %}{% endif %}" class="btn">Cancel</a>
-        <button type="submit" class="btn btn-primary">{% if project %}Save changes{% else %}Create project{% endif %}</button>
+        <a href="{% if project %}{{ project.get_absolute_url }}{% else %}{% url 'project_list' %}{% endif %}" class="btn">{% translate "Cancel" %}</a>
+        <button type="submit" class="btn btn-primary">{% if project %}{% translate "Save changes" %}{% else %}{% translate "Create project" %}{% endif %}</button>
       </div>
     </form>
   </div>

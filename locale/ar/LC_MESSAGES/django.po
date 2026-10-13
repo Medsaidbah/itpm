@@ -1,0 +1,2430 @@
+# IT Projects: Arabic translation (Stage 17c).
+# The texts to translate come from the app; msgstr is what people read.
+msgid ""
+msgstr ""
+"Project-Id-Version: IT Projects\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-11 12:04+0000\n"
+"PO-Revision-Date: 2026-10-11 12:00+0000\n"
+"Last-Translator: IT Projects team\n"
+"Language-Team: Arabic\n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
+
+#: accounts/admin.py
+msgid "IT Projects · Django admin (technical)"
+msgstr "IT Projects · إدارة Django (تقنية)"
+
+#: accounts/admin.py
+msgid "Personal info"
+msgstr "المعلومات الشخصية"
+
+#: accounts/admin.py
+msgid "Role in the app"
+msgstr "الدور في التطبيق"
+
+#: accounts/admin.py
+msgid "Personal info and role"
+msgstr "المعلومات الشخصية والدور"
+
+#: accounts/forms.py administration/forms.py
+#, python-format
+msgid "A JPG or PNG picture, up to %(size)s MB. It is cut to a square."
+msgstr "صورة بصيغة JPG أو PNG، حتى %(size)s ميغابايت. يتم قصّها على شكل مربع."
+
+#: accounts/forms.py administration/forms.py
+msgid "Picture"
+msgstr "الصورة"
+
+#: accounts/forms.py
+msgid "Remove my picture"
+msgstr "إزالة صورتي"
+
+#: accounts/forms.py templates/base.html templates/registration/login.html
+msgid "Language"
+msgstr "اللغة"
+
+#: accounts/forms.py
+msgid "The language of your pages and of the emails you get."
+msgstr "لغة صفحاتك والرسائل الإلكترونية التي تصلك."
+
+#: accounts/forms.py administration/forms.py
+msgid "Phone number"
+msgstr "رقم الهاتف"
+
+#: accounts/models.py
+msgid "Enter a phone number with digits, spaces and + - ( ) only, like +222 22 12 34 56."
+msgstr "أدخل رقم هاتف يتكوّن من أرقام ومسافات والرموز + - ( ) فقط، مثل ‎+222 22 12 34 56‎."
+
+#: accounts/models.py templates/accounts/person_detail.html
+msgid "Admin"
+msgstr "مسؤول"
+
+#: accounts/models.py
+msgid "User"
+msgstr "مستخدم"
+
+#: accounts/models.py
+msgid "The app needs at least one active admin. Give the Admin role to someone else first."
+msgstr "يحتاج التطبيق إلى مسؤول نشط واحد على الأقل. امنح دور المسؤول لشخص آخر أولًا."
+
+#: accounts/pictures.py
+#, python-format
+msgid "This picture is too big: pictures can be up to %(size)s MB."
+msgstr "هذه الصورة كبيرة جدًا: الحد الأقصى لحجم الصور %(size)s ميغابايت."
+
+#: accounts/pictures.py
+msgid "This file isn't a picture we can read. Use a JPG or PNG picture."
+msgstr "هذا الملف ليس صورة يمكن قراءتها. استخدم صورة بصيغة JPG أو PNG."
+
+#: accounts/pictures.py
+msgid "Use a JPG, PNG, WEBP or GIF picture."
+msgstr "استخدم صورة بصيغة JPG أو PNG أو WEBP أو GIF."
+
+#: accounts/views.py
+msgid "Your profile is saved."
+msgstr "تم حفظ ملفك الشخصي."
+
+#: accounts/views.py
+msgid "Your password is changed."
+msgstr "تم تغيير كلمة المرور."
+
+#: accounts/views.py
+msgid "This picture is missing from the server."
+msgstr "هذه الصورة غير موجودة على الخادم."
+
+#: administration/forms.py templates/registration/login.html
+msgid "Username"
+msgstr "اسم المستخدم"
+
+#: administration/forms.py templates/administration/user_list.html
+msgid "Role"
+msgstr "الدور"
+
+#: administration/forms.py
+msgid "What they type to log in. Letters, digits and @ . + - _ only."
+msgstr "ما يكتبه الشخص لتسجيل الدخول. حروف وأرقام والرموز ‎@ . + - _‎ فقط."
+
+#: administration/forms.py
+msgid "Admins see and change everything, including this Administration section. Users see the projects they manage or whose team they are in."
+msgstr "يرى المسؤولون كل شيء ويعدّلونه، بما في ذلك قسم الإدارة هذا. أما المستخدمون فيرون المشاريع التي يديرونها أو التي هم ضمن فريقها."
+
+#: administration/forms.py
+msgid "Another account already uses this email address."
+msgstr "هناك حساب آخر يستخدم عنوان البريد الإلكتروني هذا بالفعل."
+
+#: administration/forms.py templates/administration/user_new.html
+msgid "First password"
+msgstr "كلمة المرور الأولى"
+
+#: administration/forms.py
+msgid "Remove the picture"
+msgstr "إزالة الصورة"
+
+#: administration/forms.py
+msgid "You can't change your own role. Another admin can: this way the app always keeps an admin."
+msgstr "لا يمكنك تغيير دورك بنفسك. يمكن لمسؤول آخر فعل ذلك: وبهذه الطريقة يبقى في التطبيق مسؤول دائمًا."
+
+#: administration/forms.py
+msgid "This account was made with the createsuperuser command, so it is always an admin."
+msgstr "تم إنشاء هذا الحساب بالأمر createsuperuser، لذلك يبقى مسؤولًا دائمًا."
+
+#: administration/forms.py projects/reports.py templates/administration/project_list.html templates/administration/task_list.html templates/administration/user_detail.html templates/home.html templates/projects/activity.html templates/projects/project_list.html
+msgid "Project"
+msgstr "المشروع"
+
+#: administration/forms.py
+msgid "Choose a project."
+msgstr "اختر مشروعًا."
+
+#: administration/forms.py
+msgid "This person can't be added to this project: they are in its team already."
+msgstr "لا يمكن إضافة هذا الشخص إلى هذا المشروع: فهو ضمن فريقه بالفعل."
+
+#: administration/forms.py projects/views.py templates/administration/project_list.html templates/home.html templates/projects/project_list.html
+msgid "Active projects"
+msgstr "المشاريع النشطة"
+
+#: administration/forms.py
+msgid "Finished projects"
+msgstr "المشاريع المنتهية"
+
+#: administration/forms.py
+msgid "Choose a project…"
+msgstr "اختر مشروعًا…"
+
+#: administration/forms.py
+msgid "This account is deactivated. Reactivate it before adding the person to a project."
+msgstr "هذا الحساب معطّل. أعد تفعيله قبل إضافة الشخص إلى مشروع."
+
+#: administration/views.py
+msgid "Only admins can open the Administration section."
+msgstr "يمكن للمسؤولين فقط فتح قسم الإدارة."
+
+#: administration/views.py
+#, python-format
+msgid "The account of %(person)s is created. Give them their username and first password in person or by phone, not by email. They can change the password on their profile."
+msgstr "تم إنشاء حساب %(person)s. سلّم الشخص اسم المستخدم وكلمة المرور الأولى شخصيًا أو عبر الهاتف، وليس عبر البريد الإلكتروني. يمكنه تغيير كلمة المرور من ملفه الشخصي."
+
+#: administration/views.py projects/views.py
+msgid "Changes saved."
+msgstr "تم حفظ التغييرات."
+
+#: administration/views.py
+#, python-format
+msgid "The new password of %(person)s is saved. Give it to them in person or by phone, not by email. They can change it on their profile."
+msgstr "تم حفظ كلمة المرور الجديدة لـ %(person)s. سلّمها للشخص شخصيًا أو عبر الهاتف، وليس عبر البريد الإلكتروني. يمكنه تغييرها من ملفه الشخصي."
+
+#: administration/views.py
+msgid "You can't deactivate your own account. Another admin can."
+msgstr "لا يمكنك تعطيل حسابك بنفسك. يمكن لمسؤول آخر فعل ذلك."
+
+#: administration/views.py
+msgid "This account is deactivated already."
+msgstr "هذا الحساب معطّل بالفعل."
+
+#: administration/views.py
+#, python-format
+msgid "The account of %(person)s is deactivated: they can't log in anymore. Their projects, tasks and comments are kept."
+msgstr "تم تعطيل حساب %(person)s: لم يعد بإمكانه تسجيل الدخول. تبقى مشاريعه ومهامه وتعليقاته محفوظة."
+
+#: administration/views.py
+#, python-format
+msgid "The account of %(person)s is active again: they can log in."
+msgstr "عاد حساب %(person)s نشطًا: يمكنه تسجيل الدخول."
+
+#: administration/views.py
+#, python-format
+msgid "%(person)s is now in the team of %(project)s."
+msgstr "أصبح %(person)s ضمن فريق %(project)s."
+
+#: administration/views.py
+#, python-format
+msgid "%(person)s manages %(project)s, and the manager is always in the team. To take them out, first choose another manager on the project's Edit page."
+msgstr "%(person)s يدير %(project)s، ومدير المشروع ضمن الفريق دائمًا. لإخراجه، اختر أولًا مديرًا آخر في صفحة تعديل المشروع."
+
+#: administration/views.py
+#, python-format
+msgid "%(person)s still has %(count)d open task in %(project)s. Give it to someone else (or finish it) first."
+msgid_plural "%(person)s still has %(count)d open tasks in %(project)s. Give them to someone else (or finish them) first."
+msgstr[0] "لا يزال لدى %(person)s %(count)d مهمة مفتوحة في %(project)s. أسندها إلى شخص آخر (أو أنهِها) أولًا."
+msgstr[1] "لا يزال لدى %(person)s مهمة مفتوحة واحدة في %(project)s. أسندها إلى شخص آخر (أو أنهِها) أولًا."
+msgstr[2] "لا يزال لدى %(person)s مهمتان مفتوحتان في %(project)s. أسندهما إلى شخص آخر (أو أنهِهما) أولًا."
+msgstr[3] "لا يزال لدى %(person)s %(count)d مهام مفتوحة في %(project)s. أسندها إلى شخص آخر (أو أنهِها) أولًا."
+msgstr[4] "لا يزال لدى %(person)s %(count)d مهمة مفتوحة في %(project)s. أسندها إلى شخص آخر (أو أنهِها) أولًا."
+msgstr[5] "لا يزال لدى %(person)s %(count)d مهمة مفتوحة في %(project)s. أسندها إلى شخص آخر (أو أنهِها) أولًا."
+
+#: administration/views.py
+#, python-format
+msgid "%(person)s is no longer in the team of %(project)s."
+msgstr "لم يعد %(person)s ضمن فريق %(project)s."
+
+#: administration/views.py
+msgid "This login couldn't be found."
+msgstr "تعذّر العثور على عملية تسجيل الدخول هذه."
+
+#: administration/views.py
+#, python-format
+msgid "The login with the username %(username)s is unlocked."
+msgstr "تم فتح قفل تسجيل الدخول لاسم المستخدم %(username)s."
+
+#: administration/views.py
+msgid "There was nothing to unlock: these wrong passwords don't count anymore."
+msgstr "لم يكن هناك ما يلزم فتحه: لم تعد كلمات المرور الخاطئة هذه محتسبة."
+
+#: projects/activity.py projects/forms.py
+msgid "Name"
+msgstr "الاسم"
+
+#: projects/activity.py projects/forms.py projects/reports.py templates/administration/project_list.html templates/administration/task_list.html templates/home.html templates/projects/project_detail.html templates/projects/project_list.html templates/projects/project_report.html templates/projects/task_detail.html
+msgid "Status"
+msgstr "الحالة"
+
+#: projects/activity.py projects/forms.py projects/reports.py templates/projects/project_list.html
+msgid "Priority"
+msgstr "الأولوية"
+
+#: projects/activity.py projects/forms.py projects/reports.py templates/accounts/person_detail.html templates/administration/project_list.html templates/administration/user_detail.html templates/projects/project_detail.html templates/projects/project_list.html templates/projects/project_report.html
+msgid "Manager"
+msgstr "مدير المشروع"
+
+#: projects/activity.py projects/forms.py projects/reports.py templates/projects/project_detail.html templates/projects/task_detail.html
+msgid "Start date"
+msgstr "تاريخ البدء"
+
+#: projects/activity.py projects/forms.py projects/reports.py templates/projects/project_detail.html templates/projects/project_list.html
+msgid "End date"
+msgstr "تاريخ الانتهاء"
+
+#: projects/activity.py projects/forms.py templates/projects/project_detail.html templates/projects/project_report.html templates/projects/task_detail.html
+msgid "Description"
+msgstr "الوصف"
+
+#: projects/activity.py projects/forms.py
+msgid "Title"
+msgstr "العنوان"
+
+#: projects/activity.py projects/forms.py projects/reports.py templates/administration/task_list.html templates/projects/dashboard.html templates/projects/project_detail.html templates/projects/project_report.html templates/projects/task_detail.html
+msgid "Assigned to"
+msgstr "مُسنَدة إلى"
+
+#: projects/activity.py projects/forms.py projects/reports.py templates/administration/task_list.html templates/home.html templates/projects/project_detail.html templates/projects/project_report.html templates/projects/task_detail.html
+msgid "Due date"
+msgstr "تاريخ الاستحقاق"
+
+#: projects/activity.py projects/forms.py projects/reports.py
+msgid "Main task"
+msgstr "المهمة الرئيسية"
+
+#: projects/activity.py projects/reports.py templates/includes/task_row.html templates/projects/my_tasks.html templates/projects/project_board.html templates/projects/project_report.html templates/projects/task_detail.html
+msgid "Milestone"
+msgstr "معلم"
+
+#: projects/activity.py
+msgid "just now"
+msgstr "الآن"
+
+#: projects/activity.py
+#, python-format
+msgid "%(num)d year"
+msgid_plural "%(num)d years"
+msgstr[0] "%(num)d سنة"
+msgstr[1] "سنة واحدة"
+msgstr[2] "سنتين"
+msgstr[3] "%(num)d سنوات"
+msgstr[4] "%(num)d سنة"
+msgstr[5] "%(num)d سنة"
+
+#: projects/activity.py
+#, python-format
+msgid "%(num)d month"
+msgid_plural "%(num)d months"
+msgstr[0] "%(num)d شهر"
+msgstr[1] "شهر واحد"
+msgstr[2] "شهرين"
+msgstr[3] "%(num)d أشهر"
+msgstr[4] "%(num)d شهرًا"
+msgstr[5] "%(num)d شهر"
+
+#: projects/activity.py
+#, python-format
+msgid "%(num)d week"
+msgid_plural "%(num)d weeks"
+msgstr[0] "%(num)d أسبوع"
+msgstr[1] "أسبوع واحد"
+msgstr[2] "أسبوعين"
+msgstr[3] "%(num)d أسابيع"
+msgstr[4] "%(num)d أسبوعًا"
+msgstr[5] "%(num)d أسبوع"
+
+#: projects/activity.py
+#, python-format
+msgid "%(num)d day"
+msgid_plural "%(num)d days"
+msgstr[0] "%(num)d يوم"
+msgstr[1] "يوم واحد"
+msgstr[2] "يومين"
+msgstr[3] "%(num)d أيام"
+msgstr[4] "%(num)d يومًا"
+msgstr[5] "%(num)d يوم"
+
+#: projects/activity.py
+#, python-format
+msgid "%(num)d hour"
+msgid_plural "%(num)d hours"
+msgstr[0] "%(num)d ساعة"
+msgstr[1] "ساعة واحدة"
+msgstr[2] "ساعتين"
+msgstr[3] "%(num)d ساعات"
+msgstr[4] "%(num)d ساعة"
+msgstr[5] "%(num)d ساعة"
+
+#: projects/activity.py
+#, python-format
+msgid "%(num)d minute"
+msgid_plural "%(num)d minutes"
+msgstr[0] "أقل من دقيقة"
+msgstr[1] "دقيقة واحدة"
+msgstr[2] "دقيقتين"
+msgstr[3] "%(num)d دقائق"
+msgstr[4] "%(num)d دقيقة"
+msgstr[5] "%(num)d دقيقة"
+
+#: projects/activity.py templates/projects/task_detail.html
+#, python-format
+msgid "%(time)s ago"
+msgstr "منذ %(time)s"
+
+#: projects/activity.py projects/forms.py projects/reports.py projects/views.py templates/administration/task_list.html templates/emails/reminder.html templates/emails/reminder.txt templates/includes/avatar.html templates/includes/task_row.html templates/projects/dashboard.html templates/projects/project_report.html templates/projects/task_detail.html
+msgid "Unassigned"
+msgstr "غير مُسنَدة"
+
+#: projects/activity.py
+msgid "A deleted user"
+msgstr "مستخدم محذوف"
+
+#: projects/activity.py
+msgid "None (main task)"
+msgstr "لا شيء (مهمة رئيسية)"
+
+#: projects/activity.py
+msgid "A deleted task"
+msgstr "مهمة محذوفة"
+
+#: projects/activity.py projects/reports.py
+msgid "Yes"
+msgstr "نعم"
+
+#: projects/activity.py
+msgid "No"
+msgstr "لا"
+
+#: projects/activity.py projects/tests/test_languages.py projects/views.py templates/accounts/person_detail.html templates/administration/task_list.html templates/administration/user_detail.html templates/administration/user_list.html templates/home.html templates/includes/task_row.html templates/projects/my_tasks.html templates/projects/project_board.html templates/projects/project_detail.html templates/projects/project_list.html templates/projects/project_report.html templates/projects/task_detail.html
+msgid "d M Y"
+msgstr "j F Y"
+
+#: projects/activity.py templates/accounts/person_detail.html templates/accounts/profile.html templates/projects/project_detail.html templates/projects/project_list.html templates/projects/project_report.html templates/projects/task_detail.html
+msgid "Not set"
+msgstr "غير محدد"
+
+#: projects/activity.py
+msgid "changed"
+msgstr "تم تغييره"
+
+#: projects/activity.py
+msgid "updated the project"
+msgstr "حدّث المشروع"
+
+#: projects/activity.py
+msgid "created the project"
+msgstr "أنشأ المشروع"
+
+#: projects/activity.py
+msgid "deleted the project"
+msgstr "حذف المشروع"
+
+#: projects/activity.py
+msgid "updated the task"
+msgstr "حدّث المهمة"
+
+#: projects/activity.py
+msgid "created the subtask"
+msgstr "أنشأ المهمة الفرعية"
+
+#: projects/activity.py
+msgid "created the task"
+msgstr "أنشأ المهمة"
+
+#: projects/activity.py
+msgid "deleted the task"
+msgstr "حذف المهمة"
+
+#: projects/activity.py
+msgid "a deleted user"
+msgstr "مستخدم محذوف"
+
+#: projects/activity.py
+#, python-format
+msgid "added %(person)s to the team of"
+msgstr "أضاف %(person)s إلى فريق"
+
+#: projects/activity.py
+#, python-format
+msgid "removed %(person)s from the team of"
+msgstr "أزال %(person)s من فريق"
+
+#: projects/activity.py
+msgid "commented on"
+msgstr "علّق على"
+
+#: projects/activity.py
+msgid "added a file to"
+msgstr "أضاف ملفًا إلى"
+
+#: projects/admin.py
+#, python-format
+msgid "%(person)s still has %(count)d open task(s) in this project. Give them to someone else (or finish them) before removing %(person)s from the team."
+msgstr "لا يزال لدى %(person)s عدد %(count)d من المهام المفتوحة في هذا المشروع. أسندها إلى شخص آخر (أو أنهِها) قبل إزالة %(person)s من الفريق."
+
+#: projects/admin.py
+msgid "team member"
+msgstr "عضو الفريق"
+
+#: projects/admin.py
+msgid "Team (besides the manager)"
+msgstr "الفريق (إضافة إلى مدير المشروع)"
+
+#: projects/admin.py templates/projects/project_detail.html templates/projects/project_list.html templates/projects/project_report.html
+msgid "Progress"
+msgstr "التقدّم"
+
+#: projects/admin.py
+msgid "A task can only wait for tasks of its own project."
+msgstr "لا يمكن للمهمة أن تنتظر إلا مهامّ من مشروعها نفسه."
+
+#: projects/admin.py projects/emails.py projects/views.py templates/projects/dashboard.html
+msgid "Overdue"
+msgstr "متأخرة"
+
+#: projects/emails.py projects/tests/test_languages.py
+#, python-format
+msgid "%(count)d day late"
+msgid_plural "%(count)d days late"
+msgstr[0] "متأخرة %(count)d يوم"
+msgstr[1] "متأخرة بيوم واحد"
+msgstr[2] "متأخرة بيومين"
+msgstr[3] "متأخرة بـ %(count)d أيام"
+msgstr[4] "متأخرة بـ %(count)d يومًا"
+msgstr[5] "متأخرة بـ %(count)d يوم"
+
+#: projects/emails.py
+msgid "due today"
+msgstr "موعدها اليوم"
+
+#: projects/emails.py
+msgid "due tomorrow"
+msgstr "موعدها غدًا"
+
+#: projects/emails.py
+#, python-format
+msgid "due %(date)s"
+msgstr "موعدها %(date)s"
+
+#: projects/emails.py
+msgid "D j M"
+msgstr "D j F"
+
+#: projects/emails.py
+#, python-format
+msgid "%(count)d overdue"
+msgstr "%(count)d متأخرة"
+
+#: projects/emails.py
+#, python-format
+msgid "Due in the next %(days)d day"
+msgid_plural "Due in the next %(days)d days"
+msgstr[0] "تستحق خلال الأيام القادمة"
+msgstr[1] "تستحق خلال اليوم القادم"
+msgstr[2] "تستحق خلال اليومين القادمين"
+msgstr[3] "تستحق خلال الأيام الـ %(days)d القادمة"
+msgstr[4] "تستحق خلال الأيام الـ %(days)d القادمة"
+msgstr[5] "تستحق خلال الأيام الـ %(days)d القادمة"
+
+#: projects/emails.py
+#, python-format
+msgid "%(count)d due soon"
+msgstr "%(count)d تستحق قريبًا"
+
+#: projects/emails.py
+msgid "Late in projects you manage"
+msgstr "متأخرة في المشاريع التي تديرها"
+
+#: projects/emails.py
+#, python-format
+msgid "%(count)d late in your projects"
+msgstr "%(count)d متأخرة في مشاريعك"
+
+#: projects/emails.py
+msgctxt "separator between items of a list"
+msgid ", "
+msgstr "، "
+
+#: projects/emails.py
+#, python-format
+msgid "Your tasks: %(summary)s"
+msgstr "مهامك: %(summary)s"
+
+#: projects/emails.py
+msgid "Your tasks: nothing urgent"
+msgstr "مهامك: لا شيء عاجل"
+
+#: projects/emails.py
+#, python-format
+msgid "New task for you: %(title)s"
+msgstr "مهمة جديدة لك: %(title)s"
+
+#: projects/forms.py
+msgid "Only admins can change the manager."
+msgstr "يمكن للمسؤولين فقط تغيير مدير المشروع."
+
+#: projects/forms.py
+msgid "The manager can edit the project, its tasks and its team."
+msgstr "يمكن لمدير المشروع تعديل المشروع ومهامه وفريقه."
+
+#: projects/forms.py
+msgid "Type the project's name to confirm"
+msgstr "اكتب اسم المشروع للتأكيد"
+
+#: projects/forms.py
+msgid "Type the project's name to confirm."
+msgstr "اكتب اسم المشروع للتأكيد."
+
+#: projects/forms.py
+msgid "This isn't the project's name. Type it exactly as it is written above."
+msgstr "هذا ليس اسم المشروع. اكتبه تمامًا كما هو مكتوب أعلاه."
+
+#: projects/forms.py
+msgid "This task is a milestone"
+msgstr "هذه المهمة معلم"
+
+#: projects/forms.py projects/reports.py templates/projects/task_detail.html
+msgid "Waits for"
+msgstr "تنتظر إنجاز"
+
+#: projects/forms.py
+msgid "Pick a main task to make this a subtask of it."
+msgstr "اختر مهمة رئيسية لتصبح هذه المهمة فرعية منها."
+
+#: projects/forms.py
+msgid "Tick the tasks that must be done before this one can start."
+msgstr "حدّد المهام التي يجب إنجازها قبل أن تبدأ هذه المهمة."
+
+#: projects/forms.py
+msgid "None (this is a main task)"
+msgstr "لا شيء (هذه مهمة رئيسية)"
+
+#: projects/forms.py
+msgid "Only people in this project's team are listed. People are added to the team on the project page."
+msgstr "يظهر هنا الأشخاص ضمن فريق هذا المشروع فقط. تتم إضافة الأشخاص إلى الفريق من صفحة المشروع."
+
+#: projects/forms.py
+msgid "Choose someone in the project's team."
+msgstr "اختر شخصًا من فريق المشروع."
+
+#: projects/forms.py
+msgid "In the team"
+msgstr "في الفريق"
+
+#: projects/forms.py
+msgid "Not in the team: they will join it"
+msgstr "خارج الفريق: سينضمون إليه"
+
+#: projects/forms.py
+msgid "As an admin, you can choose anyone. A person outside the team joins the team when you save."
+msgstr "بصفتك مسؤولًا، يمكنك اختيار أي شخص. ينضم الشخص من خارج الفريق إلى الفريق عند الحفظ."
+
+#: projects/forms.py
+#, python-format
+msgid "\"%(task)s\" already waits for this task, so this task can't wait for it."
+msgstr "\"%(task)s\" تنتظر هذه المهمة بالفعل، لذلك لا يمكن لهذه المهمة أن تنتظرها."
+
+#: projects/forms.py
+msgid "Choose a person…"
+msgstr "اختر شخصًا…"
+
+#: projects/forms.py
+msgid "Choose a person to add to the team."
+msgstr "اختر شخصًا لإضافته إلى الفريق."
+
+#: projects/forms.py
+msgid "This person can't be added: they are in the team already, or their account is deactivated."
+msgstr "لا يمكن إضافة هذا الشخص: فهو ضمن الفريق بالفعل، أو أن حسابه معطّل."
+
+#: projects/forms.py
+msgid "Write a comment…"
+msgstr "اكتب تعليقًا…"
+
+#: projects/forms.py templates/projects/task_detail.html
+msgid "Comment"
+msgstr "التعليق"
+
+#: projects/forms.py templates/projects/task_detail.html
+msgid "File"
+msgstr "الملف"
+
+#: projects/forms.py
+msgid "Choose a file before clicking Upload."
+msgstr "اختر ملفًا قبل النقر على «رفع»."
+
+#: projects/forms.py
+#, python-format
+msgid "This file is too big: files can be up to %(size)s MB."
+msgstr "هذا الملف كبير جدًا: الحد الأقصى لحجم الملفات %(size)s ميغابايت."
+
+#: projects/models.py
+msgid "Low"
+msgstr "منخفضة"
+
+#: projects/models.py
+msgid "Medium"
+msgstr "متوسطة"
+
+#: projects/models.py
+msgid "High"
+msgstr "عالية"
+
+#: projects/models.py
+msgid "Critical"
+msgstr "حرجة"
+
+#: projects/models.py
+msgid "Planned"
+msgstr "مخطَّط"
+
+#: projects/models.py templates/projects/project_gantt.html
+msgid "In progress"
+msgstr "قيد التنفيذ"
+
+#: projects/models.py
+msgid "On hold"
+msgstr "معلّق"
+
+#: projects/models.py
+msgid "Completed"
+msgstr "مكتمل"
+
+#: projects/models.py
+msgid "Cancelled"
+msgstr "ملغى"
+
+#: projects/models.py
+msgid "The end date can't be before the start date."
+msgstr "لا يمكن أن يكون تاريخ الانتهاء قبل تاريخ البدء."
+
+#: projects/models.py
+#, python-format
+msgid "%(person)s in %(project)s"
+msgstr "%(person)s في %(project)s"
+
+#: projects/models.py templates/projects/project_gantt.html
+msgid "To do"
+msgstr "للتنفيذ"
+
+#: projects/models.py templates/projects/project_gantt.html
+msgid "Blocked"
+msgstr "متوقفة"
+
+#: projects/models.py projects/reports.py templates/administration/task_list.html templates/projects/project_gantt.html
+msgid "Done"
+msgstr "منجزة"
+
+#: projects/models.py
+msgid "The due date can't be before the start date."
+msgstr "لا يمكن أن يكون تاريخ الاستحقاق قبل تاريخ البدء."
+
+#: projects/models.py
+msgid "A task can't be its own subtask."
+msgstr "لا يمكن أن تكون المهمة فرعية من نفسها."
+
+#: projects/models.py
+msgid "A subtask can't have its own subtasks."
+msgstr "لا يمكن أن تكون للمهمة الفرعية مهامّ فرعية خاصة بها."
+
+#: projects/models.py
+msgid "A subtask must be in the same project as its main task."
+msgstr "يجب أن تكون المهمة الفرعية في المشروع نفسه الذي توجد فيه مهمتها الرئيسية."
+
+#: projects/models.py
+msgid "This task has its own subtasks, so it can't become a subtask."
+msgstr "لهذه المهمة مهامّ فرعية خاصة بها، لذلك لا يمكن أن تصبح مهمة فرعية."
+
+#: projects/models.py
+#, python-format
+msgid "Comment by %(person)s on %(task)s"
+msgstr "تعليق من %(person)s على %(task)s"
+
+#: projects/reports.py
+msgid "Summary"
+msgstr "ملخص"
+
+#: projects/reports.py
+msgid "Item"
+msgstr "البند"
+
+#: projects/reports.py
+msgid "Value"
+msgstr "القيمة"
+
+#: projects/reports.py
+msgid "Progress (%)"
+msgstr "التقدّم (%)"
+
+#: projects/reports.py templates/administration/base.html templates/administration/home.html templates/administration/task_list.html templates/projects/project_detail.html
+msgid "Tasks"
+msgstr "المهام"
+
+#: projects/reports.py templates/projects/dashboard.html
+msgid "Tasks done"
+msgstr "المهام المنجزة"
+
+#: projects/reports.py projects/views.py templates/projects/project_detail.html templates/projects/project_report.html
+msgid "Overdue tasks"
+msgstr "المهام المتأخرة"
+
+#: projects/reports.py
+msgid "Exported on"
+msgstr "تاريخ التصدير"
+
+#: projects/reports.py
+msgid "Exported by"
+msgstr "صدّره"
+
+#: projects/reports.py templates/administration/task_list.html templates/home.html templates/projects/dashboard.html templates/projects/project_detail.html templates/projects/project_report.html templates/projects/task_detail.html
+msgid "Task"
+msgstr "المهمة"
+
+#: projects/reports.py templates/projects/task_detail.html
+msgid "Done on"
+msgstr "تاريخ الإنجاز"
+
+#: projects/reports.py templates/administration/task_list.html templates/projects/dashboard.html templates/projects/project_detail.html templates/projects/project_report.html templates/projects/task_detail.html
+msgid "Late"
+msgstr "متأخرة"
+
+#: projects/reports.py templates/accounts/person_detail.html templates/administration/base.html templates/administration/home.html templates/administration/project_list.html templates/administration/user_detail.html templates/administration/user_list.html templates/base.html templates/projects/project_list.html
+msgid "Projects"
+msgstr "المشاريع"
+
+#: projects/views.py
+msgid "Only admins can create projects."
+msgstr "يمكن للمسؤولين فقط إنشاء المشاريع."
+
+#: projects/views.py
+#, python-format
+msgid "Project \"%(name)s\" created."
+msgstr "تم إنشاء المشروع \"%(name)s\"."
+
+#: projects/views.py
+msgid "Only the project's manager and admins can edit this project."
+msgstr "يمكن لمدير المشروع والمسؤولين فقط تعديل هذا المشروع."
+
+#: projects/views.py
+#, python-format
+msgid "%(person)s stays in the team, as a member."
+msgstr "يبقى %(person)s في الفريق كعضو."
+
+#: projects/views.py
+msgid "Only admins can delete projects."
+msgstr "يمكن للمسؤولين فقط حذف المشاريع."
+
+#: projects/views.py
+#, python-format
+msgid "Project \"%(name)s\" deleted."
+msgstr "تم حذف المشروع \"%(name)s\"."
+
+#: projects/views.py
+msgid "Only the project's manager and admins can change its team."
+msgstr "يمكن لمدير المشروع والمسؤولين فقط تعديل فريقه."
+
+#: projects/views.py
+#, python-format
+msgid "%(person)s is now in the team."
+msgstr "أصبح %(person)s ضمن الفريق."
+
+#: projects/views.py
+#, python-format
+msgid "%(person)s is the project's manager: the manager is always in the team."
+msgstr "%(person)s هو مدير المشروع: ومدير المشروع ضمن الفريق دائمًا."
+
+#: projects/views.py
+#, python-format
+msgid "%(person)s still has %(count)d open task in this project. Give it to someone else (or finish it), then remove %(person)s from the team."
+msgid_plural "%(person)s still has %(count)d open tasks in this project. Give them to someone else (or finish them), then remove %(person)s from the team."
+msgstr[0] "لا يزال لدى %(person)s %(count)d مهمة مفتوحة في هذا المشروع. أسندها إلى شخص آخر (أو أنهِها)، ثم أزل %(person)s من الفريق."
+msgstr[1] "لا يزال لدى %(person)s مهمة مفتوحة واحدة في هذا المشروع. أسندها إلى شخص آخر (أو أنهِها)، ثم أزل %(person)s من الفريق."
+msgstr[2] "لا يزال لدى %(person)s مهمتان مفتوحتان في هذا المشروع. أسندهما إلى شخص آخر (أو أنهِهما)، ثم أزل %(person)s من الفريق."
+msgstr[3] "لا يزال لدى %(person)s %(count)d مهام مفتوحة في هذا المشروع. أسندها إلى شخص آخر (أو أنهِها)، ثم أزل %(person)s من الفريق."
+msgstr[4] "لا يزال لدى %(person)s %(count)d مهمة مفتوحة في هذا المشروع. أسندها إلى شخص آخر (أو أنهِها)، ثم أزل %(person)s من الفريق."
+msgstr[5] "لا يزال لدى %(person)s %(count)d مهمة مفتوحة في هذا المشروع. أسندها إلى شخص آخر (أو أنهِها)، ثم أزل %(person)s من الفريق."
+
+#: projects/views.py
+#, python-format
+msgid "%(person)s is no longer in the team."
+msgstr "لم يعد %(person)s ضمن الفريق."
+
+#: projects/views.py
+#, python-format
+msgid "The task is saved, but the email to %(person)s couldn't be sent."
+msgstr "تم حفظ المهمة، لكن تعذّر إرسال الرسالة الإلكترونية إلى %(person)s."
+
+#: projects/views.py
+#, python-format
+msgid "%(person)s is now in the team of this project."
+msgstr "أصبح %(person)s ضمن فريق هذا المشروع."
+
+#: projects/views.py
+msgid "Only the project's manager and admins can add tasks."
+msgstr "يمكن لمدير المشروع والمسؤولين فقط إضافة المهام."
+
+#: projects/views.py
+#, python-format
+msgid "Task \"%(title)s\" created."
+msgstr "تم إنشاء المهمة \"%(title)s\"."
+
+#: projects/views.py
+msgid "Only the project's manager and admins can edit tasks."
+msgstr "يمكن لمدير المشروع والمسؤولين فقط تعديل المهام."
+
+#: projects/views.py templates/projects/task_detail.html
+msgid "Only the person assigned to this task, the project's manager and admins can change its status."
+msgstr "يمكن للشخص المُسنَدة إليه هذه المهمة ولمدير المشروع وللمسؤولين فقط تغيير حالتها."
+
+#: projects/views.py
+msgid "Unknown status."
+msgstr "حالة غير معروفة."
+
+#: projects/views.py
+#, python-format
+msgid "\"%(title)s\" is now %(status)s."
+msgstr "أصبحت حالة \"%(title)s\": %(status)s."
+
+#: projects/views.py
+msgid "Only the project's manager and admins can delete tasks."
+msgstr "يمكن لمدير المشروع والمسؤولين فقط حذف المهام."
+
+#: projects/views.py
+#, python-format
+msgid "Task \"%(title)s\" deleted."
+msgstr "تم حذف المهمة \"%(title)s\"."
+
+#: projects/views.py
+msgid "Write something before sending a comment."
+msgstr "اكتب شيئًا قبل إرسال التعليق."
+
+#: projects/views.py
+msgid "You can only delete your own comments."
+msgstr "يمكنك حذف تعليقاتك أنت فقط."
+
+#: projects/views.py
+msgid "You can only delete files you uploaded."
+msgstr "يمكنك حذف الملفات التي رفعتها أنت فقط."
+
+#: projects/views.py
+msgid "This file is missing from the server."
+msgstr "هذا الملف غير موجود على الخادم."
+
+#: projects/views.py
+msgid "You can only move tasks assigned to you."
+msgstr "يمكنك نقل المهام المُسنَدة إليك فقط."
+
+#: projects/views.py templates/projects/activity.html
+msgid "Today"
+msgstr "اليوم"
+
+#: projects/views.py
+msgctxt "timeline: the list of zoom levels"
+msgid "Mode"
+msgstr "العرض"
+
+#: projects/views.py
+msgctxt "timeline zoom level"
+msgid "Hour"
+msgstr "ساعة"
+
+#: projects/views.py
+msgctxt "timeline zoom level"
+msgid "Quarter Day"
+msgstr "ربع يوم"
+
+#: projects/views.py
+msgctxt "timeline zoom level"
+msgid "Half Day"
+msgstr "نصف يوم"
+
+#: projects/views.py
+msgctxt "timeline zoom level"
+msgid "Day"
+msgstr "يوم"
+
+#: projects/views.py
+msgctxt "timeline zoom level"
+msgid "Week"
+msgstr "أسبوع"
+
+#: projects/views.py
+msgctxt "timeline zoom level"
+msgid "Month"
+msgstr "شهر"
+
+#: projects/views.py
+msgctxt "timeline zoom level"
+msgid "Year"
+msgstr "سنة"
+
+#: projects/views.py
+msgid "Open task"
+msgstr "فتح المهمة"
+
+#: projects/views.py
+msgid "The server refused the change."
+msgstr "رفض الخادم التغيير."
+
+#: projects/views.py
+#, python-brace-format
+msgid "The new dates weren't saved. {error} The page will reload."
+msgstr "لم يتم حفظ التواريخ الجديدة. {error} ستتم إعادة تحميل الصفحة."
+
+#: projects/views.py
+#, python-format
+msgid "%(start)s → %(end)s"
+msgstr "%(start)s ← %(end)s"
+
+#: projects/views.py
+msgid "Only the project's manager and admins can change dates."
+msgstr "يمكن لمدير المشروع والمسؤولين فقط تغيير التواريخ."
+
+#: projects/views.py
+msgid "These dates aren't valid."
+msgstr "هذه التواريخ غير صالحة."
+
+#: projects/views.py
+msgid "Due in the next 7 days"
+msgstr "تستحق خلال الأيام السبعة القادمة"
+
+#: projects/views.py
+msgid "Later"
+msgstr "لاحقًا"
+
+#: projects/views.py templates/emails/assigned.html templates/emails/assigned.txt
+msgid "No due date"
+msgstr "بلا تاريخ استحقاق"
+
+#: projects/views.py templates/projects/my_tasks.html
+msgid "d M"
+msgstr "j F"
+
+#: projects/views.py
+msgid "Late projects"
+msgstr "المشاريع المتأخرة"
+
+#: projects/views.py templates/accounts/person_detail.html templates/administration/user_detail.html templates/administration/user_list.html
+msgid "Open tasks"
+msgstr "المهام المفتوحة"
+
+#: projects/views.py
+msgid "Done in the last 30 days"
+msgstr "المنجزة خلال آخر 30 يومًا"
+
+#: templates/403.html
+msgid "No access"
+msgstr "لا صلاحية للوصول"
+
+#: templates/403.html
+msgid "You don't have permission to do this"
+msgstr "ليست لديك صلاحية للقيام بذلك"
+
+#: templates/403.html
+msgid "Ask an admin if you think you need access."
+msgstr "اسأل أحد المسؤولين إذا كنت تعتقد أنك بحاجة إلى صلاحية."
+
+#: templates/403.html templates/404.html templates/500.html
+msgid "Back to home"
+msgstr "العودة إلى الرئيسية"
+
+#: templates/404.html
+msgid "Page not found"
+msgstr "الصفحة غير موجودة"
+
+#: templates/404.html
+msgid "This page doesn't exist"
+msgstr "هذه الصفحة غير موجودة"
+
+#: templates/404.html
+msgid "The address may be wrong, or what it showed was deleted."
+msgstr "ربما يكون العنوان خاطئًا، أو أن ما كان يعرضه قد حُذف."
+
+#: templates/500.html
+msgid "Something went wrong"
+msgstr "حدث خطأ ما"
+
+#: templates/500.html
+msgid "Something went wrong on our side"
+msgstr "حدث خطأ من جانبنا"
+
+#: templates/500.html
+msgid "The problem was written in the server's log. Please try again in a moment."
+msgstr "تم تسجيل المشكلة في سجل الخادم. يرجى المحاولة مرة أخرى بعد قليل."
+
+#: templates/accounts/password_change.html templates/accounts/profile.html templates/administration/user_detail.html
+msgid "Change my password"
+msgstr "تغيير كلمة المرور"
+
+#: templates/accounts/password_change.html templates/accounts/profile.html templates/base.html
+msgid "My profile"
+msgstr "ملفي الشخصي"
+
+#: templates/accounts/password_change.html templates/administration/user_deactivate.html templates/administration/user_new.html templates/administration/user_password.html templates/projects/project_confirm_delete.html templates/projects/project_form.html templates/projects/task_confirm_delete.html templates/projects/task_form.html
+msgid "Cancel"
+msgstr "إلغاء"
+
+#: templates/accounts/person_detail.html templates/administration/project_list.html templates/administration/task_list.html templates/projects/project_detail.html
+msgid "Account deactivated"
+msgstr "الحساب معطّل"
+
+#: templates/accounts/person_detail.html
+msgid "Edit my profile"
+msgstr "تعديل ملفي الشخصي"
+
+#: templates/accounts/person_detail.html
+msgid "Manage the account"
+msgstr "إدارة الحساب"
+
+#: templates/accounts/person_detail.html templates/accounts/profile.html templates/administration/user_list.html
+msgid "Email"
+msgstr "البريد الإلكتروني"
+
+#: templates/accounts/person_detail.html
+msgid "Phone"
+msgstr "الهاتف"
+
+#: templates/accounts/person_detail.html
+msgid "Only the projects you are part of"
+msgstr "المشاريع التي أنت جزء منها فقط"
+
+#: templates/accounts/person_detail.html templates/administration/user_detail.html templates/projects/project_detail.html
+msgid "Member"
+msgstr "عضو"
+
+#: templates/accounts/person_detail.html
+msgid "No projects to show."
+msgstr "لا توجد مشاريع للعرض."
+
+#: templates/accounts/person_detail.html templates/administration/task_list.html templates/administration/user_detail.html templates/home.html templates/includes/task_row.html templates/projects/project_report.html
+msgid "No date"
+msgstr "بلا تاريخ"
+
+#: templates/accounts/person_detail.html
+msgid "No open tasks to show."
+msgstr "لا توجد مهام مفتوحة للعرض."
+
+#: templates/accounts/profile.html
+msgid "See my page"
+msgstr "عرض صفحتي"
+
+#: templates/accounts/profile.html
+msgid "First name"
+msgstr "الاسم الأول"
+
+#: templates/accounts/profile.html
+msgid "Last name"
+msgstr "اسم العائلة"
+
+#: templates/accounts/profile.html
+msgid "An admin manages your names and your email. Ask an admin if they need to change."
+msgstr "يتولى أحد المسؤولين إدارة اسمك وبريدك الإلكتروني. اطلب من مسؤول تغييرهما إذا لزم الأمر."
+
+#: templates/accounts/profile.html
+msgid "Phone, picture and language"
+msgstr "الهاتف والصورة واللغة"
+
+#: templates/accounts/profile.html
+msgid "Save"
+msgstr "حفظ"
+
+#: templates/administration/base.html templates/administration/home.html templates/administration/login_list.html templates/administration/project_list.html templates/administration/task_list.html templates/administration/user_deactivate.html templates/administration/user_detail.html templates/administration/user_list.html templates/administration/user_new.html templates/administration/user_password.html templates/base.html
+msgid "Administration"
+msgstr "الإدارة"
+
+#: templates/administration/base.html templates/administration/home.html
+msgid "Overview"
+msgstr "نظرة عامة"
+
+#: templates/administration/base.html templates/administration/home.html templates/administration/user_deactivate.html templates/administration/user_detail.html templates/administration/user_list.html templates/administration/user_new.html templates/administration/user_password.html
+msgid "Users"
+msgstr "المستخدمون"
+
+#: templates/administration/base.html templates/administration/home.html templates/administration/login_list.html
+msgid "Locked logins"
+msgstr "عمليات الدخول المقفلة"
+
+#: templates/administration/home.html
+msgid "As an admin, you see every project. You edit any project, task or team from its own page, and you manage the accounts here."
+msgstr "بصفتك مسؤولًا، ترى جميع المشاريع. تعدّل أي مشروع أو مهمة أو فريق من صفحته الخاصة، وتدير الحسابات من هنا."
+
+#: templates/administration/home.html
+msgid "active account"
+msgid_plural "active accounts"
+msgstr[0] "حسابات نشطة"
+msgstr[1] "حساب نشط"
+msgstr[2] "حسابان نشطان"
+msgstr[3] "حسابات نشطة"
+msgstr[4] "حسابًا نشطًا"
+msgstr[5] "حساب نشط"
+
+#: templates/administration/home.html
+#, python-format
+msgid "%(counter)s admin"
+msgid_plural "%(counter)s admins"
+msgstr[0] "لا مسؤولين"
+msgstr[1] "مسؤول واحد"
+msgstr[2] "مسؤولان"
+msgstr[3] "%(counter)s مسؤولين"
+msgstr[4] "%(counter)s مسؤولًا"
+msgstr[5] "%(counter)s مسؤول"
+
+#: templates/administration/home.html
+#, python-format
+msgid "%(counter)s deactivated"
+msgid_plural "%(counter)s deactivated"
+msgstr[0] "لا حسابات معطّلة"
+msgstr[1] "حساب واحد معطّل"
+msgstr[2] "حسابان معطّلان"
+msgstr[3] "%(counter)s حسابات معطّلة"
+msgstr[4] "%(counter)s حسابًا معطّلًا"
+msgstr[5] "%(counter)s حساب معطّل"
+
+#: templates/administration/home.html
+#, python-format
+msgid "%(counter)s account has no name or no email"
+msgid_plural "%(counter)s accounts have no name or no email"
+msgstr[0] "لا توجد حسابات بلا اسم أو بريد إلكتروني"
+msgstr[1] "حساب واحد بلا اسم أو بريد إلكتروني"
+msgstr[2] "حسابان بلا اسم أو بريد إلكتروني"
+msgstr[3] "%(counter)s حسابات بلا اسم أو بريد إلكتروني"
+msgstr[4] "%(counter)s حسابًا بلا اسم أو بريد إلكتروني"
+msgstr[5] "%(counter)s حساب بلا اسم أو بريد إلكتروني"
+
+#: templates/administration/home.html
+msgid "Manage users"
+msgstr "إدارة المستخدمين"
+
+#: templates/administration/home.html templates/administration/user_list.html templates/administration/user_new.html
+msgid "New user"
+msgstr "مستخدم جديد"
+
+#: templates/administration/home.html
+msgid "active project"
+msgid_plural "active projects"
+msgstr[0] "مشاريع نشطة"
+msgstr[1] "مشروع نشط"
+msgstr[2] "مشروعان نشطان"
+msgstr[3] "مشاريع نشطة"
+msgstr[4] "مشروعًا نشطًا"
+msgstr[5] "مشروع نشط"
+
+#: templates/administration/home.html
+#, python-format
+msgid "%(counter)s finished"
+msgid_plural "%(counter)s finished"
+msgstr[0] "لا مشاريع منتهية"
+msgstr[1] "مشروع واحد منتهٍ"
+msgstr[2] "مشروعان منتهيان"
+msgstr[3] "%(counter)s مشاريع منتهية"
+msgstr[4] "%(counter)s مشروعًا منتهيًا"
+msgstr[5] "%(counter)s مشروع منتهٍ"
+
+#: templates/administration/home.html templates/administration/project_list.html
+msgid "Projects and teams"
+msgstr "المشاريع والفرق"
+
+#: templates/administration/home.html templates/administration/project_list.html templates/projects/project_form.html templates/projects/project_list.html
+msgid "New project"
+msgstr "مشروع جديد"
+
+#: templates/administration/home.html
+msgid "open task"
+msgid_plural "open tasks"
+msgstr[0] "مهام مفتوحة"
+msgstr[1] "مهمة مفتوحة"
+msgstr[2] "مهمتان مفتوحتان"
+msgstr[3] "مهام مفتوحة"
+msgstr[4] "مهمة مفتوحة"
+msgstr[5] "مهمة مفتوحة"
+
+#: templates/administration/home.html templates/administration/project_list.html
+#, python-format
+msgid "%(counter)s late"
+msgid_plural "%(counter)s late"
+msgstr[0] "لا شيء متأخر"
+msgstr[1] "واحدة متأخرة"
+msgstr[2] "اثنتان متأخرتان"
+msgstr[3] "%(counter)s متأخرة"
+msgstr[4] "%(counter)s متأخرة"
+msgstr[5] "%(counter)s متأخرة"
+
+#: templates/administration/home.html templates/administration/task_list.html templates/projects/project_report.html
+msgid "All tasks"
+msgstr "جميع المهام"
+
+#: templates/administration/home.html
+msgid "Logins locked after too many wrong passwords. You can unlock them."
+msgstr "عمليات دخول أُقفلت بعد كلمات مرور خاطئة كثيرة. يمكنك فتح قفلها."
+
+#: templates/administration/home.html
+msgid "See the locked logins"
+msgstr "عرض عمليات الدخول المقفلة"
+
+#: templates/administration/home.html templates/base.html
+msgid "Django admin (technical)"
+msgstr "إدارة Django (تقنية)"
+
+#: templates/administration/home.html
+msgid "Django's own admin panel, for technical work only. Everything else is done in the app's pages."
+msgstr "لوحة إدارة Django الخاصة، للأعمال التقنية فقط. كل ما عدا ذلك يتم من صفحات التطبيق."
+
+#: templates/administration/home.html
+msgid "Open the Django admin"
+msgstr "فتح إدارة Django"
+
+#: templates/administration/login_list.html
+#, python-format
+msgid "After %(limit)s wrong passwords in a row, logging in with that username from that internet address (IP) is locked for %(counter)s hour."
+msgid_plural "After %(limit)s wrong passwords in a row, logging in with that username from that internet address (IP) is locked for %(counter)s hours."
+msgstr[0] "بعد %(limit)s كلمات مرور خاطئة متتالية، يُقفل تسجيل الدخول بهذا الاسم من عنوان الإنترنت هذا (IP) لمدة %(counter)s ساعة."
+msgstr[1] "بعد %(limit)s كلمات مرور خاطئة متتالية، يُقفل تسجيل الدخول بهذا الاسم من عنوان الإنترنت هذا (IP) لمدة ساعة واحدة."
+msgstr[2] "بعد %(limit)s كلمات مرور خاطئة متتالية، يُقفل تسجيل الدخول بهذا الاسم من عنوان الإنترنت هذا (IP) لمدة ساعتين."
+msgstr[3] "بعد %(limit)s كلمات مرور خاطئة متتالية، يُقفل تسجيل الدخول بهذا الاسم من عنوان الإنترنت هذا (IP) لمدة %(counter)s ساعات."
+msgstr[4] "بعد %(limit)s كلمات مرور خاطئة متتالية، يُقفل تسجيل الدخول بهذا الاسم من عنوان الإنترنت هذا (IP) لمدة %(counter)s ساعة."
+msgstr[5] "بعد %(limit)s كلمات مرور خاطئة متتالية، يُقفل تسجيل الدخول بهذا الاسم من عنوان الإنترنت هذا (IP) لمدة %(counter)s ساعة."
+
+#: templates/administration/login_list.html
+#, python-format
+msgid "After %(limit)s wrong passwords in a row, logging in with that username from that internet address (IP) is locked for %(counter)s minute."
+msgid_plural "After %(limit)s wrong passwords in a row, logging in with that username from that internet address (IP) is locked for %(counter)s minutes."
+msgstr[0] "بعد %(limit)s كلمات مرور خاطئة متتالية، يُقفل تسجيل الدخول بهذا الاسم من عنوان الإنترنت هذا (IP) لمدة %(counter)s دقيقة."
+msgstr[1] "بعد %(limit)s كلمات مرور خاطئة متتالية، يُقفل تسجيل الدخول بهذا الاسم من عنوان الإنترنت هذا (IP) لمدة دقيقة واحدة."
+msgstr[2] "بعد %(limit)s كلمات مرور خاطئة متتالية، يُقفل تسجيل الدخول بهذا الاسم من عنوان الإنترنت هذا (IP) لمدة دقيقتين."
+msgstr[3] "بعد %(limit)s كلمات مرور خاطئة متتالية، يُقفل تسجيل الدخول بهذا الاسم من عنوان الإنترنت هذا (IP) لمدة %(counter)s دقائق."
+msgstr[4] "بعد %(limit)s كلمات مرور خاطئة متتالية، يُقفل تسجيل الدخول بهذا الاسم من عنوان الإنترنت هذا (IP) لمدة %(counter)s دقيقة."
+msgstr[5] "بعد %(limit)s كلمات مرور خاطئة متتالية، يُقفل تسجيل الدخول بهذا الاسم من عنوان الإنترنت هذا (IP) لمدة %(counter)s دقيقة."
+
+#: templates/administration/login_list.html
+msgid "Unlock it if the person remembers their password; if they forgot it, set a new password on their page instead (that unlocks it too)."
+msgstr "افتح القفل إذا كان الشخص يتذكر كلمة مروره؛ وإذا نسيها، فعيّن له كلمة مرور جديدة من صفحته بدلًا من ذلك (وهذا يفتح القفل أيضًا)."
+
+#: templates/administration/login_list.html
+msgid "Username typed"
+msgstr "اسم المستخدم المكتوب"
+
+#: templates/administration/login_list.html
+msgid "Internet address (IP)"
+msgstr "عنوان الإنترنت (IP)"
+
+#: templates/administration/login_list.html
+msgid "Wrong passwords"
+msgstr "كلمات المرور الخاطئة"
+
+#: templates/administration/login_list.html
+msgid "Last try"
+msgstr "آخر محاولة"
+
+#: templates/administration/login_list.html templates/administration/user_detail.html
+msgid "Login"
+msgstr "تسجيل الدخول"
+
+#: templates/administration/login_list.html
+msgid "No account has this username"
+msgstr "لا يوجد حساب بهذا الاسم"
+
+#: templates/administration/login_list.html templates/administration/user_detail.html
+#, python-format
+msgid "%(counter)s wrong password from %(address)s"
+msgid_plural "%(counter)s wrong passwords from %(address)s"
+msgstr[0] "لا كلمات مرور خاطئة من %(address)s"
+msgstr[1] "كلمة مرور خاطئة واحدة من %(address)s"
+msgstr[2] "كلمتا مرور خاطئتان من %(address)s"
+msgstr[3] "%(counter)s كلمات مرور خاطئة من %(address)s"
+msgstr[4] "%(counter)s كلمة مرور خاطئة من %(address)s"
+msgstr[5] "%(counter)s كلمة مرور خاطئة من %(address)s"
+
+#: templates/administration/login_list.html templates/administration/user_detail.html templates/includes/activity_item.html templates/projects/project_report.html templates/projects/task_detail.html
+msgid "d M Y, H:i"
+msgstr "j F Y، H:i"
+
+#: templates/administration/login_list.html templates/administration/user_detail.html
+#, python-format
+msgid "Locked until %(time)s"
+msgstr "مقفلة حتى %(time)s"
+
+#: templates/administration/login_list.html
+msgid "Not locked"
+msgstr "غير مقفلة"
+
+#: templates/administration/login_list.html
+msgid "Unlock"
+msgstr "فتح القفل"
+
+#: templates/administration/login_list.html
+msgid "Forget"
+msgstr "نسيان"
+
+#: templates/administration/login_list.html
+msgid "No wrong passwords lately: no login is locked."
+msgstr "لا توجد كلمات مرور خاطئة مؤخرًا: لا توجد عمليات دخول مقفلة."
+
+#: templates/administration/project_list.html templates/projects/project_list.html
+msgid "Search by name…"
+msgstr "ابحث بالاسم…"
+
+#: templates/administration/project_list.html templates/projects/project_list.html
+msgid "Search by name"
+msgstr "ابحث بالاسم"
+
+#: templates/administration/project_list.html templates/projects/project_list.html
+msgid "Show"
+msgstr "عرض"
+
+#: templates/administration/project_list.html templates/administration/task_list.html templates/projects/activity.html templates/projects/project_detail.html templates/projects/project_list.html
+msgid "All projects"
+msgstr "جميع المشاريع"
+
+#: templates/administration/project_list.html templates/administration/task_list.html templates/administration/user_list.html templates/projects/project_list.html
+msgid "Search"
+msgstr "بحث"
+
+#: templates/administration/project_list.html templates/projects/project_detail.html
+msgid "Team"
+msgstr "الفريق"
+
+#: templates/administration/project_list.html templates/administration/user_detail.html templates/projects/project_detail.html
+#, python-format
+msgid "%(counter)s open task"
+msgid_plural "%(counter)s open tasks"
+msgstr[0] "لا مهام مفتوحة"
+msgstr[1] "مهمة مفتوحة واحدة"
+msgstr[2] "مهمتان مفتوحتان"
+msgstr[3] "%(counter)s مهام مفتوحة"
+msgstr[4] "%(counter)s مهمة مفتوحة"
+msgstr[5] "%(counter)s مهمة مفتوحة"
+
+#: templates/administration/project_list.html
+msgid "Only the manager"
+msgstr "مدير المشروع فقط"
+
+#: templates/administration/project_list.html templates/projects/project_detail.html templates/projects/task_detail.html
+msgid "Edit"
+msgstr "تعديل"
+
+#: templates/administration/project_list.html templates/projects/task_detail.html
+msgid "Delete"
+msgstr "حذف"
+
+#: templates/administration/project_list.html
+msgid "No project matches this search."
+msgstr "لا يوجد مشروع يطابق هذا البحث."
+
+#: templates/administration/project_list.html
+msgid "There are no projects yet."
+msgstr "لا توجد مشاريع بعد."
+
+#: templates/administration/task_list.html
+msgid "Words of the title…"
+msgstr "كلمات من العنوان…"
+
+#: templates/administration/task_list.html
+msgid "Open"
+msgstr "المفتوحة"
+
+#: templates/administration/task_list.html templates/projects/activity.html
+msgid "Everyone"
+msgstr "الجميع"
+
+#: templates/administration/task_list.html
+#, python-format
+msgid "%(counter)s task"
+msgid_plural "%(counter)s tasks"
+msgstr[0] "لا مهام"
+msgstr[1] "مهمة واحدة"
+msgstr[2] "مهمتان"
+msgstr[3] "%(counter)s مهام"
+msgstr[4] "%(counter)s مهمة"
+msgstr[5] "%(counter)s مهمة"
+
+#: templates/administration/task_list.html
+#, python-format
+msgid "Page %(number)s of %(total)s"
+msgstr "الصفحة %(number)s من %(total)s"
+
+#: templates/administration/task_list.html
+msgid "Previous"
+msgstr "السابق"
+
+#: templates/administration/task_list.html
+msgid "Next"
+msgstr "التالي"
+
+#: templates/administration/task_list.html
+msgid "No task matches these filters."
+msgstr "لا توجد مهمة تطابق هذه المرشحات."
+
+#: templates/administration/task_list.html
+msgid "There are no open tasks."
+msgstr "لا توجد مهام مفتوحة."
+
+#: templates/administration/user_deactivate.html templates/administration/user_detail.html
+msgid "Deactivate"
+msgstr "تعطيل"
+
+#: templates/administration/user_deactivate.html
+#, python-format
+msgid "Deactivate the account of %(person)s?"
+msgstr "هل تريد تعطيل حساب %(person)s؟"
+
+#: templates/administration/user_deactivate.html
+msgid "They can't log in anymore: they are logged out at their next click."
+msgstr "لن يتمكن الشخص من تسجيل الدخول بعد الآن: سيُسجَّل خروجه عند نقرته التالية."
+
+#: templates/administration/user_deactivate.html
+msgid "They get no more reminder emails, and nobody can give them new tasks."
+msgstr "لن تصله رسائل التذكير الإلكترونية، ولن يتمكن أحد من إسناد مهام جديدة إليه."
+
+#: templates/administration/user_deactivate.html
+msgid "Nothing is deleted: their projects, tasks, comments and files stay, with their name."
+msgstr "لن يُحذف شيء: تبقى مشاريعه ومهامه وتعليقاته وملفاته باسمه."
+
+#: templates/administration/user_deactivate.html
+msgid "You can reactivate the account at any time."
+msgstr "يمكنك إعادة تفعيل الحساب في أي وقت."
+
+#: templates/administration/user_deactivate.html
+msgid "They manage these active projects. Only admins can edit a project whose manager is deactivated, so choose a new manager on each project's Edit page:"
+msgstr "يدير الشخص هذه المشاريع النشطة. لا يمكن إلا للمسؤولين تعديل مشروع مديره معطّل، لذلك اختر مديرًا جديدًا في صفحة تعديل كل مشروع:"
+
+#: templates/administration/user_deactivate.html
+#, python-format
+msgid "They still have %(counter)s open task. It stays theirs until someone gives it to another person:"
+msgid_plural "They still have %(counter)s open tasks. They stay theirs until someone gives them to another person:"
+msgstr[0] "لا يزال لدى الشخص %(counter)s مهمة مفتوحة. تبقى له حتى يسندها أحد إلى شخص آخر:"
+msgstr[1] "لا يزال لدى الشخص مهمة مفتوحة واحدة. تبقى له حتى يسندها أحد إلى شخص آخر:"
+msgstr[2] "لا يزال لدى الشخص مهمتان مفتوحتان. تبقيان له حتى يسندهما أحد إلى شخص آخر:"
+msgstr[3] "لا يزال لدى الشخص %(counter)s مهام مفتوحة. تبقى له حتى يسندها أحد إلى شخص آخر:"
+msgstr[4] "لا يزال لدى الشخص %(counter)s مهمة مفتوحة. تبقى له حتى يسندها أحد إلى شخص آخر:"
+msgstr[5] "لا يزال لدى الشخص %(counter)s مهمة مفتوحة. تبقى له حتى يسندها أحد إلى شخص آخر:"
+
+#: templates/administration/user_deactivate.html
+msgid "Deactivate the account"
+msgstr "تعطيل الحساب"
+
+#: templates/administration/user_detail.html templates/administration/user_new.html
+msgid "All users"
+msgstr "جميع المستخدمين"
+
+#: templates/administration/user_detail.html
+msgid "This account is deactivated."
+msgstr "هذا الحساب معطّل."
+
+#: templates/administration/user_detail.html
+#, python-format
+msgid "%(person)s can't log in. Their projects, tasks and comments are kept."
+msgstr "لا يستطيع %(person)s تسجيل الدخول. تبقى مشاريعه ومهامه وتعليقاته محفوظة."
+
+#: templates/administration/user_detail.html
+msgid "Reactivate"
+msgstr "إعادة التفعيل"
+
+#: templates/administration/user_detail.html
+#, python-format
+msgid "last login %(date)s"
+msgstr "آخر دخول %(date)s"
+
+#: templates/administration/user_detail.html
+msgid "never logged in"
+msgstr "لم يسجّل الدخول قط"
+
+#: templates/administration/user_detail.html templates/administration/user_list.html
+msgid "Deactivated"
+msgstr "معطّل"
+
+#: templates/administration/user_detail.html
+msgid "You"
+msgstr "أنت"
+
+#: templates/administration/user_detail.html
+msgid "My page"
+msgstr "صفحتي"
+
+#: templates/administration/user_detail.html
+msgid "Their page"
+msgstr "صفحة الشخص"
+
+#: templates/administration/user_detail.html templates/administration/user_password.html
+msgid "Set a new password"
+msgstr "تعيين كلمة مرور جديدة"
+
+#: templates/administration/user_detail.html
+msgid "Account details"
+msgstr "تفاصيل الحساب"
+
+#: templates/administration/user_detail.html templates/projects/project_form.html templates/projects/task_form.html
+msgid "Save changes"
+msgstr "حفظ التغييرات"
+
+#: templates/administration/user_detail.html
+#, python-format
+msgid "Take %(person)s out of the team of %(project)s?"
+msgstr "هل تريد إخراج %(person)s من فريق %(project)s؟"
+
+#: templates/administration/user_detail.html
+msgid "Take out of the team"
+msgstr "إخراج من الفريق"
+
+#: templates/administration/user_detail.html
+msgid "Not in any project's team."
+msgstr "ليس ضمن فريق أي مشروع."
+
+#: templates/administration/user_detail.html
+msgid "Reactivate the account to add this person to projects."
+msgstr "أعد تفعيل الحساب لإضافة هذا الشخص إلى المشاريع."
+
+#: templates/administration/user_detail.html templates/projects/project_detail.html
+msgid "Add to the team"
+msgstr "إضافة إلى الفريق"
+
+#: templates/administration/user_detail.html
+msgid "In the team of every project already."
+msgstr "ضمن فريق كل مشروع بالفعل."
+
+#: templates/administration/user_detail.html
+msgid "No open tasks."
+msgstr "لا توجد مهام مفتوحة."
+
+#: templates/administration/user_detail.html
+msgid "See my reminder email"
+msgstr "عرض رسالة التذكير الخاصة بي"
+
+#: templates/administration/user_detail.html
+msgid "See the reminder email they get"
+msgstr "عرض رسالة التذكير التي يتلقاها الشخص"
+
+#: templates/administration/user_detail.html
+msgid "Unlock and forget the wrong passwords"
+msgstr "فتح القفل ونسيان كلمات المرور الخاطئة"
+
+#: templates/administration/user_list.html
+msgid "Name, username, email or phone…"
+msgstr "الاسم أو اسم المستخدم أو البريد الإلكتروني أو الهاتف…"
+
+#: templates/administration/user_list.html
+msgid "Accounts"
+msgstr "الحسابات"
+
+#: templates/administration/user_list.html
+msgid "Active accounts"
+msgstr "الحسابات النشطة"
+
+#: templates/administration/user_list.html
+msgid "Deactivated accounts"
+msgstr "الحسابات المعطّلة"
+
+#: templates/administration/user_list.html
+msgid "All accounts"
+msgstr "جميع الحسابات"
+
+#: templates/administration/user_list.html
+msgid "All roles"
+msgstr "جميع الأدوار"
+
+#: templates/administration/user_list.html
+msgid "These accounts have no first name, no last name or no email. Open each one to complete it."
+msgstr "هذه الحسابات ينقصها الاسم الأول أو اسم العائلة أو البريد الإلكتروني. افتح كل حساب لاستكماله."
+
+#: templates/administration/user_list.html
+msgid "Show every account"
+msgstr "عرض كل الحسابات"
+
+#: templates/administration/user_list.html templates/projects/activity.html templates/projects/dashboard.html
+msgid "Person"
+msgstr "الشخص"
+
+#: templates/administration/user_list.html
+msgid "Last login"
+msgstr "آخر دخول"
+
+#: templates/administration/user_list.html templates/registration/locked_out.html
+msgid "Login locked"
+msgstr "الدخول مقفل"
+
+#: templates/administration/user_list.html
+msgid "Missing details"
+msgstr "بيانات ناقصة"
+
+#: templates/administration/user_list.html
+msgid "Never"
+msgstr "أبدًا"
+
+#: templates/administration/user_list.html
+msgid "No account matches this search."
+msgstr "لا يوجد حساب يطابق هذا البحث."
+
+#: templates/administration/user_list.html
+msgid "There are no accounts yet."
+msgstr "لا توجد حسابات بعد."
+
+#: templates/administration/user_new.html
+msgid "Choose a first password and give it to the person in person or by phone, not by email. They can change it on their profile."
+msgstr "اختر كلمة مرور أولى وسلّمها للشخص شخصيًا أو عبر الهاتف، وليس عبر البريد الإلكتروني. يمكنه تغييرها من ملفه الشخصي."
+
+#: templates/administration/user_new.html
+msgid "Create the account"
+msgstr "إنشاء الحساب"
+
+#: templates/administration/user_password.html
+#, python-format
+msgid "A new password for %(person)s"
+msgstr "كلمة مرور جديدة لـ %(person)s"
+
+#: templates/administration/user_password.html
+msgid "Use this when someone forgot their password. Their old password stops working, they are logged out everywhere, and a login locked after wrong passwords is unlocked."
+msgstr "استخدم هذا عندما ينسى شخص كلمة مروره. تتوقف كلمة المرور القديمة عن العمل، ويُسجَّل خروجه من كل مكان، ويُفتح قفل تسجيل الدخول الذي أُقفل بعد كلمات مرور خاطئة."
+
+#: templates/administration/user_password.html
+msgid "Give the new password to the person in person or by phone, not by email. They can change it on their profile."
+msgstr "سلّم كلمة المرور الجديدة للشخص شخصيًا أو عبر الهاتف، وليس عبر البريد الإلكتروني. يمكنه تغييرها من ملفه الشخصي."
+
+#: templates/administration/user_password.html
+msgid "Save the new password"
+msgstr "حفظ كلمة المرور الجديدة"
+
+#: templates/base.html
+msgid "Open menu"
+msgstr "فتح القائمة"
+
+#: templates/base.html
+msgid "Open user menu"
+msgstr "فتح قائمة المستخدم"
+
+#: templates/base.html
+msgid "Log out"
+msgstr "تسجيل الخروج"
+
+#: templates/base.html templates/home.html
+msgid "Home"
+msgstr "الرئيسية"
+
+#: templates/base.html templates/projects/my_tasks.html
+msgid "My tasks"
+msgstr "مهامي"
+
+#: templates/base.html templates/projects/activity.html
+msgid "Activity"
+msgstr "النشاط"
+
+#: templates/base.html templates/projects/dashboard.html
+msgid "Dashboard"
+msgstr "لوحة المعلومات"
+
+#: templates/base.html
+msgid "Close"
+msgstr "إغلاق"
+
+#: templates/emails/assigned.html templates/emails/assigned.txt templates/emails/reminder.html templates/emails/reminder.txt
+#, python-format
+msgid "Hello %(name)s,"
+msgstr "مرحبًا %(name)s،"
+
+#: templates/emails/assigned.html
+#, python-format
+msgid "%(person)s gave you a task in <strong>%(project)s</strong>:"
+msgstr "أسند إليك %(person)s مهمة في <strong>%(project)s</strong>:"
+
+#: templates/emails/assigned.html templates/emails/assigned.txt
+msgid "D j M Y"
+msgstr "D j F Y"
+
+#: templates/emails/assigned.html templates/emails/assigned.txt
+#, python-format
+msgid "Due %(date)s"
+msgstr "الاستحقاق: %(date)s"
+
+#: templates/emails/assigned.html templates/emails/assigned.txt templates/projects/project_detail.html templates/projects/project_report.html templates/projects/task_detail.html
+#, python-format
+msgid "%(priority)s priority"
+msgstr "أولوية %(priority)s"
+
+#: templates/emails/assigned.html
+#, python-format
+msgid "Part of “%(title)s”"
+msgstr "جزء من “%(title)s”"
+
+#: templates/emails/assigned.html
+msgid "Open the task"
+msgstr "فتح المهمة"
+
+#: templates/emails/assigned.html
+msgid "You get this email when someone assigns a task to you in IT Projects."
+msgstr "تصلك هذه الرسالة عندما يُسند إليك شخص مهمة في IT Projects."
+
+#: templates/emails/assigned.txt
+#, python-format
+msgid "%(person)s gave you a task in \"%(project)s\":"
+msgstr "أسند إليك %(person)s مهمة في \"%(project)s\":"
+
+#: templates/emails/assigned.txt
+#, python-format
+msgid "Part of \"%(title)s\""
+msgstr "جزء من \"%(title)s\""
+
+#: templates/emails/assigned.txt
+#, python-format
+#| msgid "Open the task"
+msgid "Open the task: %(link)s"
+msgstr "فتح المهمة: %(link)s"
+
+#: templates/emails/reminder.html templates/emails/reminder.txt
+#, python-format
+msgid "These tasks need your attention today, %(day)s."
+msgstr "هذه المهام تحتاج إلى اهتمامك اليوم، %(day)s."
+
+#: templates/emails/reminder.html
+#, python-format
+msgid "…and %(counter)s more"
+msgid_plural "…and %(counter)s more"
+msgstr[0] "…وغيرها"
+msgstr[1] "…وواحدة أخرى"
+msgstr[2] "…واثنتان أخريان"
+msgstr[3] "…و%(counter)s أخرى"
+msgstr[4] "…و%(counter)s أخرى"
+msgstr[5] "…و%(counter)s أخرى"
+
+#: templates/emails/reminder.html templates/emails/reminder.txt
+msgid "Nothing needs your attention today."
+msgstr "لا شيء يحتاج إلى اهتمامك اليوم."
+
+#: templates/emails/reminder.html
+msgid "Open my tasks"
+msgstr "فتح مهامي"
+
+#: templates/emails/reminder.html
+msgid "You get this email when tasks assigned to you are late or due soon, or when tasks in projects you manage are late."
+msgstr "تصلك هذه الرسالة عندما تتأخر المهام المُسنَدة إليك أو يقترب موعد استحقاقها، أو عندما تتأخر مهام في مشاريع تديرها."
+
+#: templates/emails/reminder.html
+msgid "You get this email when tasks assigned to you are late or due soon."
+msgstr "تصلك هذه الرسالة عندما تتأخر المهام المُسنَدة إليك أو يقترب موعد استحقاقها."
+
+#: templates/emails/reminder.txt
+#, python-format
+msgid "...and %(counter)s more"
+msgid_plural "...and %(counter)s more"
+msgstr[0] "...وغيرها"
+msgstr[1] "...وواحدة أخرى"
+msgstr[2] "...واثنتان أخريان"
+msgstr[3] "...و%(counter)s أخرى"
+msgstr[4] "...و%(counter)s أخرى"
+msgstr[5] "...و%(counter)s أخرى"
+
+#: templates/emails/reminder.txt
+#, python-format
+#| msgid "Open my tasks"
+msgid "Open my tasks: %(link)s"
+msgstr "فتح مهامي: %(link)s"
+
+#: templates/home.html
+#, python-format
+msgid "Hello, %(name)s"
+msgstr "مرحبًا، %(name)s"
+
+#: templates/home.html
+msgid "My open tasks"
+msgstr "مهامي المفتوحة"
+
+#: templates/home.html
+msgid "My overdue tasks"
+msgstr "مهامي المتأخرة"
+
+#: templates/home.html
+msgid "My next tasks"
+msgstr "مهامي القادمة"
+
+#: templates/home.html
+msgid "See all my tasks"
+msgstr "عرض جميع مهامي"
+
+#: templates/home.html templates/projects/my_tasks.html
+msgid "You have no open tasks. Nice work!"
+msgstr "ليست لديك مهام مفتوحة. عمل رائع!"
+
+#: templates/includes/activity_item.html
+msgid "Someone"
+msgstr "شخص ما"
+
+#: templates/includes/activity_item.html
+msgctxt "in a project"
+msgid "in"
+msgstr "في"
+
+#: templates/includes/activity_item.html
+#, python-format
+msgid "%(label)s:"
+msgstr "%(label)s:"
+
+#: templates/includes/form_field.html
+msgid "Nothing to choose yet."
+msgstr "لا شيء للاختيار بعد."
+
+#: templates/includes/task_row.html templates/projects/my_tasks.html templates/projects/project_board.html
+msgid "Waiting for other tasks"
+msgstr "بانتظار مهام أخرى"
+
+#: templates/projects/activity.html templates/projects/task_detail.html
+msgid "History"
+msgstr "السجل"
+
+#: templates/projects/activity.html
+msgid "History of the task"
+msgstr "سجل المهمة"
+
+#: templates/projects/activity.html
+msgid "All activity"
+msgstr "كل النشاط"
+
+#: templates/projects/activity.html
+msgid "Yesterday"
+msgstr "أمس"
+
+#: templates/projects/activity.html
+msgid "Nothing older to show."
+msgstr "لا يوجد ما هو أقدم للعرض."
+
+#: templates/projects/activity.html
+msgid "Nothing to show for this choice yet."
+msgstr "لا شيء للعرض لهذا الاختيار بعد."
+
+#: templates/projects/activity.html
+msgid "Nothing has happened yet."
+msgstr "لم يحدث شيء بعد."
+
+#: templates/projects/activity.html
+msgid "Back to the newest"
+msgstr "العودة إلى الأحدث"
+
+#: templates/projects/activity.html
+msgid "Show older activity"
+msgstr "عرض النشاط الأقدم"
+
+#: templates/projects/dashboard.html
+msgid "The big picture across all active projects."
+msgstr "الصورة العامة لجميع المشاريع النشطة."
+
+#: templates/projects/dashboard.html
+msgid "The big picture of the active projects you are part of."
+msgstr "الصورة العامة للمشاريع النشطة التي أنت جزء منها."
+
+#: templates/projects/dashboard.html
+msgid "Workload"
+msgstr "حجم العمل"
+
+#: templates/projects/dashboard.html
+msgid "Open tasks per person, in active projects"
+msgstr "المهام المفتوحة لكل شخص في المشاريع النشطة"
+
+#: templates/projects/dashboard.html
+msgid "Open tasks per person"
+msgstr "المهام المفتوحة لكل شخص"
+
+#: templates/projects/dashboard.html
+msgid "On time"
+msgstr "في الموعد"
+
+#: templates/projects/dashboard.html
+msgid "Show as a table"
+msgstr "عرض كجدول"
+
+#: templates/projects/dashboard.html
+msgid "No open tasks right now."
+msgstr "لا توجد مهام مفتوحة حاليًا."
+
+#: templates/projects/dashboard.html
+msgid "Tasks done per week"
+msgstr "المهام المنجزة أسبوعيًا"
+
+#: templates/projects/dashboard.html
+msgid "The last 8 weeks, each starting on Monday"
+msgstr "آخر 8 أسابيع، يبدأ كل أسبوع يوم الاثنين"
+
+#: templates/projects/dashboard.html
+msgid "Week of"
+msgstr "الأسبوع الذي يبدأ في"
+
+#: templates/projects/dashboard.html
+msgid "Most overdue tasks"
+msgstr "المهام الأكثر تأخرًا"
+
+#: templates/projects/dashboard.html templates/projects/project_report.html
+msgid "Late by"
+msgstr "التأخير"
+
+#: templates/projects/dashboard.html templates/projects/project_report.html
+#, python-format
+msgid "%(counter)s day"
+msgid_plural "%(counter)s days"
+msgstr[0] "%(counter)s يوم"
+msgstr[1] "يوم واحد"
+msgstr[2] "يومان"
+msgstr[3] "%(counter)s أيام"
+msgstr[4] "%(counter)s يومًا"
+msgstr[5] "%(counter)s يوم"
+
+#: templates/projects/dashboard.html
+msgid "No overdue tasks."
+msgstr "لا توجد مهام متأخرة."
+
+#: templates/projects/dashboard.html
+msgid "Projects that need attention"
+msgstr "مشاريع تحتاج إلى اهتمام"
+
+#: templates/projects/dashboard.html
+#, python-format
+msgid "%(counter)s overdue task"
+msgid_plural "%(counter)s overdue tasks"
+msgstr[0] "لا مهام متأخرة"
+msgstr[1] "مهمة متأخرة واحدة"
+msgstr[2] "مهمتان متأخرتان"
+msgstr[3] "%(counter)s مهام متأخرة"
+msgstr[4] "%(counter)s مهمة متأخرة"
+msgstr[5] "%(counter)s مهمة متأخرة"
+
+#: templates/projects/dashboard.html templates/projects/project_detail.html templates/projects/project_list.html templates/projects/project_report.html
+#, python-format
+msgid "%(percent)s%% done"
+msgstr "%(percent)s%% منجز"
+
+#: templates/projects/dashboard.html
+msgid "Every active project is on time."
+msgstr "جميع المشاريع النشطة في موعدها."
+
+#: templates/projects/my_tasks.html
+#, python-format
+msgid "%(counter)s open task assigned to you, in active projects."
+msgid_plural "%(counter)s open tasks assigned to you, in active projects."
+msgstr[0] "لا توجد مهام مفتوحة مُسنَدة إليك في المشاريع النشطة."
+msgstr[1] "مهمة مفتوحة واحدة مُسنَدة إليك في المشاريع النشطة."
+msgstr[2] "مهمتان مفتوحتان مُسنَدتان إليك في المشاريع النشطة."
+msgstr[3] "%(counter)s مهام مفتوحة مُسنَدة إليك في المشاريع النشطة."
+msgstr[4] "%(counter)s مهمة مفتوحة مُسنَدة إليك في المشاريع النشطة."
+msgstr[5] "%(counter)s مهمة مفتوحة مُسنَدة إليك في المشاريع النشطة."
+
+#: templates/projects/my_tasks.html
+msgid "My reminder email"
+msgstr "رسالة التذكير الخاصة بي"
+
+#: templates/projects/my_tasks.html
+msgid "Mark as done"
+msgstr "تحديد كمنجزة"
+
+#: templates/projects/my_tasks.html
+#, python-format
+msgid "Mark %(title)s as done"
+msgstr "تحديد %(title)s كمنجزة"
+
+#: templates/projects/my_tasks.html
+msgid "Done in the last 14 days"
+msgstr "المنجزة خلال آخر 14 يومًا"
+
+#: templates/projects/project_board.html templates/projects/project_detail.html
+msgid "Board"
+msgstr "اللوحة"
+
+#: templates/projects/project_board.html
+msgid "Drag a card to another column to change its status. You can move the tasks assigned to you; the project's manager and admins can move every card."
+msgstr "اسحب بطاقة إلى عمود آخر لتغيير حالتها. يمكنك نقل المهام المُسنَدة إليك؛ ويمكن لمدير المشروع والمسؤولين نقل جميع البطاقات."
+
+#: templates/projects/project_board.html
+msgid "This card couldn't be moved. The page will reload."
+msgstr "تعذّر نقل هذه البطاقة. ستتم إعادة تحميل الصفحة."
+
+#: templates/projects/project_confirm_delete.html templates/projects/project_form.html
+msgid "Delete project"
+msgstr "حذف المشروع"
+
+#: templates/projects/project_confirm_delete.html
+msgid "Delete this project?"
+msgstr "هل تريد حذف هذا المشروع؟"
+
+#: templates/projects/project_confirm_delete.html
+#, python-format
+msgid "You're about to delete the project <strong>%(name)s</strong> and everything in it:"
+msgstr "أنت على وشك حذف المشروع <strong>%(name)s</strong> وكل ما فيه:"
+
+#: templates/projects/project_confirm_delete.html
+#, python-format
+msgid "%(counter)s task, subtasks included"
+msgid_plural "%(counter)s tasks, subtasks included"
+msgstr[0] "لا مهام"
+msgstr[1] "مهمة واحدة، بما فيها المهام الفرعية"
+msgstr[2] "مهمتان، بما فيهما المهام الفرعية"
+msgstr[3] "%(counter)s مهام، بما فيها المهام الفرعية"
+msgstr[4] "%(counter)s مهمة، بما فيها المهام الفرعية"
+msgstr[5] "%(counter)s مهمة، بما فيها المهام الفرعية"
+
+#: templates/projects/project_confirm_delete.html
+#, python-format
+msgid "%(counter)s comment"
+msgid_plural "%(counter)s comments"
+msgstr[0] "لا تعليقات"
+msgstr[1] "تعليق واحد"
+msgstr[2] "تعليقان"
+msgstr[3] "%(counter)s تعليقات"
+msgstr[4] "%(counter)s تعليقًا"
+msgstr[5] "%(counter)s تعليق"
+
+#: templates/projects/project_confirm_delete.html
+#, python-format
+msgid "%(counter)s file"
+msgid_plural "%(counter)s files"
+msgstr[0] "لا ملفات"
+msgstr[1] "ملف واحد"
+msgstr[2] "ملفان"
+msgstr[3] "%(counter)s ملفات"
+msgstr[4] "%(counter)s ملفًا"
+msgstr[5] "%(counter)s ملف"
+
+#: templates/projects/project_confirm_delete.html
+#, python-format
+msgid "its team of %(counter)s person (the person keeps their account)"
+msgid_plural "its team of %(counter)s people (the people keep their accounts)"
+msgstr[0] "فريقه (فارغ)"
+msgstr[1] "فريقه المكوّن من شخص واحد (يحتفظ الشخص بحسابه)"
+msgstr[2] "فريقه المكوّن من شخصين (يحتفظان بحسابيهما)"
+msgstr[3] "فريقه المكوّن من %(counter)s أشخاص (يحتفظون بحساباتهم)"
+msgstr[4] "فريقه المكوّن من %(counter)s شخصًا (يحتفظون بحساباتهم)"
+msgstr[5] "فريقه المكوّن من %(counter)s شخص (يحتفظون بحساباتهم)"
+
+#: templates/projects/project_confirm_delete.html
+msgid "This can't be undone."
+msgstr "لا يمكن التراجع عن هذا."
+
+#: templates/projects/project_confirm_delete.html
+msgid "To stop a project without losing anything, set its status to Cancelled or Completed instead: it then leaves the list of active projects, and everything in it stays."
+msgstr "لإيقاف مشروع دون فقدان أي شيء، غيّر حالته إلى «ملغى» أو «مكتمل» بدلًا من ذلك: فيخرج عندها من قائمة المشاريع النشطة، ويبقى كل ما فيه."
+
+#: templates/projects/project_confirm_delete.html
+msgid "Project name:"
+msgstr "اسم المشروع:"
+
+#: templates/projects/project_detail.html templates/projects/project_gantt.html
+msgid "Timeline"
+msgstr "الجدول الزمني"
+
+#: templates/projects/project_detail.html
+msgid "Reports"
+msgstr "التقارير"
+
+#: templates/projects/project_detail.html
+msgid "Status report to print"
+msgstr "تقرير الحالة للطباعة"
+
+#: templates/projects/project_detail.html templates/projects/project_report.html
+msgid "Tasks to Excel"
+msgstr "المهام إلى Excel"
+
+#: templates/projects/project_detail.html templates/projects/project_report.html
+#, python-format
+msgid "%(done)s of %(counter)s task done"
+msgid_plural "%(done)s of %(counter)s tasks done"
+msgstr[0] "تم إنجاز %(done)s من %(counter)s مهمة"
+msgstr[1] "تم إنجاز %(done)s من مهمة واحدة"
+msgstr[2] "تم إنجاز %(done)s من مهمتين"
+msgstr[3] "تم إنجاز %(done)s من %(counter)s مهام"
+msgstr[4] "تم إنجاز %(done)s من %(counter)s مهمة"
+msgstr[5] "تم إنجاز %(done)s من %(counter)s مهمة"
+
+#: templates/projects/project_detail.html
+#, python-format
+msgid "Remove %(person)s from the team?"
+msgstr "هل تريد إزالة %(person)s من الفريق؟"
+
+#: templates/projects/project_detail.html
+msgid "Remove from the team"
+msgstr "إزالة من الفريق"
+
+#: templates/projects/project_detail.html
+#, python-format
+msgid "Remove %(person)s from the team"
+msgstr "إزالة %(person)s من الفريق"
+
+#: templates/projects/project_detail.html
+msgid "Person to add to the team"
+msgstr "الشخص المراد إضافته إلى الفريق"
+
+#: templates/projects/project_detail.html
+msgid "Everyone is in the team already."
+msgstr "الجميع ضمن الفريق بالفعل."
+
+#: templates/projects/project_detail.html
+msgid "Add task"
+msgstr "إضافة مهمة"
+
+#: templates/projects/project_detail.html templates/projects/project_report.html
+msgid "This project has no tasks yet."
+msgstr "لا توجد مهام في هذا المشروع بعد."
+
+#: templates/projects/project_detail.html
+msgid "Recent activity"
+msgstr "النشاط الأخير"
+
+#: templates/projects/project_detail.html
+msgid "See all"
+msgstr "عرض الكل"
+
+#: templates/projects/project_detail.html
+msgid "Nothing has happened in this project yet."
+msgstr "لم يحدث شيء في هذا المشروع بعد."
+
+#: templates/projects/project_form.html
+msgid "Edit project"
+msgstr "تعديل المشروع"
+
+#: templates/projects/project_form.html
+msgid "Create project"
+msgstr "إنشاء المشروع"
+
+#: templates/projects/project_gantt.html
+msgid "Each bar runs from a task's start date to its due date, and arrows point from a task to the tasks waiting for it."
+msgstr "يمتد كل شريط من تاريخ بدء المهمة إلى تاريخ استحقاقها، وتشير الأسهم من المهمة إلى المهام التي تنتظرها."
+
+#: templates/projects/project_gantt.html
+msgid "Click a bar to see the task."
+msgstr "انقر على شريط لعرض المهمة."
+
+#: templates/projects/project_gantt.html
+msgid "Drag a bar to move a task, or drag its ends to change its dates. Tasks that wait for it move along with it."
+msgstr "اسحب شريطًا لنقل مهمة، أو اسحب طرفيه لتغيير تواريخها. تتحرك معها المهام التي تنتظرها."
+
+#: templates/projects/project_gantt.html
+msgid "milestone"
+msgstr "معلم"
+
+#: templates/projects/project_gantt.html
+msgid "subtask"
+msgstr "مهمة فرعية"
+
+#: templates/projects/project_gantt.html
+msgid "No task has a date yet. Give tasks a start date or a due date to see them here."
+msgstr "لا توجد مهمة لها تاريخ بعد. أعطِ المهام تاريخ بدء أو تاريخ استحقاق لتظهر هنا."
+
+#: templates/projects/project_gantt.html
+msgid "Not on the timeline"
+msgstr "ليست على الجدول الزمني"
+
+#: templates/projects/project_gantt.html
+msgid "These tasks have no start date and no due date yet:"
+msgstr "ليس لهذه المهام تاريخ بدء ولا تاريخ استحقاق بعد:"
+
+#: templates/projects/project_list.html
+msgid "Export to Excel"
+msgstr "تصدير إلى Excel"
+
+#: templates/projects/project_list.html
+msgid "No projects found."
+msgstr "لم يتم العثور على مشاريع."
+
+#: templates/projects/project_list.html
+msgid "You aren't in any project's team yet. An admin or a project's manager can add you."
+msgstr "لست ضمن فريق أي مشروع بعد. يمكن لمسؤول أو لمدير مشروع إضافتك."
+
+#: templates/projects/project_report.html
+msgid "Status report"
+msgstr "تقرير الحالة"
+
+#: templates/projects/project_report.html
+msgid "Print or save as PDF"
+msgstr "طباعة أو حفظ بصيغة PDF"
+
+#: templates/projects/project_report.html
+msgid "Project status report"
+msgstr "تقرير حالة المشروع"
+
+#: templates/projects/project_report.html
+msgid "Dates"
+msgstr "التواريخ"
+
+#: templates/projects/project_report.html
+#, python-format
+msgid "%(label)s: %(count)s"
+msgstr "%(label)s: %(count)s"
+
+#: templates/projects/project_report.html
+msgid "Milestones"
+msgstr "المعالم"
+
+#: templates/projects/project_report.html
+msgid "Start"
+msgstr "البدء"
+
+#: templates/projects/project_report.html
+msgid "Due"
+msgstr "الاستحقاق"
+
+#: templates/projects/project_report.html
+#, python-format
+msgid "Report made on %(date)s by %(person)s"
+msgstr "أُعدّ التقرير في %(date)s بواسطة %(person)s"
+
+#: templates/projects/task_confirm_delete.html
+msgid "Delete task"
+msgstr "حذف المهمة"
+
+#: templates/projects/task_confirm_delete.html
+msgid "Delete this task?"
+msgstr "هل تريد حذف هذه المهمة؟"
+
+#: templates/projects/task_confirm_delete.html
+#, python-format
+msgid "You're about to delete <strong>%(title)s</strong> from the project <strong>%(project)s</strong>."
+msgstr "أنت على وشك حذف <strong>%(title)s</strong> من المشروع <strong>%(project)s</strong>."
+
+#: templates/projects/task_confirm_delete.html
+#, python-format
+msgid "Its %(counter)s subtask will be deleted too."
+msgid_plural "Its %(counter)s subtasks will be deleted too."
+msgstr[0] "لن تُحذف أي مهمة فرعية."
+msgstr[1] "ستُحذف مهمتها الفرعية الواحدة أيضًا."
+msgstr[2] "ستُحذف مهمتاها الفرعيتان أيضًا."
+msgstr[3] "ستُحذف مهامها الفرعية الـ %(counter)s أيضًا."
+msgstr[4] "ستُحذف مهامها الفرعية الـ %(counter)s أيضًا."
+msgstr[5] "ستُحذف مهامها الفرعية الـ %(counter)s أيضًا."
+
+#: templates/projects/task_confirm_delete.html
+msgid "Its comments and files go with it, and this can't be undone. To stop a task without losing it, you can mark it Done instead."
+msgstr "تُحذف تعليقاتها وملفاتها معها، ولا يمكن التراجع عن ذلك. لإيقاف مهمة دون فقدانها، يمكنك وضع حالتها «منجزة» بدلًا من ذلك."
+
+#: templates/projects/task_detail.html
+msgid "Subtask"
+msgstr "مهمة فرعية"
+
+#: templates/projects/task_detail.html
+msgid "This task waits for"
+msgstr "تنتظر هذه المهمة"
+
+#: templates/projects/task_detail.html
+msgid "which isn't done yet."
+msgid_plural "which aren't done yet."
+msgstr[0] "وهي غير منجزة بعد."
+msgstr[1] "وهي غير منجزة بعد."
+msgstr[2] "وهما غير منجزتين بعد."
+msgstr[3] "وهي غير منجزة بعد."
+msgstr[4] "وهي غير منجزة بعد."
+msgstr[5] "وهي غير منجزة بعد."
+
+#: templates/projects/task_detail.html
+msgid "Subtasks"
+msgstr "المهام الفرعية"
+
+#: templates/projects/task_detail.html
+msgid "Add subtask"
+msgstr "إضافة مهمة فرعية"
+
+#: templates/projects/task_detail.html
+msgid "No subtasks."
+msgstr "لا توجد مهام فرعية."
+
+#: templates/projects/task_detail.html
+msgid "Tasks that must be done before this one"
+msgstr "المهام التي يجب إنجازها قبل هذه المهمة"
+
+#: templates/projects/task_detail.html
+msgid "Nothing. This task can start any time."
+msgstr "لا شيء. يمكن أن تبدأ هذه المهمة في أي وقت."
+
+#: templates/projects/task_detail.html
+msgid "Needed by"
+msgstr "مطلوبة من قِبل"
+
+#: templates/projects/task_detail.html
+msgid "Tasks that wait for this one"
+msgstr "المهام التي تنتظر هذه المهمة"
+
+#: templates/projects/task_detail.html
+msgid "No other task waits for this one."
+msgstr "لا توجد مهمة أخرى تنتظر هذه المهمة."
+
+#: templates/projects/task_detail.html
+msgid "Comments"
+msgstr "التعليقات"
+
+#: templates/projects/task_detail.html
+msgid "Delete this comment?"
+msgstr "هل تريد حذف هذا التعليق؟"
+
+#: templates/projects/task_detail.html
+msgid "Delete comment"
+msgstr "حذف التعليق"
+
+#: templates/projects/task_detail.html
+msgid "No comments yet."
+msgstr "لا توجد تعليقات بعد."
+
+#: templates/projects/task_detail.html
+msgid "Add comment"
+msgstr "إضافة تعليق"
+
+#: templates/projects/task_detail.html
+msgid "Files"
+msgstr "الملفات"
+
+#: templates/projects/task_detail.html
+msgid "File missing"
+msgstr "الملف مفقود"
+
+#: templates/projects/task_detail.html
+msgid "Delete this file?"
+msgstr "هل تريد حذف هذا الملف؟"
+
+#: templates/projects/task_detail.html
+msgid "Delete file"
+msgstr "حذف الملف"
+
+#: templates/projects/task_detail.html
+msgid "Upload"
+msgstr "رفع"
+
+#: templates/projects/task_detail.html
+#, python-format
+msgid "Up to %(size)s MB per file."
+msgstr "حتى %(size)s ميغابايت لكل ملف."
+
+#: templates/projects/task_form.html
+msgid "Edit task"
+msgstr "تعديل المهمة"
+
+#: templates/projects/task_form.html
+msgid "New task"
+msgstr "مهمة جديدة"
+
+#: templates/projects/task_form.html
+msgid "Create task"
+msgstr "إنشاء المهمة"
+
+#: templates/registration/locked_out.html
+msgid "Too many wrong passwords"
+msgstr "كلمات مرور خاطئة كثيرة جدًا"
+
+#: templates/registration/locked_out.html
+#, python-format
+msgid "To protect the account \"%(name)s\", logging in is blocked for one hour after %(counter)s wrong password in a row."
+msgid_plural "To protect the account \"%(name)s\", logging in is blocked for one hour after %(counter)s wrong passwords in a row."
+msgstr[0] "لحماية الحساب \"%(name)s\"، يُمنع تسجيل الدخول لمدة ساعة بعد %(counter)s كلمة مرور خاطئة متتالية."
+msgstr[1] "لحماية الحساب \"%(name)s\"، يُمنع تسجيل الدخول لمدة ساعة بعد كلمة مرور خاطئة واحدة."
+msgstr[2] "لحماية الحساب \"%(name)s\"، يُمنع تسجيل الدخول لمدة ساعة بعد كلمتي مرور خاطئتين متتاليتين."
+msgstr[3] "لحماية الحساب \"%(name)s\"، يُمنع تسجيل الدخول لمدة ساعة بعد %(counter)s كلمات مرور خاطئة متتالية."
+msgstr[4] "لحماية الحساب \"%(name)s\"، يُمنع تسجيل الدخول لمدة ساعة بعد %(counter)s كلمة مرور خاطئة متتالية."
+msgstr[5] "لحماية الحساب \"%(name)s\"، يُمنع تسجيل الدخول لمدة ساعة بعد %(counter)s كلمة مرور خاطئة متتالية."
+
+#: templates/registration/locked_out.html
+#, python-format
+msgid "To protect the account, logging in is blocked for one hour after %(counter)s wrong password in a row."
+msgid_plural "To protect the account, logging in is blocked for one hour after %(counter)s wrong passwords in a row."
+msgstr[0] "لحماية الحساب، يُمنع تسجيل الدخول لمدة ساعة بعد %(counter)s كلمة مرور خاطئة متتالية."
+msgstr[1] "لحماية الحساب، يُمنع تسجيل الدخول لمدة ساعة بعد كلمة مرور خاطئة واحدة."
+msgstr[2] "لحماية الحساب، يُمنع تسجيل الدخول لمدة ساعة بعد كلمتي مرور خاطئتين متتاليتين."
+msgstr[3] "لحماية الحساب، يُمنع تسجيل الدخول لمدة ساعة بعد %(counter)s كلمات مرور خاطئة متتالية."
+msgstr[4] "لحماية الحساب، يُمنع تسجيل الدخول لمدة ساعة بعد %(counter)s كلمة مرور خاطئة متتالية."
+msgstr[5] "لحماية الحساب، يُمنع تسجيل الدخول لمدة ساعة بعد %(counter)s كلمة مرور خاطئة متتالية."
+
+#: templates/registration/locked_out.html
+msgid "Try again later, or ask an admin to unlock it now."
+msgstr "حاول مرة أخرى لاحقًا، أو اطلب من أحد المسؤولين فتح القفل الآن."
+
+#: templates/registration/locked_out.html
+msgid "Back to the login page"
+msgstr "العودة إلى صفحة تسجيل الدخول"
+
+#: templates/registration/login.html
+msgid "Log in"
+msgstr "تسجيل الدخول"
+
+#: templates/registration/login.html
+msgid "IT department project management"
+msgstr "إدارة مشاريع قسم تقنية المعلومات"
+
+#: templates/registration/login.html
+msgid "Log in to your account"
+msgstr "سجّل الدخول إلى حسابك"
+
+#: templates/registration/login.html
+msgid "Password"
+msgstr "كلمة المرور"

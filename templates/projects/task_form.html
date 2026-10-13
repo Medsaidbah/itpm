@@ -1,14 +1,15 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {# The same page is used to create a task and to edit one #}
-{% block title %}{% if task %}Edit task{% else %}New task{% endif %} · IT Projects{% endblock %}
+{% block title %}{% if task %}{% translate "Edit task" %}{% else %}{% translate "New task" %}{% endif %} · IT Projects{% endblock %}
 {% block nav_projects %}active{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
   <div class="col-lg-8">
-    <div class="page-pretitle">{{ project }}</div>
-    <h2 class="page-title mb-4">{% if task %}Edit task{% else %}New task{% endif %}</h2>
+    <div class="page-pretitle"><bdi>{{ project }}</bdi></div>
+    <h2 class="page-title mb-4">{% if task %}{% translate "Edit task" %}{% else %}{% translate "New task" %}{% endif %}</h2>
 
     <form method="post" class="card">
       {% csrf_token %}
@@ -35,8 +36,8 @@
         {% include "includes/form_field.html" with field=form.depends_on %}
       </div>
       <div class="card-footer d-flex justify-content-end gap-2">
-        <a href="{% if task %}{{ task.get_absolute_url }}{% else %}{{ project.get_absolute_url }}{% endif %}" class="btn">Cancel</a>
-        <button type="submit" class="btn btn-primary">{% if task %}Save changes{% else %}Create task{% endif %}</button>
+        <a href="{% if task %}{{ task.get_absolute_url }}{% else %}{{ project.get_absolute_url }}{% endif %}" class="btn">{% translate "Cancel" %}</a>
+        <button type="submit" class="btn btn-primary">{% if task %}{% translate "Save changes" %}{% else %}{% translate "Create task" %}{% endif %}</button>
       </div>
     </form>
   </div>

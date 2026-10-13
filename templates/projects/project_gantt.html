@@ -1,7 +1,7 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static i18n %}
 
-{% block title %}Timeline · {{ project.name }} · IT Projects{% endblock %}
+{% block title %}{% translate "Timeline" %} · {{ project.name }} · IT Projects{% endblock %}
 {% block nav_projects %}active{% endblock %}
 
 {% block extra_head %}
@@ -20,54 +20,58 @@
 
 {% block content %}
 <div class="mb-3">
-  <a href="{{ project.get_absolute_url }}" class="text-secondary"><i class="ti ti-arrow-left me-1"></i>{{ project }}</a>
+  <a href="{{ project.get_absolute_url }}" class="text-secondary"><i class="ti ti-arrow-left me-1"></i><bdi>{{ project }}</bdi></a>
 </div>
 <div class="mb-3">
-  <h2 class="page-title">Timeline</h2>
+  <h2 class="page-title">{% translate "Timeline" %}</h2>
   <div class="text-secondary">
-    Each bar runs from a task's start date to its due date, and arrows point from a task to the tasks waiting for it.
-    Click a bar to see the task.
-    {% if can_edit %}Drag a bar to move a task, or drag its ends to change its dates. Tasks that wait for it move along with it.{% endif %}
+    {% translate "Each bar runs from a task's start date to its due date, and arrows point from a task to the tasks waiting for it." %}
+    {% translate "Click a bar to see the task." %}
+    {% if can_edit %}{% translate "Drag a bar to move a task, or drag its ends to change its dates. Tasks that wait for it move along with it." %}{% endif %}
   </div>
 </div>
 
 {# Legend: what the bar colors mean #}
 <div class="d-flex flex-wrap gap-2 mb-3">
-  <span class="badge bg-secondary-lt">To do</span>
-  <span class="badge bg-blue-lt">In progress</span>
-  <span class="badge bg-red-lt">Blocked</span>
-  <span class="badge bg-green-lt">Done</span>
-  <span class="text-secondary small ms-2">◆ milestone · ↳ subtask</span>
+  <span class="badge bg-secondary-lt">{% translate "To do" %}</span>
+  <span class="badge bg-blue-lt">{% translate "In progress" %}</span>
+  <span class="badge bg-red-lt">{% translate "Blocked" %}</span>
+  <span class="badge bg-green-lt">{% translate "Done" %}</span>
+  <span class="text-secondary small ms-2">◆ {% translate "milestone" %} · ↳ {% translate "subtask" %}</span>
 </div>
 
 {% if chart_tasks %}
 <div class="card mb-4">
   <div class="card-body p-0">
-    <div id="gantt" data-csrf="{{ csrf_token }}" data-can-edit="{{ can_edit|yesno:'true,false' }}" data-scroll-to="{{ scroll_to }}"></div>
+    {# dir="ltr": the timeline stays left to right in every language, because time runs that way #}
+    <div id="gantt" dir="ltr" data-csrf="{{ csrf_token }}" data-can-edit="{{ can_edit|yesno:'true,false' }}"
+         data-scroll-to="{{ scroll_to }}" data-language="{{ LANGUAGE_CODE }}"></div>
   </div>
 </div>
 {% else %}
 <div class="card mb-4">
-  <div class="card-body text-secondary">No task has a date yet. Give tasks a start date or a due date to see them here.</div>
+  <div class="card-body text-secondary">{% translate "No task has a date yet. Give tasks a start date or a due date to see them here." %}</div>
 </div>
 {% endif %}
 
 {% if undated %}
 <div class="card">
   <div class="card-header">
-    <h3 class="card-title">Not on the timeline</h3>
+    <h3 class="card-title">{% translate "Not on the timeline" %}</h3>
   </div>
   <div class="card-body">
-    <p class="text-secondary mb-2">These tasks have no start date and no due date yet:</p>
+    <p class="text-secondary mb-2">{% translate "These tasks have no start date and no due date yet:" %}</p>
     <ul class="mb-0">
-      {% for task in undated %}<li><a href="{{ task.get_absolute_url }}">{{ task.title }}</a></li>{% endfor %}
+      {% for task in undated %}<li><a href="{{ task.get_absolute_url }}"><bdi>{{ task.title }}</bdi></a></li>{% endfor %}
     </ul>
   </div>
 </div>
 {% endif %}
 
-{# The tasks, as data the script can read. json_script makes this safe, whatever the task titles contain. #}
+{# The tasks, and the chart's words in the language of the page, as data the script can read. #}
+{# json_script makes this safe, whatever the task titles contain. #}
 {{ chart_tasks|json_script:"gantt-tasks" }}
+{{ chart_words|json_script:"gantt-words" }}
 {% endblock %}
 
 {% block scripts %}
@@ -104,10 +108,10 @@
           if (response.ok) return;
           return response.json()
             .catch(function () { return {}; })
-            .then(function (answer) { throw new Error(answer.error || "The server refused the change."); });
+            .then(function (answer) { throw new Error(answer.error || words.refused); });
         })
         .catch(function (error) {
-          alert("The new dates weren't saved. " + error.message + " The page will reload.");
+          alert(words.not_saved.replace("{error}", error.message));
           location.reload();
         });
     }
@@ -124,20 +128,33 @@
 
     var tasks = JSON.parse(document.getElementById("gantt-tasks").textContent);
     tasks.forEach(function (task) { task.name = escapeHtml(task.name); });
+    var words = JSON.parse(document.getElementById("gantt-words").textContent);
+
+    // The chart's own buttons are written in English: put the words of the page language on them.
+    // The chart draws them again each time the view changes (days, weeks...), so this runs each time.
+    function translateButtons(chart) {
+      if (chart.$today_button) chart.$today_button.textContent = words.Today;
+      element.querySelectorAll(".viewmode-select option").forEach(function (option) {
+        option.textContent = words[option.value] || option.textContent;  // the value stays in English
+      });
+    }
 
     new Gantt(element, tasks, {
       view_mode: "Week",
       view_mode_select: true,          // a list to switch between days, weeks, months...
+      language: element.dataset.language,  // month names in the page language
       scroll_to: element.dataset.scrollTo,
       readonly: element.dataset.canEdit !== "true",  // only the project's manager and admins can move bars
       readonly_progress: true,
       popup: function (popup) {
         var task = popup.task;
-        popup.set_title(task.name);    // already made safe above
-        popup.set_subtitle(escapeHtml(task.dates));
-        popup.set_details(escapeHtml(task.status + " · " + task.assignee));
-        popup.add_action("Open task", function () { window.location.href = task.url; });
+        // dir="auto": Arabic text in the popup reads right to left, even though the chart doesn't
+        popup.set_title('<span dir="auto">' + task.name + "</span>");    // already made safe above
+        popup.set_subtitle('<span dir="auto">' + escapeHtml(task.dates) + "</span>");
+        popup.set_details('<span dir="auto">' + escapeHtml(task.status + " · " + task.assignee) + "</span>");
+        popup.add_action(escapeHtml(words.open_task), function () { window.location.href = task.url; });
       },
+      on_view_change: function () { translateButtons(this); },
       // Runs while a bar is dragged or stretched: remember the task's latest dates (saved on release)
       on_date_change: function (task, start, end) {
         pending[task.id] = { url: task.dates_url, start: toISODate(start), end: toISODate(end) };

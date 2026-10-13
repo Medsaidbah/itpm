@@ -39,8 +39,10 @@ class AccountFormMixin(PictureFormMixin):
         self.fields["picture"].help_text = gettext(
             "A JPG or PNG picture, up to %(size)s MB. It is cut to a square."
         ) % {"size": MAX_PICTURE_MB}
-        self.fields["phone"].widget.attrs.update(placeholder="+222 22 12 34 56", autocomplete="off")
-        self.fields["email"].widget.attrs["autocomplete"] = "off"
+        # dir="ltr": a phone number, an email or a username reads from left to right, even in Arabic
+        self.fields["phone"].widget.attrs.update(placeholder="+222 22 12 34 56", autocomplete="off", dir="ltr")
+        self.fields["email"].widget.attrs.update(autocomplete="off", dir="ltr")
+        self.fields["username"].widget.attrs["dir"] = "ltr"
 
     def clean_username(self):
         """Usernames must be different, even in capitals: "Sara" and "sara" can't both exist."""

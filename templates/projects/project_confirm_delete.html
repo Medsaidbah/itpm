@@ -26,7 +26,7 @@
           {% translate "To stop a project without losing anything, set its status to Cancelled or Completed instead: it then leaves the list of active projects, and everything in it stays." %}
         </p>
 
-        <div class="mb-2">{% translate "Project name:" %} <strong class="user-select-all">{{ project.name }}</strong></div>
+        <div class="mb-2">{% translate "Project name:" %} <strong class="user-select-all"><bdi>{{ project.name }}</bdi></strong></div>
         {% include "includes/form_field.html" with field=form.name %}
       </div>
       <div class="card-footer d-flex flex-wrap justify-content-end gap-2">

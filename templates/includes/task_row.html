@@ -1,17 +1,18 @@
-{% load people %}{# One row of a task table. Subtasks are indented under their main task. #}
+{% load i18n people %}{# One row of a task table. Subtasks are indented under their main task. #}
 <tr>
   <td>
     <div class="d-flex align-items-start">
-      {% if is_subtask %}<span class="text-secondary ms-3 me-2">↳</span>{% endif %}
-      {% if task.is_milestone %}<i class="ti ti-flag text-orange me-1 mt-1" title="Milestone"></i>{% endif %}
-      <a href="{{ task.get_absolute_url }}">{{ task.title }}</a>
+      {# In Arabic (right to left) the arrow turns around: ↲ #}
+      {% if is_subtask %}<span class="text-secondary ms-3 me-2">{% if LANGUAGE_BIDI %}↲{% else %}↳{% endif %}</span>{% endif %}
+      {% if task.is_milestone %}<i class="ti ti-flag text-orange me-1 mt-1" title="{% translate 'Milestone' %}"></i>{% endif %}
+      <a href="{{ task.get_absolute_url }}"><bdi>{{ task.title }}</bdi></a>
       {# A lock means: this task waits for other tasks that aren't done yet #}
-      {% if task.waiting_for %}<i class="ti ti-lock text-secondary ms-2 mt-1" title="Waiting for other tasks"></i>{% endif %}
+      {% if task.waiting_for %}<i class="ti ti-lock text-secondary ms-2 mt-1" title="{% translate 'Waiting for other tasks' %}"></i>{% endif %}
     </div>
   </td>
   <td><span class="badge bg-{{ task.status_color }}-lt">{{ task.get_status_display }}</span></td>
   <td class="d-none d-sm-table-cell">
-    {% if task.assignee %}<span class="d-inline-flex align-items-center gap-2">{% avatar task.assignee "xs" %}{{ task.assignee }}</span>{% else %}<span class="text-secondary">Unassigned</span>{% endif %}
+    {% if task.assignee %}<span class="d-inline-flex align-items-center gap-2">{% avatar task.assignee "xs" %}{{ task.assignee }}</span>{% else %}<span class="text-secondary">{% translate "Unassigned" %}</span>{% endif %}
   </td>
-  <td {% if task.is_overdue %}class="text-danger"{% endif %}>{{ task.due_date|date:"d M Y"|default:"No date" }}</td>
+  <td {% if task.is_overdue %}class="text-danger"{% endif %}>{{ task.due_date|date:_("d M Y")|default:_("No date") }}</td>
 </tr>

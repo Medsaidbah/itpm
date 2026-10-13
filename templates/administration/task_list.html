@@ -62,9 +62,9 @@
         {% for task in page.object_list %}
         <tr>
           <td class="text-break">
-            <a href="{{ task.get_absolute_url }}">{{ task.title }}</a>
+            <a href="{{ task.get_absolute_url }}"><bdi>{{ task.title }}</bdi></a>
             <div class="small text-secondary">
-              {{ task.project }}{% if task.parent %} · {{ task.parent }}{% endif %}
+              <bdi>{{ task.project }}</bdi>{% if task.parent %} · <bdi>{{ task.parent }}</bdi>{% endif %}
               {# On phones, the person and the status go here #}
               <span class="d-md-none">· {{ task.assignee|default:_("Unassigned") }}</span>
               <span class="d-sm-none">· {{ task.get_status_display }}</span>
@@ -77,7 +77,7 @@
             </div>
           </td>
           <td class="d-none d-sm-table-cell"><span class="badge bg-{{ task.status_color }}-lt">{{ task.get_status_display }}</span></td>
-          <td class="text-nowrap {% if task.is_overdue %}text-danger{% endif %}">{{ task.due_date|date:"d M Y"|default:_("No date") }}</td>
+          <td class="text-nowrap {% if task.is_overdue %}text-danger{% endif %}">{{ task.due_date|date:_("d M Y")|default:_("No date") }}</td>
         </tr>
         {% endfor %}
       </tbody>

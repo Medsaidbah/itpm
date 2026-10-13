@@ -1,32 +1,33 @@
-{% load people %}{# One line of the activity feed. Used on the Activity page and on project pages. #}
+{% load i18n people %}{# One line of the activity feed. Used on the Activity page and on project pages. #}
 {# hide_project: don't repeat the project's name. relative: "5 minutes ago" instead of "14:32". #}
 <div class="list-group-item">
   <div class="d-flex align-items-start gap-3">
     <span class="avatar avatar-sm bg-{{ event.color }}-lt flex-shrink-0"><i class="ti {{ event.icon }}"></i></span>
     <div class="flex-fill" style="min-width: 0">
       <div class="text-break">
-        <strong>{% if event.who %}{% person_link event.who "text-reset" %}{% else %}Someone{% endif %}</strong> {{ event.action }}
-        {% if event.url %}<a href="{{ event.url }}">{{ event.name }}</a>{% else %}<strong>{{ event.name }}</strong>{% endif %}
+        <strong>{% if event.who %}{% person_link event.who "text-reset" %}{% else %}{% translate "Someone" %}{% endif %}</strong> {{ event.action }}
+        {% if event.url %}<a href="{{ event.url }}"><bdi>{{ event.name }}</bdi></a>{% else %}<strong><bdi>{{ event.name }}</bdi></strong>{% endif %}
         {% if event.project and not hide_project %}
-        <span class="text-secondary">in <a href="{{ event.project.get_absolute_url }}" class="text-reset">{{ event.project }}</a></span>
+        <span class="text-secondary">{% translate "in" context "in a project" %} <a href="{{ event.project.get_absolute_url }}" class="text-reset"><bdi>{{ event.project }}</bdi></a></span>
         {% endif %}
       </div>
       {# What changed: "Status: To do → In progress". When something is created there is no old value. #}
       {% for label, old, new in event.changes %}
       <div class="small text-break">
-        <span class="text-secondary">{{ label }}:</span>
-        {% if old is not None %}<span class="text-secondary">{{ old }}</span> → {% endif %}{{ new }}
+        <span class="text-secondary">{% blocktranslate %}{{ label }}:{% endblocktranslate %}</span>
+        {# The arrow points from the old value to the new one: to the left in Arabic #}
+        {% if old is not None %}<span class="text-secondary">{{ old }}</span> {% if LANGUAGE_BIDI %}←{% else %}→{% endif %} {% endif %}{{ new }}
       </div>
       {% endfor %}
       {% if event.text %}
-      <div class="text-secondary text-break mt-1">{{ event.text|truncatechars:200|linebreaksbr }}</div>
+      <div class="text-secondary text-break mt-1" dir="auto">{{ event.text|truncatechars:200|linebreaksbr }}</div>
       {% endif %}
       {% if event.attachment %}
       <div class="small text-truncate mt-1"><i class="ti ti-file me-1"></i><a href="{{ event.attachment.file.url }}">{{ event.attachment.filename }}</a></div>
       {% endif %}
     </div>
     {# Hover over the time to see the full date #}
-    <div class="text-secondary small text-nowrap" title="{{ event.when|date:'d M Y, H:i' }}">
+    <div class="text-secondary small text-nowrap" title="{{ event.when|date:_('d M Y, H:i') }}">
       {% if relative %}{{ event.ago }}{% else %}{{ event.when|time:"H:i" }}{% endif %}
     </div>
   </div>

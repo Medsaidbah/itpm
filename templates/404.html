@@ -1,15 +1,16 @@
 {% extends "base.html" %}
+{% load i18n %}
 
 {# Django shows this page when an address doesn't exist (only when DEBUG is off) #}
-{% block title %}Page not found · IT Projects{% endblock %}
+{% block title %}{% translate "Page not found" %} · IT Projects{% endblock %}
 
 {% block content %}
 <div class="empty">
   <div class="empty-header">404</div>
-  <p class="empty-title">This page doesn't exist</p>
-  <p class="empty-subtitle text-secondary">The address may be wrong, or what it showed was deleted.</p>
+  <p class="empty-title">{% translate "This page doesn't exist" %}</p>
+  <p class="empty-subtitle text-secondary">{% translate "The address may be wrong, or what it showed was deleted." %}</p>
   <div class="empty-action">
-    <a href="{% url 'home' %}" class="btn btn-primary"><i class="ti ti-arrow-left me-2"></i>Back to home</a>
+    <a href="{% url 'home' %}" class="btn btn-primary"><i class="ti ti-arrow-left me-2"></i>{% translate "Back to home" %}</a>
   </div>
 </div>
 {% endblock %}

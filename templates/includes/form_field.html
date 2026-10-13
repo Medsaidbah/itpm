@@ -1,4 +1,4 @@
-{# One form field: its label, the input, an optional hint and any errors #}
+{% load i18n %}{# One form field: its label, the input, an optional hint and any errors #}
 <div class="mb-3">
   {% if field.widget_type == "checkbox" %}
   <label class="form-check">
@@ -17,7 +17,7 @@
         <span class="form-check-label">{{ choice.choice_label }}</span>
       </label>
       {% empty %}
-      <div class="text-secondary mb-1">Nothing to choose yet.</div>
+      <div class="text-secondary mb-1">{% translate "Nothing to choose yet." %}</div>
       {% endfor %}
     </div>
   </fieldset>

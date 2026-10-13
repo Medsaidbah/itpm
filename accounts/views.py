@@ -1,4 +1,4 @@
-"""People: your own profile, the page of a person, and profile pictures."""
+"""People: your own profile, the page of a person, profile pictures, and the language switch."""
 
 from django.contrib import messages
 from django.contrib.auth import views as auth_views
@@ -7,10 +7,16 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
+from django.utils import translation
+from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy
+from django.views.decorators.http import require_POST
 
 from projects.models import Project, Task, people_visible_to
 
 from .forms import ProfileForm, StyledPasswordChangeForm
+from .middleware import LANGUAGE_CODES, remember_language
 from .models import User
 
 
@@ -24,7 +30,9 @@ def profile(request):
         form = ProfileForm(request.POST, request.FILES, instance=me)
         if form.is_valid():
             form.save()
-            messages.success(request, "Your profile is saved.")
+            # The message appears on the next page: in the language the person just chose (if they changed it)
+            with translation.override(me.get_language()):
+                messages.success(request, _("Your profile is saved."))
             return redirect("profile")
     else:
         form = ProfileForm(instance=me)
@@ -37,7 +45,7 @@ class PasswordChangeView(SuccessMessageMixin, auth_views.PasswordChangeView):
     template_name = "accounts/password_change.html"
     form_class = StyledPasswordChangeForm
     success_url = reverse_lazy("profile")
-    success_message = "Your password is changed."
+    success_message = gettext_lazy("Your password is changed.")
 
 
 @login_required
@@ -67,7 +75,25 @@ def person_picture(request, pk):
     try:
         file = person.picture.open("rb")
     except OSError:
-        raise Http404("This picture is missing from the server.")
+        raise Http404(_("This picture is missing from the server."))
     response = FileResponse(file, content_type="image/jpeg")
     response["Cache-Control"] = "private, max-age=86400"  # the browser keeps it for a day
+    return response
+
+
+@require_POST
+def set_language(request):
+    """The language switch, in the user menu and on the login page. The choice is saved in the
+    person's profile (when they are logged in) and in the browser, then the same page opens again."""
+    language = request.POST.get("language")
+    # Back to the page the switch was on. Only addresses on this site are accepted.
+    next_page = request.POST.get("next", "")
+    if not url_has_allowed_host_and_scheme(next_page, allowed_hosts={request.get_host()},
+                                           require_https=request.is_secure()):
+        next_page = reverse_lazy("home")
+    response = redirect(next_page)
+    if language in LANGUAGE_CODES:
+        if request.user.is_authenticated:
+            User.objects.filter(pk=request.user.pk).update(language=language)
+        remember_language(response, language)
     return response

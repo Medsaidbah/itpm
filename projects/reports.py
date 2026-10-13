@@ -1,5 +1,6 @@
 """Reports: Excel files to download, and a status report page made for printing.
-Everyone in a project's team can open its reports (they only read). Admins can open all of them."""
+Everyone in a project's team can open its reports (they only read). Admins can open all of them.
+The Excel files are written in the language of the person who downloads them (Stage 17c)."""
 from datetime import date
 
 from django.contrib.auth.decorators import login_required
@@ -7,6 +8,8 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.utils import timezone
 from django.utils.text import slugify
+from django.utils.translation import get_language_bidi
+from django.utils.translation import gettext as _
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill
 from openpyxl.utils import get_column_letter
@@ -38,6 +41,8 @@ def add_table_sheet(workbook, title, headers, rows, widths):
                 cell.data_type = "s"
     sheet.freeze_panes = "A2"
     sheet.auto_filter.ref = sheet.dimensions
+    # Arabic reads right to left: the sheet opens with column A on the right
+    sheet.sheet_view.rightToLeft = get_language_bidi()
     for column, width in enumerate(widths, start=1):
         sheet.column_dimensions[get_column_letter(column)].width = width
     return sheet
@@ -90,38 +95,38 @@ def project_tasks_excel(request, pk):
     workbook = Workbook()
     workbook.remove(workbook.active)  # start without the empty default sheet
 
-    summary = add_table_sheet(workbook, "Summary", ["Item", "Value"], [
-        ["Project", project.name],
-        ["Status", project.get_status_display()],
-        ["Priority", project.get_priority_display()],
-        ["Manager", str(project.manager)],
-        ["Start date", project.start_date],
-        ["End date", project.end_date],
-        ["Progress (%)", project.progress],
-        ["Tasks", project.task_total],
-        ["Tasks done", project.task_done],
-        ["Overdue tasks", project.task_overdue],
-        ["Exported on", today],
-        ["Exported by", str(request.user)],
+    summary = add_table_sheet(workbook, _("Summary"), [_("Item"), _("Value")], [
+        [_("Project"), project.name],
+        [_("Status"), project.get_status_display()],
+        [_("Priority"), project.get_priority_display()],
+        [_("Manager"), str(project.manager)],
+        [_("Start date"), project.start_date],
+        [_("End date"), project.end_date],
+        [_("Progress (%)"), project.progress],
+        [_("Tasks"), project.task_total],
+        [_("Tasks done"), project.task_done],
+        [_("Overdue tasks"), project.task_overdue],
+        [_("Exported on"), today],
+        [_("Exported by"), str(request.user)],
     ], widths=[18, 45])
     summary.auto_filter.ref = None  # no filter buttons on a two-column summary
 
     sheet = add_table_sheet(
-        workbook, "Tasks",
-        ["Task", "Main task", "Status", "Priority", "Assigned to", "Start date", "Due date",
-         "Done on", "Milestone", "Waits for", "Late"],
+        workbook, _("Tasks"),
+        [_("Task"), _("Main task"), _("Status"), _("Priority"), _("Assigned to"), _("Start date"), _("Due date"),
+         _("Done on"), _("Milestone"), _("Waits for"), _("Late")],
         [[
             task.title,
             task.parent.title if task.parent else "",
             task.get_status_display(),
             task.get_priority_display(),
-            str(task.assignee) if task.assignee else "Unassigned",
+            str(task.assignee) if task.assignee else _("Unassigned"),
             task.start_date,
             task.due_date,
             done_on(task),
-            "Yes" if task.is_milestone else "",
+            _("Yes") if task.is_milestone else "",
             ", ".join(other.title for other in task.depends_on.all()),
-            "Yes" if task.is_overdue else "",
+            _("Yes") if task.is_overdue else "",
         ] for task in tasks],
         widths=[40, 28, 13, 11, 20, 13, 13, 13, 10, 35, 7],
     )
@@ -141,9 +146,9 @@ def projects_excel(request):
     workbook = Workbook()
     workbook.remove(workbook.active)
     sheet = add_table_sheet(
-        workbook, "Projects",
-        ["Project", "Status", "Priority", "Manager", "Start date", "End date",
-         "Tasks", "Done", "Overdue tasks", "Progress (%)", "Late"],
+        workbook, _("Projects"),
+        [_("Project"), _("Status"), _("Priority"), _("Manager"), _("Start date"), _("End date"),
+         _("Tasks"), _("Done"), _("Overdue tasks"), _("Progress (%)"), _("Late")],
         [[
             project.name,
             project.get_status_display(),
@@ -155,7 +160,7 @@ def projects_excel(request):
             project.task_done,
             project.task_overdue,
             project.progress,
-            "Yes" if project.is_overdue else "",
+            _("Yes") if project.is_overdue else "",
         ] for project in projects],
         widths=[40, 13, 11, 20, 13, 13, 8, 8, 14, 13, 7],
     )

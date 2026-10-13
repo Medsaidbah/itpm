@@ -1,6 +1,7 @@
 {% extends "base.html" %}
+{% load i18n %}
 
-{% block title %}Status report · {{ project.name }}{% endblock %}
+{% block title %}{% translate "Status report" %} · {{ project.name }}{% endblock %}
 {% block nav_projects %}active{% endblock %}
 
 {% block extra_head %}
@@ -23,17 +24,17 @@
 {% block content %}
 {# These buttons are only on screen, not on paper (d-print-none) #}
 <div class="d-flex flex-wrap align-items-center gap-2 mb-4 d-print-none">
-  <a href="{{ project.get_absolute_url }}" class="text-secondary me-auto"><i class="ti ti-arrow-left me-1"></i>{{ project }}</a>
-  <a href="{% url 'project_tasks_excel' project.pk %}" class="btn"><i class="ti ti-file-spreadsheet me-2"></i>Tasks to Excel</a>
-  <button type="button" class="btn btn-primary" onclick="window.print()"><i class="ti ti-printer me-2"></i>Print or save as PDF</button>
+  <a href="{{ project.get_absolute_url }}" class="text-secondary me-auto"><i class="ti ti-arrow-left me-1"></i><bdi>{{ project }}</bdi></a>
+  <a href="{% url 'project_tasks_excel' project.pk %}" class="btn"><i class="ti ti-file-spreadsheet me-2"></i>{% translate "Tasks to Excel" %}</a>
+  <button type="button" class="btn btn-primary" onclick="window.print()"><i class="ti ti-printer me-2"></i>{% translate "Print or save as PDF" %}</button>
 </div>
 
 <div class="mb-4">
-  <div class="page-pretitle">Project status report · {{ generated_at|date:"d M Y" }}</div>
-  <h1 class="page-title h1 mb-2">{{ project.name }}</h1>
+  <div class="page-pretitle">{% translate "Project status report" %} · {{ generated_at|date:_("d M Y") }}</div>
+  <h1 class="page-title h1 mb-2"><bdi>{{ project.name }}</bdi></h1>
   <span class="badge bg-{{ project.status_color }}-lt">{{ project.get_status_display }}</span>
-  <span class="badge bg-{{ project.priority_color }}-lt">{{ project.get_priority_display }} priority</span>
-  {% if project.is_overdue %}<span class="badge bg-red-lt">Late</span>{% endif %}
+  <span class="badge bg-{{ project.priority_color }}-lt">{% blocktranslate with priority=project.get_priority_display %}{{ priority }} priority{% endblocktranslate %}</span>
+  {% if project.is_overdue %}<span class="badge bg-red-lt">{% translate "Late" %}</span>{% endif %}
 </div>
 
 {# Key facts and progress #}
@@ -41,49 +42,49 @@
   <div class="card-body">
     <div class="datagrid">
       <div class="datagrid-item">
-        <div class="datagrid-title">Manager</div>
+        <div class="datagrid-title">{% translate "Manager" %}</div>
         <div class="datagrid-content">{{ project.manager }}</div>
       </div>
       <div class="datagrid-item">
-        <div class="datagrid-title">Dates</div>
-        <div class="datagrid-content">{{ project.start_date|date:"d M Y"|default:"Not set" }} → {{ project.end_date|date:"d M Y"|default:"Not set" }}</div>
+        <div class="datagrid-title">{% translate "Dates" %}</div>
+        <div class="datagrid-content">{{ project.start_date|date:_("d M Y")|default:_("Not set") }} {% if LANGUAGE_BIDI %}←{% else %}→{% endif %} {{ project.end_date|date:_("d M Y")|default:_("Not set") }}</div>
       </div>
       <div class="datagrid-item">
-        <div class="datagrid-title">Progress</div>
-        <div class="datagrid-content">{{ project.progress }}% · {{ project.task_done }} of {{ project.task_total }} tasks done</div>
+        <div class="datagrid-title">{% translate "Progress" %}</div>
+        <div class="datagrid-content">{{ project.progress }}% · {% blocktranslate with done=project.task_done count counter=project.task_total %}{{ done }} of {{ counter }} task done{% plural %}{{ done }} of {{ counter }} tasks done{% endblocktranslate %}</div>
       </div>
       <div class="datagrid-item">
-        <div class="datagrid-title">Overdue tasks</div>
+        <div class="datagrid-title">{% translate "Overdue tasks" %}</div>
         <div class="datagrid-content">{{ project.task_overdue }}</div>
       </div>
     </div>
     <div class="progress progress-sm mt-3">
       <div class="progress-bar" style="width: {{ project.progress }}%" role="progressbar"
-           aria-valuenow="{{ project.progress }}" aria-valuemin="0" aria-valuemax="100" aria-label="{{ project.progress }}% done"></div>
+           aria-valuenow="{{ project.progress }}" aria-valuemin="0" aria-valuemax="100" aria-label="{% blocktranslate with percent=project.progress %}{{ percent }}% done{% endblocktranslate %}"></div>
     </div>
     <div class="d-flex flex-wrap gap-2 mt-3">
       {% for label, count, color in status_counts %}
-      <span class="badge bg-{{ color }}-lt">{{ label }}: {{ count }}</span>
+      <span class="badge bg-{{ color }}-lt">{% blocktranslate %}{{ label }}: {{ count }}{% endblocktranslate %}</span>
       {% endfor %}
     </div>
     {% if project.description %}
-    <div class="datagrid-title mt-4">Description</div>
-    <div>{{ project.description|linebreaksbr }}</div>
+    <div class="datagrid-title mt-4">{% translate "Description" %}</div>
+    <div dir="auto">{{ project.description|linebreaksbr }}</div>
     {% endif %}
   </div>
 </div>
 
 {% if milestones %}
 <div class="card mb-4 report-block">
-  <div class="card-header"><h3 class="card-title"><i class="ti ti-flag text-orange me-2"></i>Milestones</h3></div>
+  <div class="card-header"><h3 class="card-title"><i class="ti ti-flag text-orange me-2"></i>{% translate "Milestones" %}</h3></div>
   <div class="table-responsive">
     <table class="table card-table table-vcenter">
-      <thead><tr><th>Milestone</th><th>Due date</th><th>Status</th></tr></thead>
+      <thead><tr><th>{% translate "Milestone" %}</th><th>{% translate "Due date" %}</th><th>{% translate "Status" %}</th></tr></thead>
       <tbody>
         {% for task in milestones %}
         <tr>
-          <td>{{ task.title }}</td>
-          <td class="text-nowrap {% if task.is_overdue %}text-danger{% endif %}">{{ task.due_date|date:"d M Y"|default:"No date" }}</td>
+          <td><bdi>{{ task.title }}</bdi></td>
+          <td class="text-nowrap {% if task.is_overdue %}text-danger{% endif %}">{{ task.due_date|date:_("d M Y")|default:_("No date") }}</td>
           <td><span class="badge bg-{{ task.status_color }}-lt">{{ task.get_status_display }}</span></td>
         </tr>
         {% endfor %}
@@ -95,17 +96,17 @@
 
 {% if overdue %}
 <div class="card mb-4 report-block">
-  <div class="card-header"><h3 class="card-title"><i class="ti ti-alert-triangle text-danger me-2"></i>Overdue tasks</h3></div>
+  <div class="card-header"><h3 class="card-title"><i class="ti ti-alert-triangle text-danger me-2"></i>{% translate "Overdue tasks" %}</h3></div>
   <div class="table-responsive">
     <table class="table card-table table-vcenter">
-      <thead><tr><th>Task</th><th>Assigned to</th><th>Due date</th><th class="text-end">Late by</th></tr></thead>
+      <thead><tr><th>{% translate "Task" %}</th><th>{% translate "Assigned to" %}</th><th>{% translate "Due date" %}</th><th class="text-end">{% translate "Late by" %}</th></tr></thead>
       <tbody>
         {% for task in overdue %}
         <tr>
-          <td>{{ task.title }}</td>
-          <td>{{ task.assignee|default:"Unassigned" }}</td>
-          <td class="text-nowrap">{{ task.due_date|date:"d M Y" }}</td>
-          <td class="text-end text-nowrap text-danger">{{ task.days_late }} day{{ task.days_late|pluralize }}</td>
+          <td><bdi>{{ task.title }}</bdi></td>
+          <td>{{ task.assignee|default:_("Unassigned") }}</td>
+          <td class="text-nowrap">{{ task.due_date|date:_("d M Y") }}</td>
+          <td class="text-end text-nowrap text-danger">{% blocktranslate count counter=task.days_late %}{{ counter }} day{% plural %}{{ counter }} days{% endblocktranslate %}</td>
         </tr>
         {% endfor %}
       </tbody>
@@ -116,30 +117,30 @@
 
 {# Every task. This table can run over several pages; its header repeats on each page. #}
 <div class="card mb-4">
-  <div class="card-header"><h3 class="card-title">All tasks</h3></div>
+  <div class="card-header"><h3 class="card-title">{% translate "All tasks" %}</h3></div>
   {% if tasks %}
   <div class="table-responsive">
     <table class="table card-table table-vcenter">
-      <thead><tr><th>Task</th><th>Status</th><th>Assigned to</th><th>Start</th><th>Due</th></tr></thead>
+      <thead><tr><th>{% translate "Task" %}</th><th>{% translate "Status" %}</th><th>{% translate "Assigned to" %}</th><th>{% translate "Start" %}</th><th>{% translate "Due" %}</th></tr></thead>
       <tbody>
         {% for task in tasks %}
         <tr>
-          <td>{% if task.parent_id %}<span class="text-secondary ms-3 me-1">↳</span>{% endif %}{{ task.title }}</td>
+          <td>{% if task.parent_id %}<span class="text-secondary ms-3 me-1">{% if LANGUAGE_BIDI %}↲{% else %}↳{% endif %}</span>{% endif %}<bdi>{{ task.title }}</bdi></td>
           <td><span class="badge bg-{{ task.status_color }}-lt">{{ task.get_status_display }}</span></td>
-          <td>{{ task.assignee|default:"Unassigned" }}</td>
-          <td class="text-nowrap">{{ task.start_date|date:"d M Y" }}</td>
-          <td class="text-nowrap {% if task.is_overdue %}text-danger{% endif %}">{{ task.due_date|date:"d M Y" }}</td>
+          <td>{{ task.assignee|default:_("Unassigned") }}</td>
+          <td class="text-nowrap">{{ task.start_date|date:_("d M Y") }}</td>
+          <td class="text-nowrap {% if task.is_overdue %}text-danger{% endif %}">{{ task.due_date|date:_("d M Y") }}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
   {% else %}
-  <div class="card-body text-secondary">This project has no tasks yet.</div>
+  <div class="card-body text-secondary">{% translate "This project has no tasks yet." %}</div>
   {% endif %}
 </div>
 
 <div class="text-secondary small">
-  Report made on {{ generated_at|date:"d M Y, H:i" }} by {{ user }} · IT Projects
+  {% blocktranslate with date=generated_at|date:_("d M Y, H:i") person=user %}Report made on {{ date }} by {{ person }}{% endblocktranslate %} · IT Projects
 </div>
 {% endblock %}

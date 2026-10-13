@@ -19,6 +19,8 @@ from django.utils import timezone
 from django.utils.dateparse import parse_datetime
 from django.utils.formats import date_format
 from django.utils.timesince import timesince
+from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy, ngettext_lazy
 
 from .models import Attachment, Comment, Project, ProjectMember, Task
 
@@ -27,25 +29,38 @@ PAGE_SIZE = 30  # events per page
 # The fields the feed talks about, with the names people see on the forms.
 # Other fields, like the order of the cards on the board, are left out.
 PROJECT_FIELDS = {
-    "name": "Name",
-    "status": "Status",
-    "priority": "Priority",
-    "manager": "Manager",
-    "start_date": "Start date",
-    "end_date": "End date",
-    "description": "Description",
+    "name": gettext_lazy("Name"),
+    "status": gettext_lazy("Status"),
+    "priority": gettext_lazy("Priority"),
+    "manager": gettext_lazy("Manager"),
+    "start_date": gettext_lazy("Start date"),
+    "end_date": gettext_lazy("End date"),
+    "description": gettext_lazy("Description"),
 }
 TASK_FIELDS = {
-    "title": "Title",
-    "status": "Status",
-    "priority": "Priority",
-    "assignee": "Assigned to",
-    "start_date": "Start date",
-    "due_date": "Due date",
-    "parent": "Main task",
-    "is_milestone": "Milestone",
-    "description": "Description",
+    "title": gettext_lazy("Title"),
+    "status": gettext_lazy("Status"),
+    "priority": gettext_lazy("Priority"),
+    "assignee": gettext_lazy("Assigned to"),
+    "start_date": gettext_lazy("Start date"),
+    "due_date": gettext_lazy("Due date"),
+    "parent": gettext_lazy("Main task"),
+    "is_milestone": gettext_lazy("Milestone"),
+    "description": gettext_lazy("Description"),
 }
+
+# The words Django uses for "5 minutes" (django/utils/timesince.py), used by every "... ago" in the app.
+# They are listed again here so that our own translation files (locale/) carry them: Django's Arabic wording
+# repeats the number for two ("2 دقيقتين") and gets the numbers 11 to 99 wrong, and our files win over
+# Django's. Nothing reads this list: it only lets "makemessages" find the texts.
+TIME_WORDS = (
+    ngettext_lazy("%(num)d year", "%(num)d years", "num"),
+    ngettext_lazy("%(num)d month", "%(num)d months", "num"),
+    ngettext_lazy("%(num)d week", "%(num)d weeks", "num"),
+    ngettext_lazy("%(num)d day", "%(num)d days", "num"),
+    ngettext_lazy("%(num)d hour", "%(num)d hours", "num"),
+    ngettext_lazy("%(num)d minute", "%(num)d minutes", "num"),
+)
 
 
 @dataclass
@@ -68,8 +83,9 @@ class Event:
     def ago(self):
         """Like "5 minutes ago", or "just now" during the first minute."""
         if timezone.now() - self.when < timedelta(minutes=1):
-            return "just now"
-        return f"{timesince(self.when)} ago"
+            return _("just now")
+        # timesince() gives "5 minutes" in the language of the page
+        return _("%(time)s ago") % {"time": timesince(self.when)}
 
 
 # ---------- Turning saved versions into sentences ----------
@@ -85,17 +101,17 @@ def readable(version, name, people, tasks):
         return version.get_priority_display()
     if name in ("assignee", "manager"):
         if value is None:
-            return "Unassigned"
-        return str(people[value]) if value in people else "A deleted user"
+            return _("Unassigned")
+        return str(people[value]) if value in people else _("A deleted user")
     if name == "parent":
         if value is None:
-            return "None (main task)"
-        return tasks[value].title if value in tasks else "A deleted task"
+            return _("None (main task)")
+        return tasks[value].title if value in tasks else _("A deleted task")
     if name == "is_milestone":
-        return "Yes" if value else "No"
+        return _("Yes") if value else _("No")
     if isinstance(value, date):
-        return date_format(value, "d M Y")
-    return value or "Not set"
+        return date_format(value, _("d M Y"))
+    return value or _("Not set")
 
 
 def changes_between(old, new, fields, people, tasks):
@@ -106,7 +122,7 @@ def changes_between(old, new, fields, people, tasks):
         if getattr(old, attname) == getattr(new, attname):
             continue
         if name == "description":  # too long to show, so we only say that it changed
-            changes.append((label, None, "changed"))
+            changes.append((label, None, _("changed")))
         else:
             changes.append((label, readable(old, name, people, tasks), readable(new, name, people, tasks)))
     return changes
@@ -123,15 +139,15 @@ def project_event(version, projects, people):
         who=version.history_user,
         icon="ti-pencil",
         color="blue",
-        action="updated the project",
+        action=_("updated the project"),
         name=version.name,
         url=project.get_absolute_url() if project else "",
     )
     if version.history_type == "+":
-        event.icon, event.color, event.action = "ti-plus", "green", "created the project"
-        event.changes = [("Manager", None, readable(version, "manager", people, {}))]
+        event.icon, event.color, event.action = "ti-plus", "green", _("created the project")
+        event.changes = [(PROJECT_FIELDS["manager"], None, readable(version, "manager", people, {}))]
     elif version.history_type == "-":
-        event.icon, event.color, event.action, event.url = "ti-trash", "red", "deleted the project", ""
+        event.icon, event.color, event.action, event.url = "ti-trash", "red", _("deleted the project"), ""
     elif version.previous:
         event.changes = changes_between(version.previous, version, PROJECT_FIELDS, people, {})
         if not event.changes:
@@ -146,20 +162,20 @@ def task_event(version, tasks, projects, people):
         who=version.history_user,
         icon="ti-pencil",
         color="blue",
-        action="updated the task",
+        action=_("updated the task"),
         name=version.title,
         url=task.get_absolute_url() if task else "",
         project=projects.get(version.project_id),
     )
     if version.history_type == "+":
         event.icon, event.color = "ti-plus", "green"
-        event.action = "created the subtask" if version.parent_id else "created the task"
+        event.action = _("created the subtask") if version.parent_id else _("created the task")
         if version.assignee_id:
-            event.changes.append(("Assigned to", None, readable(version, "assignee", people, tasks)))
+            event.changes.append((TASK_FIELDS["assignee"], None, readable(version, "assignee", people, tasks)))
         if version.due_date:
-            event.changes.append(("Due date", None, readable(version, "due_date", people, tasks)))
+            event.changes.append((TASK_FIELDS["due_date"], None, readable(version, "due_date", people, tasks)))
     elif version.history_type == "-":
-        event.icon, event.color, event.action, event.url = "ti-trash", "red", "deleted the task", ""
+        event.icon, event.color, event.action, event.url = "ti-trash", "red", _("deleted the task"), ""
     elif version.previous and version.previous.project_id != version.project_id:
         pass  # moved here from another project: its earlier values belong to that project, so they aren't shown
     elif version.previous:
@@ -177,11 +193,11 @@ def team_event(version, projects, people):
     if project is None:
         return None  # the project was deleted since: the feed already says so
     person = people.get(version.user_id)
-    name = str(person) if person else "a deleted user"
+    name = str(person) if person else _("a deleted user")
     if version.history_type == "+":
-        icon, color, action = "ti-user-plus", "green", f"added {name} to the team of"
+        icon, color, action = "ti-user-plus", "green", _("added %(person)s to the team of") % {"person": name}
     elif version.history_type == "-":
-        icon, color, action = "ti-user-minus", "orange", f"removed {name} from the team of"
+        icon, color, action = "ti-user-minus", "orange", _("removed %(person)s from the team of") % {"person": name}
     else:
         return None  # "~": nothing that the feed shows changed
     return Event(
@@ -201,7 +217,7 @@ def comment_event(comment):
         who=comment.author,
         icon="ti-message",
         color="azure",
-        action="commented on",
+        action=_("commented on"),
         name=comment.task.title,
         url=f"{comment.task.get_absolute_url()}#comments",
         project=comment.task.project,
@@ -215,7 +231,7 @@ def file_event(attachment):
         who=attachment.uploaded_by,
         icon="ti-paperclip",
         color="purple",
-        action="added a file to",
+        action=_("added a file to"),
         name=attachment.task.title,
         url=f"{attachment.task.get_absolute_url()}#files",
         project=attachment.task.project,
@@ -298,8 +314,8 @@ def get_events(viewer, project=None, task=None, person=None, before=None, limit=
 
     # 5. Load at once what the sentences need: the version saved just before each change
     #    (to see what changed), and the names of people, tasks and projects.
-    page_project_versions = [item for _, kind, item in page if kind == "project"]
-    page_task_versions = [item for _, kind, item in page if kind == "task"]
+    page_project_versions = [item for _when, kind, item in page if kind == "project"]
+    page_task_versions = [item for _when, kind, item in page if kind == "task"]
     for versions, model in ((page_project_versions, Project), (page_task_versions, Task)):
         previous = model.history.in_bulk([v.previous_id for v in versions if v.previous_id])
         for version in versions:
@@ -308,7 +324,7 @@ def get_events(viewer, project=None, task=None, person=None, before=None, limit=
     people = get_user_model().objects.in_bulk()  # everyone (there aren't many people)
     task_ids = set()
     project_ids = {version.id for version in page_project_versions}
-    project_ids |= {item.project_id for _, kind, item in page if kind == "team"}
+    project_ids |= {item.project_id for _when, kind, item in page if kind == "team"}
     for version in page_task_versions:
         task_ids.add(version.id)
         project_ids.add(version.project_id)
@@ -320,7 +336,7 @@ def get_events(viewer, project=None, task=None, person=None, before=None, limit=
 
     # 6. One sentence per event
     events = []
-    for _, kind, item in page:
+    for _when, kind, item in page:
         if kind == "project":
             event = project_event(item, projects, people)
         elif kind == "task":

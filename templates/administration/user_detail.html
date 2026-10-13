@@ -32,7 +32,7 @@
       <h3 class="h2 mb-1">{{ person }}</h3>
       <div class="text-secondary">
         {{ person.username }} ·
-        {% if person.last_login %}{% blocktranslate with date=person.last_login|date:"d M Y, H:i" %}last login {{ date }}{% endblocktranslate %}{% else %}{% translate "never logged in" %}{% endif %}
+        {% if person.last_login %}{% blocktranslate with date=person.last_login|date:_("d M Y, H:i") %}last login {{ date }}{% endblocktranslate %}{% else %}{% translate "never logged in" %}{% endif %}
       </div>
       <div class="mt-2">
         {% if person.is_admin %}<span class="badge bg-blue-lt">{{ person.get_role_display }}</span>{% else %}<span class="badge bg-secondary-lt">{{ person.get_role_display }}</span>{% endif %}
@@ -102,7 +102,7 @@
         <div class="list-group-item">
           <div class="d-flex align-items-center gap-2">
             <div class="me-auto text-break">
-              <a href="{{ project.get_absolute_url }}">{{ project.name }}</a>
+              <a href="{{ project.get_absolute_url }}"><bdi>{{ project.name }}</bdi></a>
               <div class="small text-secondary">
                 {% translate "Manager" %}{% if project.open_count %} · {% blocktranslate count counter=project.open_count %}{{ counter }} open task{% plural %}{{ counter }} open tasks{% endblocktranslate %}{% endif %}
               </div>
@@ -115,7 +115,7 @@
         <div class="list-group-item">
           <div class="d-flex align-items-center gap-2">
             <div class="me-auto text-break">
-              <a href="{{ project.get_absolute_url }}">{{ project.name }}</a>
+              <a href="{{ project.get_absolute_url }}"><bdi>{{ project.name }}</bdi></a>
               <div class="small text-secondary">
                 {% translate "Member" %}{% if project.open_count %} · {% blocktranslate count counter=project.open_count %}{{ counter }} open task{% plural %}{{ counter }} open tasks{% endblocktranslate %}{% endif %}
               </div>
@@ -162,10 +162,10 @@
         {% for task in open_tasks %}
         <a href="{{ task.get_absolute_url }}" class="list-group-item list-group-item-action">
           <div class="d-flex align-items-center gap-2">
-            <span class="me-auto text-break">{{ task.title }}</span>
-            <span class="small {% if task.is_overdue %}text-danger{% else %}text-secondary{% endif %} text-nowrap">{{ task.due_date|date:"d M Y"|default:_("No date") }}</span>
+            <span class="me-auto text-break"><bdi>{{ task.title }}</bdi></span>
+            <span class="small {% if task.is_overdue %}text-danger{% else %}text-secondary{% endif %} text-nowrap">{{ task.due_date|date:_("d M Y")|default:_("No date") }}</span>
           </div>
-          <div class="small text-secondary">{{ task.project }}</div>
+          <div class="small text-secondary"><bdi>{{ task.project }}</bdi></div>
         </a>
         {% endfor %}
       </div>
