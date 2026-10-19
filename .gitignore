@@ -5,3 +5,9 @@ __pycache__/
 media/
 # made by "collectstatic" on the server
 staticfiles/
+# on the server: the service program (WinSW) and the app's logs
+deploy/*.exe
+logs/
+
+# Docker: the container settings hold secrets
+.env.docker

@@ -1,0 +1,52 @@
+# Example to try the app (and its database) on one machine:
+#   cp docker.env.example .env.docker      (then edit the secrets)
+#   docker compose --env-file .env.docker up --build
+#   docker compose --env-file .env.docker exec web python manage.py createsuperuser
+# then open http://localhost:8000
+# In production the infrastructure team uses its own PostgreSQL, proxy and secrets: see DEPLOY-DOCKER.md.
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - itpm_db:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  web:
+    build: .
+    image: itpm:latest
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      SECRET_KEY: ${SECRET_KEY}
+      DEBUG: "False"
+      ALLOWED_HOSTS: ${ALLOWED_HOSTS}
+      HTTPS: ${HTTPS}
+      HSTS_SECONDS: ${HSTS_SECONDS}
+      SITE_URL: ${SITE_URL}
+      TRUSTED_PROXY: ${TRUSTED_PROXY}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      DB_HOST: ${DB_HOST}
+      DB_PORT: ${DB_PORT}
+      EMAIL_BACKEND: ${EMAIL_BACKEND}
+      DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL}
+    ports:
+      - "127.0.0.1:8000:8000"   # this machine only; production traffic goes through the company's proxy
+    volumes:
+      - itpm_media:/app/media
+
+volumes:
+  itpm_db:
+  itpm_media:

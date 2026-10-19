@@ -178,6 +178,7 @@ MEDIA_ROOT = BASE_DIR / "media"
 HTTPS = os.environ.get("HTTPS", "False") == "True"
 if HTTPS:
     SECURE_SSL_REDIRECT = True  # an http:// address is sent to https://
+    SECURE_REDIRECT_EXEMPT = [r"^healthz/$"]  # the health check (inside the container) uses plain http
     SESSION_COOKIE_SECURE = True  # the login cookie only travels encrypted
     CSRF_COOKIE_SECURE = True
     LANGUAGE_COOKIE_SECURE = True

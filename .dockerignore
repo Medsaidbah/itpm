@@ -1,0 +1,17 @@
+# Nothing secret and nothing useless goes into the image
+.git
+.gitignore
+.venv
+.env
+.env.*
+__pycache__
+*.pyc
+media
+staticfiles
+logs
+# Windows server install files (Step 15b): not used in a container
+deploy
+# the image's own files are needed, but not these
+Dockerfile
+docker-compose.yml
+.dockerignore

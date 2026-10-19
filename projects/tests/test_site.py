@@ -39,3 +39,29 @@ class SiteTests(TeamTestCase):
         self.assertEqual(response["X-Frame-Options"], "DENY")  # no showing our pages inside another site
         self.assertEqual(response["X-Content-Type-Options"], "nosniff")
         self.assertEqual(response["Referrer-Policy"], "same-origin")
+
+
+class HealthCheckTests(TeamTestCase):
+    """/healthz/ is for Docker and monitoring: public, shows nothing, tells if the database answers."""
+
+    def test_answers_ok_without_login(self):
+        response = self.client.get("/healthz/")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.content, b"ok")
+
+    def test_shows_no_data(self):
+        self.assertNotIn(self.sara.username.encode(), self.client.get("/healthz/").content)
+
+    def test_says_503_when_the_database_fails(self):
+        from unittest import mock
+
+        with mock.patch("config.health.connection.cursor", side_effect=Exception("down")):
+            with self.assertLogs("config.health", level="ERROR"):
+                response = self.client.get("/healthz/")
+        self.assertEqual(response.status_code, 503)
+
+    def test_is_not_sent_to_https(self):
+        # inside the container the check uses plain http, even when the site itself forces https
+        with self.settings(SECURE_SSL_REDIRECT=True, SECURE_REDIRECT_EXEMPT=[r"^healthz/$"]):
+            self.assertEqual(self.client.get("/healthz/").status_code, 200)
+            self.assertEqual(self.client.get("/login/").status_code, 301)
