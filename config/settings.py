@@ -222,5 +222,17 @@ EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True") == "True"
 EMAIL_TIMEOUT = 10  # seconds: a slow mail server can't freeze a page for long
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "IT Projects <it-projects@example.com>")
 
+# Microsoft 365 (Step 15d): used when EMAIL_BACKEND=config.graph_email.GraphEmailBackend.
+# The secret only ever lives in .env / the container's settings, never in git.
+GRAPH_TENANT_ID = os.environ.get("GRAPH_TENANT_ID", "")
+GRAPH_CLIENT_ID = os.environ.get("GRAPH_CLIENT_ID", "")
+GRAPH_CLIENT_SECRET = os.environ.get("GRAPH_CLIENT_SECRET", "")
+GRAPH_SENDER = os.environ.get("GRAPH_SENDER", "")  # the mailbox the emails are sent from
+GRAPH_SAVE_TO_SENT_ITEMS = os.environ.get("GRAPH_SAVE_TO_SENT_ITEMS", "False") == "True"
+# Only change these three for a special Microsoft cloud (or in tests)
+GRAPH_AUTHORITY = os.environ.get("GRAPH_AUTHORITY", "https://login.microsoftonline.com")
+GRAPH_API_URL = os.environ.get("GRAPH_API_URL", "https://graph.microsoft.com/v1.0")
+GRAPH_SCOPE = os.environ.get("GRAPH_SCOPE", "https://graph.microsoft.com/.default")
+
 # The app's address, for the links inside emails
 SITE_URL = os.environ.get("SITE_URL", "http://127.0.0.1:8000")

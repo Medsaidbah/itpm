@@ -32,7 +32,8 @@ Build: `docker build -t itpm:<version> .`
 | `DEBUG` | no | must stay `False` (the image sets it) |
 | `RUN_MIGRATIONS` | no | default `1`: the container applies database migrations at start. Set `0` if you run them as a separate job |
 | `SERVE_HOST` / `SERVE_PORT` | no | default `0.0.0.0` / `8000` |
-| `EMAIL_BACKEND` and friends | no | **see section 6: real email is not built yet** |
+| `EMAIL_BACKEND` | no | default: `console` (emails only appear in the log). For real email use `config.graph_email.GraphEmailBackend` (Microsoft 365) |
+| `GRAPH_TENANT_ID` `GRAPH_CLIENT_ID` `GRAPH_CLIENT_SECRET` `GRAPH_SENDER` | with the Graph backend | Microsoft 365 sending; the tenant administrator follows **`EMAIL-M365-SETUP.md`** and gives you these four values. The secret goes through your secret store |
 
 `docker.env.example` lists all of them. Do not put real values in git.
 
@@ -53,7 +54,8 @@ and the login lockout (django-axes) would see the proxy's address instead of the
 1. Start the container with a reachable, empty database: it waits for the database (up to 60 s), applies migrations, then serves.
 2. Create the first administrator (interactive): `docker exec -it <container> python manage.py createsuperuser`.
    After that, the administrator creates all other accounts in the application (Administration section).
-3. Daily reminder emails (when email exists, section 6): schedule `python manage.py send_reminders` once a day
+3. Check the email settings: `docker exec -it <container> python manage.py send_test_email someone@company.mr`.
+4. Daily reminder emails: schedule `python manage.py send_reminders` once a day
    with the same image and environment (`docker run ... itpm:<version> python manage.py send_reminders`, or a cron / Kubernetes job).
    Any command other than `python serve.py` skips the database wait and migrations.
 
@@ -66,9 +68,9 @@ run migrations from one place only (`RUN_MIGRATIONS=0` on the others).
 
 ## 6. Known limits (honest list)
 
-- **Email is not finished (planned "Step 15d")**: with the default `console` backend, emails are only printed in the logs.
-  The application needs Microsoft 365 (Graph) sending to be built; tell the developer which mail system you will provide
-  (SMTP relay or Microsoft 365) – SMTP settings already work through `EMAIL_HOST*` variables.
+- **Email (Step 15d)**: Microsoft 365 sending is built (`config.graph_email.GraphEmailBackend`) and tested against a simulated Microsoft service,
+  **not yet against a real tenant**. Until the four `GRAPH_*` values are set and `EMAIL_BACKEND` is changed, emails are only printed in the log.
+  The reminder job sends one email after the other (Exchange Online allows about 30 per minute per mailbox).
 - No two-factor login, no password reset by email (an administrator sets a new password).
 - Time zone is fixed to `Africa/Nouakchott`; the interface has English, French and Arabic.
 

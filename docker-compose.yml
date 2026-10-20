@@ -42,6 +42,10 @@ services:
       DB_PORT: ${DB_PORT}
       EMAIL_BACKEND: ${EMAIL_BACKEND}
       DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL}
+      GRAPH_TENANT_ID: ${GRAPH_TENANT_ID:-}
+      GRAPH_CLIENT_ID: ${GRAPH_CLIENT_ID:-}
+      GRAPH_CLIENT_SECRET: ${GRAPH_CLIENT_SECRET:-}
+      GRAPH_SENDER: ${GRAPH_SENDER:-}
     ports:
       - "127.0.0.1:8000:8000"   # this machine only; production traffic goes through the company's proxy
     volumes:
