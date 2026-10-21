@@ -2260,9 +2260,6 @@ msgstr "Veuillez saisir une adresse e-mail professionnelle (ou un nom d'utilisat
 msgid "Your temporary password has expired. Ask an admin for a new one."
 msgstr "Votre mot de passe temporaire a expiré. Demandez-en un nouveau à un administrateur."
 
-msgid "Optional. Leave it empty: the person logs in with their work email address. Letters, digits and @ . + - _ only."
-msgstr "Facultatif. Laissez vide : la personne se connecte avec son adresse e-mail professionnelle. Lettres, chiffres et @ . + - _ uniquement."
-
 msgid "Temporary password"
 msgstr "Mot de passe temporaire"
 
@@ -2301,9 +2298,6 @@ msgstr "Un compte utilise déjà %(email)s."
 
 msgid "A value is too long."
 msgstr "Une valeur est trop longue."
-
-msgid "The account of %(person)s is created. Give them their work email address and the temporary password in person or by phone, not by email. They must choose their own password at their first login."
-msgstr "Le compte de %(person)s est créé. Donnez-lui son adresse e-mail professionnelle et le mot de passe temporaire en personne ou par téléphone, pas par e-mail. Il ou elle devra choisir son propre mot de passe à la première connexion."
 
 msgid "The new password of %(person)s is saved. Give it to them in person or by phone, not by email. They must choose their own password at their next login."
 msgstr "Le nouveau mot de passe de %(person)s est enregistré. Donnez-le en personne ou par téléphone, pas par e-mail. Il ou elle devra choisir son propre mot de passe à la prochaine connexion."
@@ -2347,9 +2341,6 @@ msgstr "Ligne %(number)s :"
 msgid "Create the accounts"
 msgstr "Créer les comptes"
 
-msgid "Choose a temporary password and give it to the person in person or by phone, not by email. They must choose their own password at their first login."
-msgstr "Choisissez un mot de passe temporaire et donnez-le à la personne en personne ou par téléphone, pas par e-mail. Elle devra choisir son propre mot de passe à la première connexion."
-
 msgid "Give the new password to the person in person or by phone, not by email. It is temporary: the person must choose their own password at their next login."
 msgstr "Donnez le nouveau mot de passe à la personne en personne ou par téléphone, pas par e-mail. Il est temporaire : la personne devra choisir son propre mot de passe à sa prochaine connexion."
 
@@ -2358,3 +2349,9 @@ msgstr "Générer un mot de passe aléatoire"
 
 msgid "Work email or username"
 msgstr "Adresse e-mail professionnelle ou nom d'utilisateur"
+
+msgid "Made from the names when the account is created (for example mssaidi). The person logs in with their work email address. Letters, digits and @ . + - _ only."
+msgstr "Créé à partir des noms à la création du compte (par exemple mssaidi). La personne se connecte avec son adresse e-mail professionnelle. Lettres, chiffres et @ . + - _ uniquement."
+
+msgid "The app makes the username (from the names) and a random temporary password. You see them once, on the next page. Give the password to the person in person or by phone, not by email: they must choose their own password at their first login."
+msgstr "L'application génère le nom d'utilisateur (à partir des noms) et un mot de passe temporaire aléatoire. Vous les voyez une seule fois, sur la page suivante. Donnez le mot de passe à la personne en personne ou par téléphone, pas par e-mail : elle devra choisir son propre mot de passe à sa première connexion."

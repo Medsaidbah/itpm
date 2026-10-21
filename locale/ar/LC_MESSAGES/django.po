@@ -2412,9 +2412,6 @@ msgstr "يرجى إدخال بريد العمل الإلكتروني (أو اس�
 msgid "Your temporary password has expired. Ask an admin for a new one."
 msgstr "انتهت صلاحية كلمة المرور المؤقتة. اطلب كلمة مرور جديدة من أحد المشرفين."
 
-msgid "Optional. Leave it empty: the person logs in with their work email address. Letters, digits and @ . + - _ only."
-msgstr "اختياري. اتركه فارغًا: يسجّل الشخص الدخول ببريد عمله الإلكتروني. أحرف وأرقام و @ . + - _ فقط."
-
 msgid "Temporary password"
 msgstr "كلمة مرور مؤقتة"
 
@@ -2453,9 +2450,6 @@ msgstr "يوجد حساب يستخدم %(email)s بالفعل."
 
 msgid "A value is too long."
 msgstr "إحدى القيم طويلة جدًا."
-
-msgid "The account of %(person)s is created. Give them their work email address and the temporary password in person or by phone, not by email. They must choose their own password at their first login."
-msgstr "تم إنشاء حساب %(person)s. سلّمه بريد العمل الإلكتروني وكلمة المرور المؤقتة شخصيًا أو بالهاتف، وليس بالبريد الإلكتروني. عليه اختيار كلمة مروره الخاصة عند أول تسجيل دخول."
 
 msgid "The new password of %(person)s is saved. Give it to them in person or by phone, not by email. They must choose their own password at their next login."
 msgstr "تم حفظ كلمة المرور الجديدة لـ %(person)s. سلّمها شخصيًا أو بالهاتف، وليس بالبريد الإلكتروني. عليه اختيار كلمة مروره الخاصة عند تسجيل الدخول التالي."
@@ -2499,9 +2493,6 @@ msgstr "السطر %(number)s:"
 msgid "Create the accounts"
 msgstr "إنشاء الحسابات"
 
-msgid "Choose a temporary password and give it to the person in person or by phone, not by email. They must choose their own password at their first login."
-msgstr "اختر كلمة مرور مؤقتة وسلّمها للشخص شخصيًا أو بالهاتف، وليس بالبريد الإلكتروني. عليه اختيار كلمة مروره الخاصة عند أول تسجيل دخول."
-
 msgid "Give the new password to the person in person or by phone, not by email. It is temporary: the person must choose their own password at their next login."
 msgstr "سلّم كلمة المرور الجديدة للشخص شخصيًا أو بالهاتف، وليس بالبريد الإلكتروني. هي مؤقتة: عليه اختيار كلمة مروره الخاصة عند تسجيل الدخول التالي."
 
@@ -2510,3 +2501,9 @@ msgstr "إنشاء كلمة مرور عشوائية"
 
 msgid "Work email or username"
 msgstr "بريد العمل أو اسم المستخدم"
+
+msgid "Made from the names when the account is created (for example mssaidi). The person logs in with their work email address. Letters, digits and @ . + - _ only."
+msgstr "يُنشأ من الاسمين عند إنشاء الحساب (مثل mssaidi). يسجّل الشخص الدخول ببريد عمله الإلكتروني. أحرف وأرقام و @ . + - _ فقط."
+
+msgid "The app makes the username (from the names) and a random temporary password. You see them once, on the next page. Give the password to the person in person or by phone, not by email: they must choose their own password at their first login."
+msgstr "ينشئ التطبيق اسم المستخدم (من الاسمين) وكلمة مرور مؤقتة عشوائية. تراهما مرة واحدة في الصفحة التالية. سلّم كلمة المرور للشخص شخصيًا أو بالهاتف، وليس بالبريد الإلكتروني: عليه اختيار كلمة مروره الخاصة عند أول تسجيل دخول."

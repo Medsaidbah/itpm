@@ -12,6 +12,5 @@ logs/
 # Docker: the container settings hold secrets
 .env.docker
 
-docker.env
-
+# a copy of the container settings under another name
 docker.env

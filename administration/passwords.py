@@ -1,7 +1,10 @@
-"""Stage 18a: temporary passwords, and the reading of a list of people to create in one go."""
+"""Stages 18a/18b: temporary passwords, usernames made from the names, and the reading of a list of
+people to create in one go."""
 
 import csv
+import re
 import secrets
+import unicodedata
 from dataclasses import dataclass, field
 
 from django.core.exceptions import ValidationError
@@ -18,6 +21,34 @@ MAX_IMPORT_LINES = 200
 def temporary_password():
     """A new random password like "k7mp-x3qa-h9ne" (about 59 bits: enough, it must be changed at first login)."""
     return "-".join("".join(secrets.choice(ALPHABET) for _ in range(4)) for _ in range(3))
+
+
+def _ascii(text):
+    """"Éloïse" -> "Eloise"; letters that have no Latin form (Arabic...) disappear."""
+    return unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode()
+
+
+def username_from_names(first_name, last_name, email=""):
+    """The first letter of each first name + the whole last name, in small letters without accents or spaces:
+    "Mohamed Said" "Saidi" -> "mssaidi", "Sara" "Ben" -> "sben". With names that have no Latin letters
+    (Arabic), the part of the email before the @ is used instead."""
+    initials = "".join(word[0] for word in re.split(r"[\s'’-]+", _ascii(first_name)) if word)
+    last = re.sub(r"[^a-z0-9]", "", _ascii(last_name).lower())
+    username = re.sub(r"[^a-z0-9]", "", initials.lower()) + last
+    if len(username) < 2:
+        username = re.sub(r"[^a-z0-9._-]", "", _ascii(email.split("@")[0]).lower()) or "user"
+    return username[:30]
+
+
+def free_username(first_name, last_name, email="", taken=()):
+    """username_from_names(), with a number added when someone has it already: "msaidi", "msaidi2"...
+    `taken` = names chosen earlier in the same list, not saved yet (lower-case)."""
+    base = username_from_names(first_name, last_name, email)
+    candidate, number = base, 1
+    while candidate in taken or User.objects.filter(username__iexact=candidate).exists():
+        number += 1
+        candidate = f"{base}{number}"
+    return candidate
 
 
 @dataclass
@@ -66,8 +97,7 @@ def read_people(text):
                                   % {"email": email, "line": seen[key]}))
             continue
         seen[key] = number
-        username_taken = User.objects.filter(username__iexact=key).exists()
-        if username_taken or User.objects.filter(email__iexact=email).exists():
+        if User.objects.filter(email__iexact=email).exists():
             result.errors.append((number, _("An account already uses %(email)s.") % {"email": email}))
             continue
         if len(first) > 150 or len(last) > 150 or len(email) > 150:

@@ -165,11 +165,10 @@ class OverviewAndListTests(TeamTestCase):
 @override_settings(PASSWORD_HASHERS=["django.contrib.auth.hashers.MD5PasswordHasher"])
 class NewAccountTests(MediaFolderMixin, TeamTestCase):
     def new_account(self, **changes):
-        data = {"username": "lina", "first_name": "Lina", "last_name": "Diallo", "email": "lina@example.com",
-                "phone": "+222 22 33 44 55", "role": "user",
-                "password1": "Blue-river-2026", "password2": "Blue-river-2026"}
+        data = {"first_name": "Lina", "last_name": "Diallo", "email": "lina@example.com",
+                "phone": "+222 22 33 44 55", "role": "user"}
         data.update(changes)
-        return self.client.post("/administration/users/new/", data, follow=True)
+        return self.client.post("/administration/users/new/", data)
 
     def setUp(self):
         super().setUp()
@@ -177,44 +176,50 @@ class NewAccountTests(MediaFolderMixin, TeamTestCase):
 
     def test_creating_an_account(self):
         response = self.new_account(picture=picture_file())
-        lina = User.objects.get(username="lina")
-        self.assertRedirects(response, f"/administration/users/{lina.pk}/")
-        self.assertIn("The account of Lina Diallo is created.", messages_in(response)[0])
-        self.assertEqual((lina.get_full_name(), lina.email, lina.phone, lina.role, lina.is_active),
-                         ("Lina Diallo", "lina@example.com", "+222 22 33 44 55", "user", True))
-        self.assertTrue(lina.check_password("Blue-river-2026"))
+        self.assertEqual(response.status_code, 200)  # the one-time sheet, not a redirect
+        self.assertEqual(response["Cache-Control"], "no-store")
+        lina = User.objects.get(email="lina@example.com")
+        self.assertEqual(lina.username, "ldiallo")  # first letter of the first name + the last name
+        self.assertEqual((lina.get_full_name(), lina.phone, lina.role, lina.is_active),
+                         ("Lina Diallo", "+222 22 33 44 55", "user", True))
+        password = response.context["accounts"][0][1]
+        self.assertContains(response, password)
+        self.assertTrue(lina.check_password(password))
+        self.assertTrue(lina.must_change_password)  # made by the app, so temporary
+        self.assertIsNotNone(lina.temporary_password_until)
         with Image.open(lina.picture.path) as image:  # made small and square, like on the profile page
             self.assertEqual(image.size, (PICTURE_SIZE, PICTURE_SIZE))
-        # The new person can log in
-        self.assertRedirects(Client().post("/login/", {"username": "lina", "password": "Blue-river-2026"}), "/",
+        # The new person logs in with the email address and is sent to choose their own password
+        browser = Client()
+        self.assertRedirects(browser.post("/login/", {"username": "Lina@Example.com", "password": password}), "/",
                              fetch_redirect_response=False)
-        # ... and the password was chosen by an admin, so it is temporary (Stage 18a)
-        self.assertTrue(lina.must_change_password)
-        self.assertIsNotNone(lina.temporary_password_until)
+        self.assertRedirects(browser.get("/projects/"), "/profile/password/", fetch_redirect_response=False)
+
+    def test_no_password_or_username_is_asked(self):
+        form = self.client.get("/administration/users/new/").context["form"]
+        self.assertEqual(set(form.fields), {"first_name", "last_name", "email", "phone", "picture", "role"})
 
     def test_an_admin_account(self):
         self.new_account(role="admin")
-        self.assertTrue(User.objects.get(username="lina").is_admin)
+        self.assertTrue(User.objects.get(email="lina@example.com").is_admin)
 
     def test_names_and_email_are_needed(self):
         response = self.new_account(first_name="", last_name="", email="")
         for field in ("first_name", "last_name", "email"):
             self.assertEqual(response.context["form"].errors[field], ["This field is required."])
-        self.assertFalse(User.objects.filter(username="lina").exists())
+        self.assertFalse(User.objects.filter(username="ldiallo").exists())
 
-    def test_usernames_and_emails_are_not_shared(self):
-        response = self.new_account(username="SARA", email="SARA@example.com")
-        errors = response.context["form"].errors
-        self.assertEqual(errors["username"], ["A user with that username already exists."])
-        self.assertEqual(errors["email"], ["Another account already uses this email address."])
+    def test_emails_are_not_shared(self):
+        response = self.new_account(email="SARA@example.com")
+        self.assertEqual(response.context["form"].errors["email"], ["Another account already uses this email address."])
         self.assertEqual(User.objects.filter(email__iexact="sara@example.com").count(), 1)
 
-    def test_weak_or_different_passwords_are_refused(self):
-        response = self.new_account(password1="12345678", password2="12345678")
-        self.assertIn("This password is entirely numeric.", response.context["form"].errors["password2"])
-        response = self.new_account(password2="Another-pass-2026")
-        self.assertIn("The two password fields didn’t match.", response.context["form"].errors["password2"])
-        self.assertFalse(User.objects.filter(username="lina").exists())
+    def test_a_username_already_taken_gets_a_number(self):
+        self.new_account()
+        self.new_account(email="lina2@example.com")
+        self.new_account(email="lina3@example.com")
+        usernames = User.objects.filter(email__startswith="lina").order_by("pk").values_list("username", flat=True)
+        self.assertEqual(list(usernames), ["ldiallo", "ldiallo2", "ldiallo3"])
 
 
 class AccountDetailsTests(MediaFolderMixin, TeamTestCase):

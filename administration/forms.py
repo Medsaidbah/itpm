@@ -1,7 +1,7 @@
 """The forms of the Administration section."""
 
 from django import forms
-from django.contrib.auth.forms import SetPasswordForm, UserCreationForm, UsernameField
+from django.contrib.auth.forms import SetPasswordForm, UsernameField
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
@@ -11,11 +11,13 @@ from accounts.pictures import MAX_PICTURE_MB
 from projects.forms import BootstrapFormMixin
 from projects.models import Project
 
+from .passwords import free_username, temporary_password
+
 ACCOUNT_FIELDS = ["username", "first_name", "last_name", "email", "phone", "picture", "role"]
 ACCOUNT_LABELS = {"username": _("Username"), "phone": _("Phone number"), "role": _("Role")}
 ACCOUNT_HELP = {
-    "username": _("Optional. Leave it empty: the person logs in with their work email address. "
-                  "Letters, digits and @ . + - _ only."),
+    "username": _("Made from the names when the account is created (for example mssaidi). The person logs "
+                  "in with their work email address. Letters, digits and @ . + - _ only."),
     "role": _("Admins see and change everything, including this Administration section. "
               "Users see the projects they manage or whose team they are in."),
 }
@@ -43,7 +45,8 @@ class AccountFormMixin(PictureFormMixin):
         # dir="ltr": a phone number, an email or a username reads from left to right, even in Arabic
         self.fields["phone"].widget.attrs.update(placeholder="+222 22 12 34 56", autocomplete="off", dir="ltr")
         self.fields["email"].widget.attrs.update(autocomplete="off", dir="ltr")
-        self.fields["username"].widget.attrs["dir"] = "ltr"
+        if "username" in self.fields:  # not in the "new account" form: the username is made by the app
+            self.fields["username"].widget.attrs["dir"] = "ltr"
 
     def clean_username(self):
         """Usernames must be different, even in capitals: "Sara" and "sara" can't both exist."""
@@ -64,41 +67,29 @@ class AccountFormMixin(PictureFormMixin):
         return email
 
 
-class NewAccountForm(AccountFormMixin, BootstrapFormMixin, UserCreationForm):
-    """A new account: the person's details, their role, and a first password (typed twice)."""
+class NewAccountForm(AccountFormMixin, BootstrapFormMixin, forms.ModelForm):
+    """A new account: the person's details and their role. The username (made from the names) and the
+    temporary password are made by the app when the form is saved (Stage 18b)."""
 
     picture = picture_field()
 
-    class Meta(UserCreationForm.Meta):
+    class Meta:
         model = User
-        fields = ACCOUNT_FIELDS
+        fields = [name for name in ACCOUNT_FIELDS if name != "username"]
         labels = ACCOUNT_LABELS
         help_texts = ACCOUNT_HELP
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.set_up_fields()
-        self.fields["password1"].label = _("Temporary password")
-        self.fields["username"].required = False  # empty: the work email address is used
-
-    def clean(self):
-        cleaned_data = super().clean()
-        email = cleaned_data.get("email")
-        if not cleaned_data.get("username") and email and "username" not in self.errors:
-            # Stage 18a: no username typed, so the person's login name is their email address
-            username = email.lower()
-            try:
-                self.fields["username"].run_validators(username)
-            except forms.ValidationError as error:
-                self.add_error("username", error)
-            else:
-                if User.objects.filter(username__iexact=username).exists():
-                    self.add_error("username", self.instance.unique_error_message(User, ["username"]))
-                cleaned_data["username"] = username
-        return cleaned_data
+        self.temporary_password = None
 
     def save(self, commit=True):
-        self.instance.mark_password_as_temporary()  # chosen by an admin: it must be replaced at first login
+        person = self.instance
+        person.username = free_username(person.first_name, person.last_name, person.email)
+        self.temporary_password = temporary_password()
+        person.set_password(self.temporary_password)
+        person.mark_password_as_temporary()  # it must be replaced at the first login
         return super().save(commit)
 
 

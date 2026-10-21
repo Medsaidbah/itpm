@@ -7,7 +7,14 @@ from django.test import Client
 from accounts.models import User
 from projects.tests.base import TeamTestCase
 
-from .passwords import ALPHABET, MAX_IMPORT_LINES, read_people, temporary_password
+from .passwords import (
+    ALPHABET,
+    MAX_IMPORT_LINES,
+    free_username,
+    read_people,
+    temporary_password,
+    username_from_names,
+)
 
 LIST = "Nour;Salem;nour.salem@example.org\nYoussef;Ba;Youssef.Ba@Example.org\n"
 
@@ -42,6 +49,29 @@ class ReadingTests(TeamTestCase):
             self.assertTrue(set(password.replace("-", "")) <= set(ALPHABET))
 
 
+class UsernameTests(TeamTestCase):
+    def test_initials_of_the_first_names_and_the_last_name(self):
+        for first, last, expected in [
+            ("Mohamed Said", "Saidi", "mssaidi"),
+            ("Sara", "Ben", "sben"),
+            ("Jean-Pierre", "O'Brien", "jpobrien"),
+            ("Éloïse", "Ould Ahmed", "eouldahmed"),
+            ("  fatima ", "ZAHRA", "fzahra"),
+        ]:
+            with self.subTest(first=first, last=last):
+                self.assertEqual(username_from_names(first, last), expected)
+
+    def test_arabic_names_use_the_email(self):
+        self.assertEqual(username_from_names("محمد", "سعيدي", "m.saidi@example.org"), "m.saidi")
+        self.assertEqual(username_from_names("محمد", "سعيدي", ""), "user")
+
+    def test_a_name_that_is_taken_gets_a_number(self):
+        self.assertEqual(free_username("Sara", "Ben"), "sben")  # free: Sara Ben's own username is "sara"
+        User.objects.create_user("sben")
+        self.assertEqual(free_username("Sara", "Ben"), "sben2")
+        self.assertEqual(free_username("Sara", "Ben", taken={"sben2"}), "sben3")
+
+
 class ImportViewTests(TeamTestCase):
     def setUp(self):
         super().setUp()
@@ -51,8 +81,11 @@ class ImportViewTests(TeamTestCase):
         response = self.client.post("/administration/users/import/", {"people": LIST})
         self.assertEqual(response.status_code, 200)  # shown, not redirected: the passwords exist only here
         self.assertEqual(response["Cache-Control"], "no-store")
-        nour = User.objects.get(username="nour.salem@example.org")
-        youssef = User.objects.get(username="youssef.ba@example.org")
+        usernames = User.objects.filter(email__icontains="@example.org").values_list("username", flat=True)
+        self.assertEqual(sorted(usernames),
+                         ["nsalem", "yba"])
+        nour = User.objects.get(email="nour.salem@example.org")
+        youssef = User.objects.get(email__iexact="youssef.ba@example.org")
         for account in (nour, youssef):
             self.assertEqual((account.role, account.is_active, account.must_change_password), ("user", True, True))
             self.assertIsNotNone(account.temporary_password_until)
@@ -76,7 +109,7 @@ class ImportViewTests(TeamTestCase):
         upload = SimpleUploadedFile("people.csv", ("﻿" + LIST).encode("utf-8"))
         response = self.client.post("/administration/users/import/", {"file": upload})
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(User.objects.filter(username="nour.salem@example.org").exists())
+        self.assertTrue(User.objects.filter(email="nour.salem@example.org").exists())
 
     def test_nothing_sent(self):
         self.assertContains(self.client.post("/administration/users/import/", {}), "Paste the list")
@@ -84,7 +117,7 @@ class ImportViewTests(TeamTestCase):
     def test_only_admins(self):
         self.login(self.omar)
         self.assertEqual(self.client.post("/administration/users/import/", {"people": LIST}).status_code, 403)
-        self.assertFalse(User.objects.filter(username="nour.salem@example.org").exists())
+        self.assertFalse(User.objects.filter(email="nour.salem@example.org").exists())
 
 
 class AdminCreatedAccountsTests(TeamTestCase):
@@ -92,24 +125,11 @@ class AdminCreatedAccountsTests(TeamTestCase):
         super().setUp()
         self.login(self.amina)
 
-    def data(self, **extra):
-        return {"first_name": "Lina", "last_name": "Diallo", "email": "Lina.Diallo@Example.org", "role": "user",
-                "password1": "Blue-river-2026", "password2": "Blue-river-2026", **extra}
-
-    def test_no_username_means_the_email_address(self):
-        self.client.post("/administration/users/new/", self.data(username=""))
-        account = User.objects.get(email__iexact="lina.diallo@example.org")
-        self.assertEqual(account.username, "lina.diallo@example.org")
-        self.assertTrue(account.must_change_password)
-
-    def test_a_typed_username_is_kept_and_a_taken_email_username_is_refused(self):
-        self.client.post("/administration/users/new/", self.data(username="lina"))
-        self.assertTrue(User.objects.filter(username="lina").exists())
-        response = self.client.post("/administration/users/new/",
-                                    self.data(username="", email="LINA@x.org", first_name="L2"))
-        self.assertEqual(User.objects.filter(username="lina@x.org").count(), 1)
-        response = self.client.post("/administration/users/new/", self.data(username="", first_name="Other"))
-        self.assertEqual(response.status_code, 200)  # the email is used already
+    def test_two_people_with_the_same_username_in_one_list(self):
+        self.client.post("/administration/users/import/",
+                         {"people": "Nour;Salem;n1@example.org\nNadia;Salem;n2@example.org\nNour;Salem;n3@example.org"})
+        names = User.objects.filter(email__startswith="n", email__contains="@example.org", last_name="Salem")
+        self.assertEqual(sorted(names.values_list("username", flat=True)), ["nsalem", "nsalem2", "nsalem3"])
 
     def test_a_random_password_for_someone(self):
         response = self.client.post(f"/administration/users/{self.sara.pk}/password/", {"generate": "1"})

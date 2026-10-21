@@ -32,7 +32,7 @@ from .forms import (
     UnlockForm,
 )
 from .logins import failed_logins, unlock
-from .passwords import read_people, temporary_password
+from .passwords import free_username, read_people, temporary_password
 
 
 def admin_required(view):
@@ -146,14 +146,8 @@ def user_create(request):
         form = NewAccountForm(request.POST, request.FILES)
         if form.is_valid():
             person = form.save()
-            messages.success(
-                request,
-                _("The account of %(person)s is created. Give them their work email address and the temporary "
-                  "password in person or by phone, not by email. They must choose their own password "
-                  "at their first login.")
-                % {"person": person},
-            )
-            return redirect("admin_user", person.pk)
+            # The username and the temporary password were made by the app: shown once, on this page only
+            return passwords_sheet(request, [(person, form.temporary_password)])
     else:
         form = NewAccountForm()
     return render(request, "administration/user_new.html", {"section": "users", "form": form})
@@ -251,10 +245,12 @@ def user_import(request):
         if form.is_valid():
             result = read_people(form.cleaned_data["people"])
             if not result.errors:
-                accounts = []
+                accounts, chosen = [], set()
                 with transaction.atomic():  # all the accounts, or none
                     for _line, first, last, email in result.rows:
-                        person = User(username=email.lower(), first_name=first, last_name=last, email=email,
+                        username = free_username(first, last, email, taken=chosen)
+                        chosen.add(username)
+                        person = User(username=username, first_name=first, last_name=last, email=email,
                                       role=User.Role.USER)
                         password = temporary_password()
                         person.set_password(password)
