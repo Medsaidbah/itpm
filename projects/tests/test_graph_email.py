@@ -16,6 +16,9 @@ from django.test import SimpleTestCase, override_settings
 
 from config import graph_email
 from config.graph_email import GraphEmailBackend, GraphEmailError
+from projects.models import Task
+
+from .base import TeamTestCase
 
 SECRET = "super-secret-value-123"
 
@@ -260,3 +263,100 @@ class TestEmailCommandTests(GraphTestCase):
         with self.assertLogs("config.graph_email", level="ERROR"):
             with self.assertRaisesMessage(CommandError, "The test email could not be sent: HTTP 403 ErrorAccessDenied"):
                 call_command("send_test_email", "boss@company.mr", stdout=StringIO())
+
+
+class AssignmentThroughMicrosoftTests(TeamTestCase):
+    """The real workflow: a manager gives a task to someone, and Microsoft 365 is asked to send the email
+    from the application's mailbox to that person's address. (Fake Microsoft on this computer, nothing leaves it.)"""
+
+    SENDER = "it-projects@company.mr"
+
+    def setUp(self):
+        super().setUp()
+        graph_email.forget_token()
+        self.microsoft = FakeMicrosoft()
+        self.addCleanup(self.microsoft.stop)
+        self.addCleanup(graph_email.forget_token)
+        change = override_settings(
+            EMAIL_BACKEND="config.graph_email.GraphEmailBackend",
+            GRAPH_TENANT_ID="tenant-1234",
+            GRAPH_CLIENT_ID="client-5678",
+            GRAPH_CLIENT_SECRET=SECRET,
+            GRAPH_SENDER=self.SENDER,
+            GRAPH_AUTHORITY=self.microsoft.url,
+            GRAPH_API_URL=self.microsoft.url + "/v1.0",
+            SITE_URL="https://itpm.company.mr",
+        )
+        change.enable()
+        self.addCleanup(change.disable)
+
+    def new_task(self, **changes):
+        data = {"title": "Configure the VPN", "status": "todo", "priority": "high", "assignee": self.sara.pk}
+        data.update(changes)
+        return self.client.post(f"/projects/{self.project.pk}/tasks/new/", data, follow=True)
+
+    def sent(self):
+        """The emails that reached 'Microsoft', as the JSON message of each."""
+        return [json.loads(body)["message"] for path, headers, body in self.microsoft.sends]
+
+    def test_a_new_task_is_emailed_to_its_person_from_the_application_mailbox(self):
+        self.login(self.omar)
+        self.new_task()
+        path, headers, body = self.microsoft.sends[0]
+        self.assertEqual(len(self.microsoft.sends), 1)
+        self.assertEqual(path, f"/v1.0/users/{self.SENDER}/sendMail")  # sent as the application's mailbox
+        self.assertTrue(headers["Authorization"].startswith("Bearer token-"))
+        message = self.sent()[0]
+        self.assertEqual(message["toRecipients"], [{"emailAddress": {"address": "sara@example.com"}}])
+        self.assertEqual(message["subject"], "New task for you: Configure the VPN")
+        self.assertEqual(message["body"]["contentType"], "HTML")
+        self.assertIn("Configure the VPN", message["body"]["content"])
+        self.assertIn("https://itpm.company.mr/tasks/", message["body"]["content"])  # a working link back to the task
+        self.assertNotIn(SECRET, body)
+
+    def test_giving_an_existing_task_to_someone_else_emails_only_the_new_person(self):
+        self.project.add_to_team(self.karim)
+        self.login(self.omar)
+        self.client.post(f"/tasks/{self.task.pk}/edit/", self.task_form_data(assignee=self.karim.pk))
+        self.assertEqual([m["toRecipients"][0]["emailAddress"]["address"] for m in self.sent()], ["karim@example.com"])
+
+    def test_no_email_when_nothing_changes_or_for_ones_own_task(self):
+        self.login(self.omar)
+        self.client.post(f"/tasks/{self.task.pk}/edit/", self.task_form_data(priority="low"))  # still Sara's
+        self.new_task(assignee=self.omar.pk)  # Omar gives a task to himself
+        self.new_task(assignee="")  # nobody
+        self.assertEqual(self.microsoft.sends, [])
+
+    def test_the_email_is_in_the_language_of_the_person(self):
+        self.sara.language = "fr"
+        self.sara.save()
+        self.login(self.omar)
+        self.new_task()
+        self.assertEqual(self.sent()[0]["subject"], "Nouvelle tâche pour vous : Configure the VPN")
+
+    def test_a_person_without_an_email_address_is_skipped_quietly(self):
+        self.sara.email = ""
+        self.sara.save()
+        self.login(self.omar)
+        response = self.new_task()
+        self.assertEqual(self.microsoft.sends, [])
+        self.assertNotContains(response, "couldn&#x27;t be sent")
+
+    def test_if_microsoft_refuses_the_task_is_saved_and_the_manager_is_told(self):
+        self.microsoft.send_plan = [(403, {}, {"error": {"code": "ErrorAccessDenied", "message": "Access is denied."}})]
+        self.login(self.omar)
+        with self.assertLogs(level="ERROR") as logs:
+            response = self.new_task()
+        self.assertTrue(Task.objects.filter(title="Configure the VPN").exists())
+        self.assertContains(response, "The task is saved, but the email to Sara Ben couldn&#x27;t be sent.")
+        self.assertIn("ErrorAccessDenied", "\n".join(logs.output))
+        self.assertNotIn(SECRET, "\n".join(logs.output))
+
+    def test_if_the_email_is_not_configured_the_task_is_saved_and_the_manager_is_told(self):
+        with override_settings(GRAPH_TENANT_ID="", GRAPH_CLIENT_SECRET=""):
+            self.login(self.omar)
+            with self.assertLogs(level="ERROR"):
+                response = self.new_task()
+        self.assertTrue(Task.objects.filter(title="Configure the VPN").exists())
+        self.assertContains(response, "couldn&#x27;t be sent")
+        self.assertEqual(self.microsoft.requests, [])
