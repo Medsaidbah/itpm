@@ -10,8 +10,8 @@ from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.formats import date_format
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
 from django.utils.translation import ngettext, pgettext
 from django.views.decorators.http import require_POST
@@ -28,7 +28,7 @@ from .forms import (
     TeamMemberForm,
 )
 from .models import Attachment, Comment, Project, ProjectMember, Task
-
+from .notifications import notify_assigned
 
 # ---------- Who sees what ----------
 # People only see the projects they manage or whose team they are in; admins see all of them
@@ -331,10 +331,11 @@ def task_detail(request, pk):
 
 
 def tell_new_assignee(request, task, previous_assignee_id):
-    """After a task is saved: email the person it was just given to.
+    """After a task is saved: tell the person it was just given to (the bell, and an email).
     No email when the task was already theirs, or when people give a task to themselves."""
     if task.assignee_id in (None, previous_assignee_id, request.user.pk):
         return
+    notify_assigned(task, assigned_by=request.user)  # the bell, whatever happens to the email
     if not email_new_assignee(task, assigned_by=request.user):
         messages.warning(
             request, _("The task is saved, but the email to %(person)s couldn't be sent.") % {"person": task.assignee}

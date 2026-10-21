@@ -1,12 +1,15 @@
 from django.urls import path
 
-from . import activity, emails, reports, views
+from . import activity, emails, notifications, reports, views
 
 urlpatterns = [
     path("", views.home, name="home"),
     path("my-tasks/", views.my_tasks, name="my_tasks"),
     path("dashboard/", views.dashboard, name="dashboard"),
     path("activity/", activity.activity_feed, name="activity"),
+    path("notifications/", notifications.notification_list, name="notification_list"),
+    path("notifications/read-all/", notifications.notification_read_all, name="notification_read_all"),
+    path("notifications/<int:pk>/", notifications.notification_open, name="notification_open"),
     path("reminders/preview/", emails.reminder_preview, name="reminder_preview"),
     path("projects/", views.project_list, name="project_list"),
     path("projects/new/", views.project_create, name="project_create"),

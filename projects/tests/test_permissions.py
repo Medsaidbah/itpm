@@ -23,7 +23,7 @@ from openpyxl import load_workbook
 from accounts.models import User
 from accounts.pictures import make_profile_picture
 from projects.emails import reminder_for
-from projects.models import Attachment, Comment, Project, Task
+from projects.models import Attachment, Comment, Notification, Project, Task
 
 from .base import TeamTestCase, days_from_today, picture_file
 from .test_activity import visible_text
@@ -88,6 +88,7 @@ class EveryAddressTests(TeamTestCase):
         self.attachment = Attachment.objects.create(
             task=self.task, uploaded_by=self.sara, file=SimpleUploadedFile("plan.pdf", b"%PDF-1.4 test")
         )
+        self.note = Notification.objects.create(recipient=self.sara, kind="assigned", task=self.task, actor=self.omar)
         self.sara.picture = make_profile_picture(picture_file())
         self.sara.save()
 
@@ -140,6 +141,11 @@ class EveryAddressTests(TeamTestCase):
             # The language switch (Stage 17c): everybody may change their own language (it only sets their own choice)
             ("set_language", "post", "/language/", {"language": "fr", "next": "/projects/"},
              (MOVED, MOVED, MOVED, MOVED, MOVED)),
+            # Notifications (Stage 19): each person has their own; other people's don't exist (not even for admins)
+            ("notification_list", "get", "/notifications/", None, (OK, OK, OK, OK, OK)),
+            ("notification_read_all", "post", "/notifications/read-all/", None, (MOVED, MOVED, MOVED, MOVED, MOVED)),
+            ("notification_open", "get", f"/notifications/{self.note.pk}/", None,
+             (HIDDEN, HIDDEN, MOVED, HIDDEN, HIDDEN)),
             ("person_detail", "get", f"/people/{self.sara.pk}/", None, (OK, OK, OK, OK, HIDDEN)),
             ("person_picture", "get", f"/people/{self.sara.pk}/picture/", None, (OK, OK, OK, OK, HIDDEN)),
             # Deleting a project: admins only. Like the other project pages, outsiders get "Page not found".

@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -9,6 +10,7 @@ from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.timesince import timesince
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 from simple_history.models import HistoricalRecords
@@ -440,3 +442,41 @@ def delete_attachment_file(sender, instance, **kwargs):
     name, storage = instance.file.name, instance.file.storage
     if name:
         transaction.on_commit(lambda: storage.delete(name))
+
+
+class Notification(models.Model):
+    """A short message for one person, shown under the bell in the top bar (Stage 19).
+    Only the text's ingredients are saved (what happened, to which task, who did it): the words are
+    written when the page is shown, in the language of the person who reads it."""
+
+    class Kind(models.TextChoices):
+        ASSIGNED = "assigned", gettext_lazy("A task was assigned to you")
+
+    recipient = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications")
+    kind = models.CharField(max_length=20, choices=Kind.choices)
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="notifications")
+    actor = models.ForeignKey(  # who did it; empty if that account no longer exists
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+    read_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+        indexes = [models.Index(fields=["recipient", "read_at"])]
+
+    def __str__(self):
+        return f"{self.get_kind_display()} → {self.recipient}"
+
+    @property
+    def ago(self):
+        """Like "5 minutes ago" (the same words as the activity pages)."""
+        if timezone.now() - self.created_at < timedelta(minutes=1):
+            return _("just now")
+        return _("%(time)s ago") % {"time": timesince(self.created_at)}
+
+    @classmethod
+    def for_person(cls, user):
+        """What this person may see: their own notifications, about tasks they can still see
+        (someone taken out of a team no longer gets a link to a project they can't open)."""
+        return cls.objects.filter(recipient=user, task__in=Task.objects.visible_to(user))

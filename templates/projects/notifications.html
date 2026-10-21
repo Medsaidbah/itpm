@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% load i18n people %}
+
+{% block title %}{% translate "Notifications" %} · IT Projects{% endblock %}
+
+{% block content %}
+<div class="page-header d-print-none">
+  <div class="row align-items-center">
+    <div class="col"><h2 class="page-title">{% translate "Notifications" %}</h2></div>
+    {% if unread_notifications %}
+    <div class="col-auto">
+      <form method="post" action="{% url 'notification_read_all' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn"><i class="ti ti-checks me-2"></i>{% translate "Mark all as read" %}</button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<div class="card">
+  {% if notifications %}
+  <div class="list-group list-group-flush">
+    {% for note in notifications %}
+    <a href="{% url 'notification_open' note.pk %}" class="list-group-item list-group-item-action d-flex align-items-start gap-3">
+      <span class="avatar avatar-sm bg-blue-lt flex-shrink-0"><i class="ti ti-checklist"></i></span>
+      <div class="flex-fill">
+        <div{% if not note.read_at %} class="fw-bold"{% endif %}>
+          {% if note.actor %}
+          {% blocktranslate with actor=note.actor task=note.task.title %}<bdi>{{ actor }}</bdi> assigned you the task “<bdi>{{ task }}</bdi>”.{% endblocktranslate %}
+          {% else %}
+          {% blocktranslate with task=note.task.title %}You were assigned the task “<bdi>{{ task }}</bdi>”.{% endblocktranslate %}
+          {% endif %}
+        </div>
+        <div class="text-secondary small">{{ note.task.project.name }} · {{ note.ago }}</div>
+      </div>
+      {% if not note.read_at %}<span class="status-dot bg-blue mt-2" title="{% translate 'Unread' %}"></span>{% endif %}
+    </a>
+    {% endfor %}
+  </div>
+  {% else %}
+  <div class="card-body text-secondary text-center py-5">
+    <i class="ti ti-bell-off fs-1 d-block mb-2"></i>{% translate "No notifications yet. You will see here the tasks that are assigned to you." %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

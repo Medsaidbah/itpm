@@ -73,6 +73,7 @@ TEMPLATES = [
                 "django.template.context_processors.i18n",  # LANGUAGES, LANGUAGE_CODE and LANGUAGE_BIDI
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "projects.notifications.unread_count",  # the number on the bell
             ],
         },
     },
