@@ -13,3 +13,5 @@ logs/
 .env.docker
 
 docker.env
+
+docker.env
