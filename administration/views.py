@@ -5,10 +5,12 @@ from collections import Counter
 from functools import wraps
 
 from axes.helpers import get_cool_off, get_failure_limit
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.db.models import Count, F, Q, Value
 from django.db.models.functions import Concat
 from django.shortcuts import get_object_or_404, redirect, render
@@ -21,8 +23,16 @@ from django.views.decorators.http import require_POST
 from accounts.models import NO_ADMIN_LEFT, User, leaves_no_active_admin
 from projects.models import Project, ProjectMember, Task
 
-from .forms import AccountForm, AddToProjectForm, NewAccountForm, NewPasswordForm, UnlockForm
+from .forms import (
+    AccountForm,
+    AddToProjectForm,
+    ImportForm,
+    NewAccountForm,
+    NewPasswordForm,
+    UnlockForm,
+)
 from .logins import failed_logins, unlock
+from .passwords import read_people, temporary_password
 
 
 def admin_required(view):
@@ -138,8 +148,9 @@ def user_create(request):
             person = form.save()
             messages.success(
                 request,
-                _("The account of %(person)s is created. Give them their username and first password "
-                  "in person or by phone, not by email. They can change the password on their profile.")
+                _("The account of %(person)s is created. Give them their work email address and the temporary "
+                  "password in person or by phone, not by email. They must choose their own password "
+                  "at their first login.")
                 % {"person": person},
             )
             return redirect("admin_user", person.pk)
@@ -197,6 +208,14 @@ def user_password(request, pk):
     if person.pk == request.user.pk:
         # Your own password is changed on your profile, where your current password is asked first
         return redirect("password_change")
+    if request.method == "POST" and "generate" in request.POST:
+        # "Make a random password": shown once, on a page that is not kept by the browser
+        password = temporary_password()
+        person.set_password(password)  # they are logged out wherever they were logged in
+        person.mark_password_as_temporary()
+        person.save()
+        unlock(person.username)
+        return passwords_sheet(request, [(person, password)])
     if request.method == "POST":
         form = NewPasswordForm(person, request.POST)
         if form.is_valid():
@@ -205,12 +224,47 @@ def user_password(request, pk):
             messages.success(
                 request,
                 _("The new password of %(person)s is saved. Give it to them in person or by phone, "
-                  "not by email. They can change it on their profile.") % {"person": person},
+                  "not by email. They must choose their own password at their next login.")
+                % {"person": person},
             )
             return redirect("admin_user", pk)
     else:
         form = NewPasswordForm(person)
     return render(request, "administration/user_password.html", {"section": "users", "person": person, "form": form})
+
+
+def passwords_sheet(request, accounts):
+    """The one-time page with the temporary passwords. It is rendered, never redirected to: the passwords
+    exist only in this response (they are not stored in a readable form), and the browser must not keep it."""
+    response = render(request, "administration/passwords_sheet.html",
+                      {"section": "users", "accounts": accounts, "days": settings.TEMPORARY_PASSWORD_DAYS})
+    response["Cache-Control"] = "no-store"
+    return response
+
+
+@admin_required
+def user_import(request):
+    """Create many accounts at once from a list: first name, last name, work email address."""
+    result = None
+    if request.method == "POST":
+        form = ImportForm(request.POST, request.FILES)
+        if form.is_valid():
+            result = read_people(form.cleaned_data["people"])
+            if not result.errors:
+                accounts = []
+                with transaction.atomic():  # all the accounts, or none
+                    for _line, first, last, email in result.rows:
+                        person = User(username=email.lower(), first_name=first, last_name=last, email=email,
+                                      role=User.Role.USER)
+                        password = temporary_password()
+                        person.set_password(password)
+                        person.mark_password_as_temporary()
+                        person.save()
+                        accounts.append((person, password))
+                return passwords_sheet(request, accounts)
+    else:
+        form = ImportForm()
+    return render(request, "administration/user_import.html", {"section": "users", "form": form, "result": result})
 
 
 @admin_required

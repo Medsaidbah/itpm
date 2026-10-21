@@ -186,7 +186,11 @@ class NewAccountTests(MediaFolderMixin, TeamTestCase):
         with Image.open(lina.picture.path) as image:  # made small and square, like on the profile page
             self.assertEqual(image.size, (PICTURE_SIZE, PICTURE_SIZE))
         # The new person can log in
-        self.assertRedirects(Client().post("/login/", {"username": "lina", "password": "Blue-river-2026"}), "/")
+        self.assertRedirects(Client().post("/login/", {"username": "lina", "password": "Blue-river-2026"}), "/",
+                             fetch_redirect_response=False)
+        # ... and the password was chosen by an admin, so it is temporary (Stage 18a)
+        self.assertTrue(lina.must_change_password)
+        self.assertIsNotNone(lina.temporary_password_until)
 
     def test_an_admin_account(self):
         self.new_account(role="admin")
@@ -304,7 +308,9 @@ class NewPasswordTests(TeamTestCase):
         self.assertFalse(AccessAttempt.objects.filter(username="sara").exists())  # her login is unlocked
         # Wherever she was logged in, she must log in again, with the new password
         self.assertRedirects(self.saras_browser.get("/"), "/login/?next=/")
-        self.assertRedirects(Client().post("/login/", {"username": "sara", "password": "Green-hill-2026"}), "/")
+        self.assertRedirects(Client().post("/login/", {"username": "sara", "password": "Green-hill-2026"}), "/",
+                             fetch_redirect_response=False)
+        self.assertTrue(self.sara.must_change_password)  # a password given by an admin is temporary
 
     def test_a_weak_password_is_refused(self):
         response = self.client.post(f"/administration/users/{self.sara.pk}/password/",

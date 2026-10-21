@@ -1,0 +1,43 @@
+{% extends "administration/base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Import people" %} · {% translate "Administration" %} · IT Projects{% endblock %}
+{% block page_title %}{% translate "Users" %}{% endblock %}
+
+{% block section_content %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+    <div class="mb-3">
+      <a href="{% url 'admin_users' %}" class="text-secondary"><i class="ti ti-arrow-left me-1"></i>{% translate "All users" %}</a>
+    </div>
+    <form method="post" enctype="multipart/form-data" class="card">
+      {% csrf_token %}
+      <div class="card-header"><h3 class="card-title">{% translate "Import people" %}</h3></div>
+      <div class="card-body">
+        <p class="text-secondary">
+          {% translate "One person per line: first name, last name, work email address. Separate them with a semicolon, a comma or a tab (a copy from Excel works). A first line with column titles is allowed. Everyone gets the role User and a random temporary password; they log in with their email address and must choose their own password at their first login." %}
+        </p>
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger" role="alert">{% for error in form.non_field_errors %}<div>{{ error }}</div>{% endfor %}</div>
+        {% endif %}
+        {% if result and result.errors %}
+        <div class="alert alert-danger" role="alert">
+          <h4 class="alert-title">{% translate "Nobody was created. Fix these lines and send the list again:" %}</h4>
+          <ul class="mb-0">
+            {% for number, message in result.errors %}
+            <li>{% if number %}{% blocktranslate %}Line {{ number }}:{% endblocktranslate %} {% endif %}{{ message }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+        {% include "includes/form_field.html" with field=form.people %}
+        {% include "includes/form_field.html" with field=form.file %}
+      </div>
+      <div class="card-footer d-flex justify-content-end gap-2">
+        <a href="{% url 'admin_users' %}" class="btn">{% translate "Cancel" %}</a>
+        <button type="submit" class="btn btn-primary"><i class="ti ti-users-plus me-2"></i>{% translate "Create the accounts" %}</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

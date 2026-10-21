@@ -1,3 +1,5 @@
+from datetime import timedelta
+
 from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.signals import user_logged_in
@@ -5,6 +7,7 @@ from django.core.exceptions import ValidationError
 from django.db import models, transaction
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
+from django.utils import timezone
 from django.utils.translation import gettext, gettext_lazy
 
 from .middleware import chosen_language
@@ -33,6 +36,11 @@ class User(AbstractUser):
     # The language of the person's pages and emails (Stage 17c): "en", "fr" or "ar".
     # Empty until they choose one: then the first login saves the language of the login page.
     language = models.CharField(max_length=10, choices=settings.LANGUAGES, blank=True)
+    # Stage 18a: a password an administrator chose or generated is only a temporary one. Until the person
+    # replaces it with their own, they can't use the app (see PasswordChangeRequiredMiddleware), and it
+    # stops working after TEMPORARY_PASSWORD_DAYS days if they never log in.
+    must_change_password = models.BooleanField(default=False)
+    temporary_password_until = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return self.get_full_name() or self.username
@@ -41,6 +49,25 @@ class User(AbstractUser):
     def is_admin(self):
         # Admins can do everything, in every project
         return self.role == self.Role.ADMIN
+
+    def mark_password_as_temporary(self):
+        """Call after set_password() when somebody else chose the password: the person must replace it.
+        Nothing is saved here."""
+        self.must_change_password = True
+        self.temporary_password_until = timezone.now() + timedelta(days=settings.TEMPORARY_PASSWORD_DAYS)
+
+    def mark_password_as_own(self):
+        """Call after the person chose their own password. Nothing is saved here."""
+        self.must_change_password = False
+        self.temporary_password_until = None
+
+    @property
+    def temporary_password_expired(self):
+        return bool(
+            self.must_change_password
+            and self.temporary_password_until
+            and timezone.now() > self.temporary_password_until
+        )
 
     def get_language(self):
         """The language of this person's pages and emails: their choice, or English if they have none yet."""

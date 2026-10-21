@@ -27,9 +27,9 @@
         <input type="hidden" name="next" value="{{ next }}">
 
         <div class="mb-3">
-          <label class="form-label" for="id_username">{% translate "Username" %}</label>
+          <label class="form-label" for="id_username">{% translate "Work email or username" %}</label>
           <input type="text" name="username" id="id_username" class="form-control"
-                 value="{{ form.username.value|default:'' }}" autocomplete="username" required autofocus>
+                 value="{{ form.username.value|default:'' }}" autocomplete="username" dir="ltr" required autofocus>
         </div>
 
         <div class="mb-3">

@@ -105,20 +105,12 @@ msgid "Role"
 msgstr "الدور"
 
 #: administration/forms.py
-msgid "What they type to log in. Letters, digits and @ . + - _ only."
-msgstr "ما يكتبه الشخص لتسجيل الدخول. حروف وأرقام والرموز ‎@ . + - _‎ فقط."
-
-#: administration/forms.py
 msgid "Admins see and change everything, including this Administration section. Users see the projects they manage or whose team they are in."
 msgstr "يرى المسؤولون كل شيء ويعدّلونه، بما في ذلك قسم الإدارة هذا. أما المستخدمون فيرون المشاريع التي يديرونها أو التي هم ضمن فريقها."
 
 #: administration/forms.py
 msgid "Another account already uses this email address."
 msgstr "هناك حساب آخر يستخدم عنوان البريد الإلكتروني هذا بالفعل."
-
-#: administration/forms.py templates/administration/user_new.html
-msgid "First password"
-msgstr "كلمة المرور الأولى"
 
 #: administration/forms.py
 msgid "Remove the picture"
@@ -164,19 +156,9 @@ msgstr "هذا الحساب معطّل. أعد تفعيله قبل إضافة ا
 msgid "Only admins can open the Administration section."
 msgstr "يمكن للمسؤولين فقط فتح قسم الإدارة."
 
-#: administration/views.py
-#, python-format
-msgid "The account of %(person)s is created. Give them their username and first password in person or by phone, not by email. They can change the password on their profile."
-msgstr "تم إنشاء حساب %(person)s. سلّم الشخص اسم المستخدم وكلمة المرور الأولى شخصيًا أو عبر الهاتف، وليس عبر البريد الإلكتروني. يمكنه تغيير كلمة المرور من ملفه الشخصي."
-
 #: administration/views.py projects/views.py
 msgid "Changes saved."
 msgstr "تم حفظ التغييرات."
-
-#: administration/views.py
-#, python-format
-msgid "The new password of %(person)s is saved. Give it to them in person or by phone, not by email. They can change it on their profile."
-msgstr "تم حفظ كلمة المرور الجديدة لـ %(person)s. سلّمها للشخص شخصيًا أو عبر الهاتف، وليس عبر البريد الإلكتروني. يمكنه تغييرها من ملفه الشخصي."
 
 #: administration/views.py
 msgid "You can't deactivate your own account. Another admin can."
@@ -1644,10 +1626,6 @@ msgid "There are no accounts yet."
 msgstr "لا توجد حسابات بعد."
 
 #: templates/administration/user_new.html
-msgid "Choose a first password and give it to the person in person or by phone, not by email. They can change it on their profile."
-msgstr "اختر كلمة مرور أولى وسلّمها للشخص شخصيًا أو عبر الهاتف، وليس عبر البريد الإلكتروني. يمكنه تغييرها من ملفه الشخصي."
-
-#: templates/administration/user_new.html
 msgid "Create the account"
 msgstr "إنشاء الحساب"
 
@@ -1659,10 +1637,6 @@ msgstr "كلمة مرور جديدة لـ %(person)s"
 #: templates/administration/user_password.html
 msgid "Use this when someone forgot their password. Their old password stops working, they are logged out everywhere, and a login locked after wrong passwords is unlocked."
 msgstr "استخدم هذا عندما ينسى شخص كلمة مروره. تتوقف كلمة المرور القديمة عن العمل، ويُسجَّل خروجه من كل مكان، ويُفتح قفل تسجيل الدخول الذي أُقفل بعد كلمات مرور خاطئة."
-
-#: templates/administration/user_password.html
-msgid "Give the new password to the person in person or by phone, not by email. They can change it on their profile."
-msgstr "سلّم كلمة المرور الجديدة للشخص شخصيًا أو عبر الهاتف، وليس عبر البريد الإلكتروني. يمكنه تغييرها من ملفه الشخصي."
 
 #: templates/administration/user_password.html
 msgid "Save the new password"
@@ -2428,3 +2402,111 @@ msgstr "سجّل الدخول إلى حسابك"
 #: templates/registration/login.html
 msgid "Password"
 msgstr "كلمة المرور"
+
+msgid "Choose a password that is different from the temporary one."
+msgstr "اختر كلمة مرور مختلفة عن كلمة المرور المؤقتة."
+
+msgid "Please enter a correct work email address (or username) and password. Note that the password is case-sensitive."
+msgstr "يرجى إدخال بريد العمل الإلكتروني (أو اسم المستخدم) وكلمة المرور الصحيحين. لاحظ أن كلمة المرور حساسة لحالة الأحرف."
+
+msgid "Your temporary password has expired. Ask an admin for a new one."
+msgstr "انتهت صلاحية كلمة المرور المؤقتة. اطلب كلمة مرور جديدة من أحد المشرفين."
+
+msgid "Optional. Leave it empty: the person logs in with their work email address. Letters, digits and @ . + - _ only."
+msgstr "اختياري. اتركه فارغًا: يسجّل الشخص الدخول ببريد عمله الإلكتروني. أحرف وأرقام و @ . + - _ فقط."
+
+msgid "Temporary password"
+msgstr "كلمة مرور مؤقتة"
+
+msgid "People"
+msgstr "الأشخاص"
+
+msgid "Or a file"
+msgstr "أو ملف"
+
+msgid "This file is too big."
+msgstr "هذا الملف كبير جدًا."
+
+msgid "The file must be saved as text (UTF-8)."
+msgstr "يجب حفظ الملف كنص (UTF-8)."
+
+msgid "Paste the list, or choose a file."
+msgstr "الصق القائمة أو اختر ملفًا."
+
+msgid "The list is empty."
+msgstr "القائمة فارغة."
+
+msgid "The list has more than %(max)s people. Split it in several lists."
+msgstr "تحتوي القائمة على أكثر من %(max)s شخصًا. قسّمها إلى عدة قوائم."
+
+msgid "Expected: first name, last name, email address."
+msgstr "المتوقع: الاسم الأول، اسم العائلة، البريد الإلكتروني."
+
+msgid "%(email)s is not a valid email address."
+msgstr "%(email)s ليس بريدًا إلكترونيًا صالحًا."
+
+msgid "%(email)s is already on line %(line)s."
+msgstr "%(email)s موجود بالفعل في السطر %(line)s."
+
+msgid "An account already uses %(email)s."
+msgstr "يوجد حساب يستخدم %(email)s بالفعل."
+
+msgid "A value is too long."
+msgstr "إحدى القيم طويلة جدًا."
+
+msgid "The account of %(person)s is created. Give them their work email address and the temporary password in person or by phone, not by email. They must choose their own password at their first login."
+msgstr "تم إنشاء حساب %(person)s. سلّمه بريد العمل الإلكتروني وكلمة المرور المؤقتة شخصيًا أو بالهاتف، وليس بالبريد الإلكتروني. عليه اختيار كلمة مروره الخاصة عند أول تسجيل دخول."
+
+msgid "The new password of %(person)s is saved. Give it to them in person or by phone, not by email. They must choose their own password at their next login."
+msgstr "تم حفظ كلمة المرور الجديدة لـ %(person)s. سلّمها شخصيًا أو بالهاتف، وليس بالبريد الإلكتروني. عليه اختيار كلمة مروره الخاصة عند تسجيل الدخول التالي."
+
+msgid "Choose your own password"
+msgstr "اختر كلمة مرورك الخاصة"
+
+msgid "Your password was chosen by an admin, so it is only temporary. Type it below as the current password, then choose your own password. You can use the app right after."
+msgstr "كلمة مرورك اختارها أحد المشرفين، لذلك فهي مؤقتة. اكتبها أدناه ككلمة المرور الحالية ثم اختر كلمة مرورك الخاصة. يمكنك بعدها استخدام التطبيق مباشرة."
+
+msgid "Temporary passwords"
+msgstr "كلمات المرور المؤقتة"
+
+msgid "Keep this page: the passwords are shown only once."
+msgstr "احتفظ بهذه الصفحة: كلمات المرور تُعرض مرة واحدة فقط."
+
+msgid "They are not stored in a readable form, so they can't be shown again (you can make new ones). Give each person their password in person or by phone, not by email. It is valid for %(days)s days and must be replaced by the person's own password at their first login."
+msgstr "لا تُحفظ بصيغة مقروءة، لذا لا يمكن عرضها مرة أخرى (يمكنك إنشاء كلمات جديدة). سلّم كل شخص كلمة مروره شخصيًا أو بالهاتف، وليس بالبريد الإلكتروني. صلاحيتها %(days)s أيام ويجب أن يستبدلها الشخص بكلمة مروره الخاصة عند أول تسجيل دخول."
+
+msgid "Download as CSV"
+msgstr "تنزيل بصيغة CSV"
+
+msgid "Print"
+msgstr "طباعة"
+
+msgid "Work email address"
+msgstr "بريد العمل الإلكتروني"
+
+msgid "Import people"
+msgstr "استيراد أشخاص"
+
+msgid "One person per line: first name, last name, work email address. Separate them with a semicolon, a comma or a tab (a copy from Excel works). A first line with column titles is allowed. Everyone gets the role User and a random temporary password; they log in with their email address and must choose their own password at their first login."
+msgstr "شخص واحد في كل سطر: الاسم الأول، اسم العائلة، بريد العمل الإلكتروني. افصل بينها بفاصلة منقوطة أو فاصلة أو علامة جدولة (النسخ من Excel يعمل). يُسمح بسطر أول يحتوي عناوين الأعمدة. يحصل كل شخص على دور مستخدم وكلمة مرور مؤقتة عشوائية؛ يسجّل الدخول ببريده الإلكتروني وعليه اختيار كلمة مروره الخاصة عند أول تسجيل دخول."
+
+msgid "Nobody was created. Fix these lines and send the list again:"
+msgstr "لم يتم إنشاء أي حساب. صحّح هذه السطور وأرسل القائمة مرة أخرى:"
+
+msgid "Line %(number)s:"
+msgstr "السطر %(number)s:"
+
+msgid "Create the accounts"
+msgstr "إنشاء الحسابات"
+
+msgid "Choose a temporary password and give it to the person in person or by phone, not by email. They must choose their own password at their first login."
+msgstr "اختر كلمة مرور مؤقتة وسلّمها للشخص شخصيًا أو بالهاتف، وليس بالبريد الإلكتروني. عليه اختيار كلمة مروره الخاصة عند أول تسجيل دخول."
+
+msgid "Give the new password to the person in person or by phone, not by email. It is temporary: the person must choose their own password at their next login."
+msgstr "سلّم كلمة المرور الجديدة للشخص شخصيًا أو بالهاتف، وليس بالبريد الإلكتروني. هي مؤقتة: عليه اختيار كلمة مروره الخاصة عند تسجيل الدخول التالي."
+
+msgid "Make a random password"
+msgstr "إنشاء كلمة مرور عشوائية"
+
+msgid "Work email or username"
+msgstr "بريد العمل أو اسم المستخدم"

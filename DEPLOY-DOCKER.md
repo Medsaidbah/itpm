@@ -53,8 +53,11 @@ and the login lockout (django-axes) would see the proxy's address instead of the
 
 1. Start the container with a reachable, empty database: it waits for the database (up to 60 s), applies migrations, then serves.
 2. Create the first administrator (interactive): `docker exec -it <container> python manage.py createsuperuser`.
-   After that, the administrator creates all other accounts in the application (Administration section).
-3. Check the email settings: `docker exec -it <container> python manage.py send_test_email someone@company.mr`.
+   After that, the administrator creates all other accounts in the application (Administration > Users > Import people:
+   a list of first name, last name, work email; or one by one). People log in with their **work email address** and a random
+   temporary password (valid 7 days) that they must replace at their first login. No email server is needed for this.
+3. Email is optional at first: until it is configured, "new task" emails are only written to the container log.
+   To check it later:  `docker exec -it <container> python manage.py send_test_email someone@company.mr`.
 4. Daily reminder emails: schedule `python manage.py send_reminders` once a day
    with the same image and environment (`docker run ... itpm:<version> python manage.py send_reminders`, or a cron / Kubernetes job).
    Any command other than `python serve.py` skips the database wait and migrations.

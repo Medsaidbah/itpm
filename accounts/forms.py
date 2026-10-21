@@ -1,6 +1,7 @@
 from django import forms
 from django.conf import settings
-from django.contrib.auth.forms import PasswordChangeForm, UserChangeForm
+from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, UserChangeForm
+from django.core.exceptions import ValidationError
 from django.utils.translation import get_language, gettext
 from django.utils.translation import gettext_lazy as _
 
@@ -68,7 +69,40 @@ class ProfileForm(PictureFormMixin, BootstrapFormMixin, forms.ModelForm):
 
 
 class StyledPasswordChangeForm(BootstrapFormMixin, PasswordChangeForm):
-    """Django's "change your password" form, with the app's look."""
+    """Django's "change your password" form, with the app's look. Whoever uses it chooses their own
+    password, so a temporary password stops being temporary."""
+
+    def clean(self):
+        cleaned_data = super().clean()
+        old_password = cleaned_data.get("old_password")
+        new_password = cleaned_data.get("new_password1")
+        if self.user.must_change_password and old_password and new_password == old_password:
+            self.add_error("new_password1", ValidationError(
+                _("Choose a password that is different from the temporary one."), code="same_password"))
+        return cleaned_data
+
+    def save(self, commit=True):
+        self.user.mark_password_as_own()
+        return super().save(commit)
+
+
+class LoginForm(AuthenticationForm):
+    """The login page: the work email address (or the username) and the password (Stage 18a)."""
+
+    error_messages = {
+        **AuthenticationForm.error_messages,
+        "invalid_login": _(
+            "Please enter a correct work email address (or username) and password. "
+            "Note that the password is case-sensitive."
+        ),
+        "expired": _("Your temporary password has expired. Ask an admin for a new one."),
+    }
+
+    def confirm_login_allowed(self, user):
+        super().confirm_login_allowed(user)
+        # The password is right, but a temporary one is only valid for a few days
+        if user.temporary_password_expired:
+            raise ValidationError(self.error_messages["expired"], code="expired")
 
 
 class UserAdminChangeForm(PictureFormMixin, UserChangeForm):

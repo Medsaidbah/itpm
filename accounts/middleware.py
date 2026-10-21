@@ -6,6 +6,8 @@ The browser's own language isn't used: the app stays in English until people cho
 """
 
 from django.conf import settings
+from django.shortcuts import redirect
+from django.urls import Resolver404, resolve
 from django.utils import translation
 from django.utils.cache import patch_vary_headers
 
@@ -60,3 +62,28 @@ class LanguageMiddleware:
         ):
             remember_language(response, language)
         return response
+
+
+class PasswordChangeRequiredMiddleware:
+    """Stage 18a: someone whose password was chosen by an administrator (a temporary password) can't use
+    the app until they have replaced it with their own. Every address except the ones below sends them to
+    the "change my password" page: typing an address by hand doesn't get around it. Placed after the
+    language middleware in settings.py, because it needs to know who is logged in."""
+
+    # The password page itself, logging out, the language switch, and the health check
+    ALLOWED = {"password_change", "logout", "set_language", "healthz"}
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        user = getattr(request, "user", None)
+        if user is not None and user.is_authenticated and user.must_change_password and not self.allowed(request):
+            return redirect("password_change")
+        return self.get_response(request)
+
+    def allowed(self, request):
+        try:
+            return resolve(request.path_info).view_name in self.ALLOWED
+        except Resolver404:
+            return False

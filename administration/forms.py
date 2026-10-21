@@ -14,7 +14,8 @@ from projects.models import Project
 ACCOUNT_FIELDS = ["username", "first_name", "last_name", "email", "phone", "picture", "role"]
 ACCOUNT_LABELS = {"username": _("Username"), "phone": _("Phone number"), "role": _("Role")}
 ACCOUNT_HELP = {
-    "username": _("What they type to log in. Letters, digits and @ . + - _ only."),
+    "username": _("Optional. Leave it empty: the person logs in with their work email address. "
+                  "Letters, digits and @ . + - _ only."),
     "role": _("Admins see and change everything, including this Administration section. "
               "Users see the projects they manage or whose team they are in."),
 }
@@ -77,7 +78,28 @@ class NewAccountForm(AccountFormMixin, BootstrapFormMixin, UserCreationForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.set_up_fields()
-        self.fields["password1"].label = _("First password")
+        self.fields["password1"].label = _("Temporary password")
+        self.fields["username"].required = False  # empty: the work email address is used
+
+    def clean(self):
+        cleaned_data = super().clean()
+        email = cleaned_data.get("email")
+        if not cleaned_data.get("username") and email and "username" not in self.errors:
+            # Stage 18a: no username typed, so the person's login name is their email address
+            username = email.lower()
+            try:
+                self.fields["username"].run_validators(username)
+            except forms.ValidationError as error:
+                self.add_error("username", error)
+            else:
+                if User.objects.filter(username__iexact=username).exists():
+                    self.add_error("username", self.instance.unique_error_message(User, ["username"]))
+                cleaned_data["username"] = username
+        return cleaned_data
+
+    def save(self, commit=True):
+        self.instance.mark_password_as_temporary()  # chosen by an admin: it must be replaced at first login
+        return super().save(commit)
 
 
 class AccountForm(AccountFormMixin, BootstrapFormMixin, forms.ModelForm):
@@ -118,7 +140,12 @@ class AccountForm(AccountFormMixin, BootstrapFormMixin, forms.ModelForm):
 
 
 class NewPasswordForm(BootstrapFormMixin, SetPasswordForm):
-    """An admin gives someone a new password, for example when they forgot theirs."""
+    """An admin gives someone a new password, for example when they forgot theirs.
+    It is a temporary one: the person replaces it by their own at their next login."""
+
+    def save(self, commit=True):
+        self.user.mark_password_as_temporary()
+        return super().save(commit)
 
 
 class AddToProjectForm(BootstrapFormMixin, forms.Form):
@@ -153,6 +180,29 @@ class AddToProjectForm(BootstrapFormMixin, forms.Form):
             raise forms.ValidationError(
                 _("This account is deactivated. Reactivate it before adding the person to a project.")
             )
+        return cleaned_data
+
+
+class ImportForm(forms.Form):
+    """A list of people to create: pasted, or from a .csv / .txt file."""
+
+    people = forms.CharField(label=_("People"), required=False, widget=forms.Textarea(attrs={
+        "rows": 10, "dir": "ltr", "placeholder": "Mohamed;Said;mohamed.said@mtnima.gov.mr"}))
+    file = forms.FileField(label=_("Or a file"), required=False,
+                           widget=forms.FileInput(attrs={"accept": ".csv,.txt,text/csv,text/plain"}))
+
+    def clean(self):
+        cleaned_data = super().clean()
+        upload = cleaned_data.get("file")
+        if upload:
+            if upload.size > 200_000:
+                raise forms.ValidationError(_("This file is too big."))
+            try:
+                cleaned_data["people"] = upload.read().decode("utf-8-sig")
+            except UnicodeDecodeError:
+                raise forms.ValidationError(_("The file must be saved as text (UTF-8).")) from None
+        if not (cleaned_data.get("people") or "").strip():
+            raise forms.ValidationError(_("Paste the list, or choose a file."))
         return cleaned_data
 
 

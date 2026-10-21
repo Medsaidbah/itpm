@@ -32,6 +32,7 @@
     <button type="submit" class="btn"><i class="ti ti-search me-2"></i>{% translate "Search" %}</button>
   </div>
   <div class="col-auto ms-auto">
+    <a href="{% url 'admin_user_import' %}" class="btn me-2"><i class="ti ti-users-plus me-2"></i>{% translate "Import people" %}</a>
     <a href="{% url 'admin_user_create' %}" class="btn btn-primary"><i class="ti ti-user-plus me-2"></i>{% translate "New user" %}</a>
   </div>
 </form>
@@ -69,6 +70,7 @@
                 <div class="small text-secondary">{{ person.username }}</div>
                 {% if not person.is_active %}<span class="badge bg-secondary-lt">{% translate "Deactivated" %}</span>{% endif %}
                 {% if person.is_locked %}<span class="badge bg-red-lt"><i class="ti ti-lock me-1"></i>{% translate "Login locked" %}</span>{% endif %}
+                {% if person.must_change_password %}<span class="badge bg-yellow-lt">{% translate "Temporary password" %}</span>{% endif %}
                 {% if person.has_missing_details %}<span class="badge bg-orange-lt">{% translate "Missing details" %}</span>{% endif %}
               </div>
             </div>

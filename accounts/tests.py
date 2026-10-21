@@ -86,7 +86,7 @@ class LoginTests(TestCase):
     def test_wrong_password(self):
         response = self.wrong_password()
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, "Please enter a correct username and password.")
+        self.assertContains(response, "Please enter a correct work email address (or username) and password.")
 
     def test_an_inactive_person_cannot_log_in(self):
         User.objects.filter(username="sara").update(is_active=False)

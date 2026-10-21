@@ -8,6 +8,7 @@ urlpatterns = [
     path("", views.home, name="admin_home"),
     path("users/", views.user_list, name="admin_users"),
     path("users/new/", views.user_create, name="admin_user_create"),
+    path("users/import/", views.user_import, name="admin_user_import"),
     path("users/<int:pk>/", views.user_detail, name="admin_user"),
     path("users/<int:pk>/password/", views.user_password, name="admin_user_password"),
     path("users/<int:pk>/deactivate/", views.user_deactivate, name="admin_user_deactivate"),

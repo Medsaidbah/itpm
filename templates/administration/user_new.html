@@ -38,9 +38,9 @@
         {% include "includes/form_field.html" with field=form.picture %}
       </div>
       <div class="card-body border-top">
-        <h4 class="mb-3">{% translate "First password" %}</h4>
+        <h4 class="mb-3">{% translate "Temporary password" %}</h4>
         <p class="text-secondary">
-          {% translate "Choose a first password and give it to the person in person or by phone, not by email. They can change it on their profile." %}
+          {% translate "Choose a temporary password and give it to the person in person or by phone, not by email. They must choose their own password at their first login." %}
         </p>
         <div class="row">
           <div class="col-md-6">{% include "includes/form_field.html" with field=form.password1 %}</div>

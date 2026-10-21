@@ -105,20 +105,12 @@ msgid "Role"
 msgstr "Rôle"
 
 #: administration/forms.py
-msgid "What they type to log in. Letters, digits and @ . + - _ only."
-msgstr "Ce que la personne saisit pour se connecter. Lettres, chiffres et @ . + - _ uniquement."
-
-#: administration/forms.py
 msgid "Admins see and change everything, including this Administration section. Users see the projects they manage or whose team they are in."
 msgstr "Les administrateurs voient et modifient tout, y compris cette section Administration. Les utilisateurs voient les projets qu'ils gèrent ou dont ils font partie de l'équipe."
 
 #: administration/forms.py
 msgid "Another account already uses this email address."
 msgstr "Un autre compte utilise déjà cette adresse e-mail."
-
-#: administration/forms.py templates/administration/user_new.html
-msgid "First password"
-msgstr "Premier mot de passe"
 
 #: administration/forms.py
 msgid "Remove the picture"
@@ -164,19 +156,9 @@ msgstr "Ce compte est désactivé. Réactivez-le avant d'ajouter la personne à 
 msgid "Only admins can open the Administration section."
 msgstr "Seuls les administrateurs peuvent ouvrir la section Administration."
 
-#: administration/views.py
-#, python-format
-msgid "The account of %(person)s is created. Give them their username and first password in person or by phone, not by email. They can change the password on their profile."
-msgstr "Le compte de %(person)s est créé. Donnez-lui son nom d'utilisateur et son premier mot de passe en main propre ou par téléphone, pas par e-mail. La personne peut changer son mot de passe dans son profil."
-
 #: administration/views.py projects/views.py
 msgid "Changes saved."
 msgstr "Modifications enregistrées."
-
-#: administration/views.py
-#, python-format
-msgid "The new password of %(person)s is saved. Give it to them in person or by phone, not by email. They can change it on their profile."
-msgstr "Le nouveau mot de passe de %(person)s est enregistré. Donnez-le en main propre ou par téléphone, pas par e-mail. La personne peut le changer dans son profil."
 
 #: administration/views.py
 msgid "You can't deactivate your own account. Another admin can."
@@ -1548,10 +1530,6 @@ msgid "There are no accounts yet."
 msgstr "Il n'y a pas encore de comptes."
 
 #: templates/administration/user_new.html
-msgid "Choose a first password and give it to the person in person or by phone, not by email. They can change it on their profile."
-msgstr "Choisissez un premier mot de passe et donnez-le à la personne en main propre ou par téléphone, pas par e-mail. Elle pourra le changer dans son profil."
-
-#: templates/administration/user_new.html
 msgid "Create the account"
 msgstr "Créer le compte"
 
@@ -1563,10 +1541,6 @@ msgstr "Un nouveau mot de passe pour %(person)s"
 #: templates/administration/user_password.html
 msgid "Use this when someone forgot their password. Their old password stops working, they are logged out everywhere, and a login locked after wrong passwords is unlocked."
 msgstr "À utiliser quand quelqu'un a oublié son mot de passe. L'ancien mot de passe ne fonctionne plus, la personne est déconnectée partout, et une connexion verrouillée après des mots de passe erronés est déverrouillée."
-
-#: templates/administration/user_password.html
-msgid "Give the new password to the person in person or by phone, not by email. They can change it on their profile."
-msgstr "Donnez le nouveau mot de passe à la personne en main propre ou par téléphone, pas par e-mail. Elle pourra le changer dans son profil."
 
 #: templates/administration/user_password.html
 msgid "Save the new password"
@@ -2276,3 +2250,111 @@ msgstr "Connectez-vous à votre compte"
 #: templates/registration/login.html
 msgid "Password"
 msgstr "Mot de passe"
+
+msgid "Choose a password that is different from the temporary one."
+msgstr "Choisissez un mot de passe différent du mot de passe temporaire."
+
+msgid "Please enter a correct work email address (or username) and password. Note that the password is case-sensitive."
+msgstr "Veuillez saisir une adresse e-mail professionnelle (ou un nom d'utilisateur) et un mot de passe corrects. Notez que le mot de passe est sensible à la casse."
+
+msgid "Your temporary password has expired. Ask an admin for a new one."
+msgstr "Votre mot de passe temporaire a expiré. Demandez-en un nouveau à un administrateur."
+
+msgid "Optional. Leave it empty: the person logs in with their work email address. Letters, digits and @ . + - _ only."
+msgstr "Facultatif. Laissez vide : la personne se connecte avec son adresse e-mail professionnelle. Lettres, chiffres et @ . + - _ uniquement."
+
+msgid "Temporary password"
+msgstr "Mot de passe temporaire"
+
+msgid "People"
+msgstr "Personnes"
+
+msgid "Or a file"
+msgstr "Ou un fichier"
+
+msgid "This file is too big."
+msgstr "Ce fichier est trop volumineux."
+
+msgid "The file must be saved as text (UTF-8)."
+msgstr "Le fichier doit être enregistré en texte (UTF-8)."
+
+msgid "Paste the list, or choose a file."
+msgstr "Collez la liste ou choisissez un fichier."
+
+msgid "The list is empty."
+msgstr "La liste est vide."
+
+msgid "The list has more than %(max)s people. Split it in several lists."
+msgstr "La liste contient plus de %(max)s personnes. Découpez-la en plusieurs listes."
+
+msgid "Expected: first name, last name, email address."
+msgstr "Attendu : prénom, nom, adresse e-mail."
+
+msgid "%(email)s is not a valid email address."
+msgstr "%(email)s n'est pas une adresse e-mail valide."
+
+msgid "%(email)s is already on line %(line)s."
+msgstr "%(email)s figure déjà à la ligne %(line)s."
+
+msgid "An account already uses %(email)s."
+msgstr "Un compte utilise déjà %(email)s."
+
+msgid "A value is too long."
+msgstr "Une valeur est trop longue."
+
+msgid "The account of %(person)s is created. Give them their work email address and the temporary password in person or by phone, not by email. They must choose their own password at their first login."
+msgstr "Le compte de %(person)s est créé. Donnez-lui son adresse e-mail professionnelle et le mot de passe temporaire en personne ou par téléphone, pas par e-mail. Il ou elle devra choisir son propre mot de passe à la première connexion."
+
+msgid "The new password of %(person)s is saved. Give it to them in person or by phone, not by email. They must choose their own password at their next login."
+msgstr "Le nouveau mot de passe de %(person)s est enregistré. Donnez-le en personne ou par téléphone, pas par e-mail. Il ou elle devra choisir son propre mot de passe à la prochaine connexion."
+
+msgid "Choose your own password"
+msgstr "Choisissez votre propre mot de passe"
+
+msgid "Your password was chosen by an admin, so it is only temporary. Type it below as the current password, then choose your own password. You can use the app right after."
+msgstr "Votre mot de passe a été choisi par un administrateur : il est donc temporaire. Saisissez-le ci-dessous comme mot de passe actuel, puis choisissez le vôtre. Vous pourrez ensuite utiliser l'application."
+
+msgid "Temporary passwords"
+msgstr "Mots de passe temporaires"
+
+msgid "Keep this page: the passwords are shown only once."
+msgstr "Conservez cette page : les mots de passe ne sont affichés qu'une seule fois."
+
+msgid "They are not stored in a readable form, so they can't be shown again (you can make new ones). Give each person their password in person or by phone, not by email. It is valid for %(days)s days and must be replaced by the person's own password at their first login."
+msgstr "Ils ne sont pas conservés sous forme lisible et ne peuvent donc pas être affichés de nouveau (vous pouvez en générer de nouveaux). Donnez à chaque personne son mot de passe en personne ou par téléphone, pas par e-mail. Il est valable %(days)s jours et doit être remplacé par le mot de passe choisi par la personne à sa première connexion."
+
+msgid "Download as CSV"
+msgstr "Télécharger en CSV"
+
+msgid "Print"
+msgstr "Imprimer"
+
+msgid "Work email address"
+msgstr "Adresse e-mail professionnelle"
+
+msgid "Import people"
+msgstr "Importer des personnes"
+
+msgid "One person per line: first name, last name, work email address. Separate them with a semicolon, a comma or a tab (a copy from Excel works). A first line with column titles is allowed. Everyone gets the role User and a random temporary password; they log in with their email address and must choose their own password at their first login."
+msgstr "Une personne par ligne : prénom, nom, adresse e-mail professionnelle. Séparez-les par un point-virgule, une virgule ou une tabulation (une copie depuis Excel fonctionne). Une première ligne avec les titres de colonnes est acceptée. Chacun reçoit le rôle Utilisateur et un mot de passe temporaire aléatoire ; il se connecte avec son adresse e-mail et doit choisir son propre mot de passe à la première connexion."
+
+msgid "Nobody was created. Fix these lines and send the list again:"
+msgstr "Personne n'a été créé. Corrigez ces lignes et renvoyez la liste :"
+
+msgid "Line %(number)s:"
+msgstr "Ligne %(number)s :"
+
+msgid "Create the accounts"
+msgstr "Créer les comptes"
+
+msgid "Choose a temporary password and give it to the person in person or by phone, not by email. They must choose their own password at their first login."
+msgstr "Choisissez un mot de passe temporaire et donnez-le à la personne en personne ou par téléphone, pas par e-mail. Elle devra choisir son propre mot de passe à la première connexion."
+
+msgid "Give the new password to the person in person or by phone, not by email. It is temporary: the person must choose their own password at their next login."
+msgstr "Donnez le nouveau mot de passe à la personne en personne ou par téléphone, pas par e-mail. Il est temporaire : la personne devra choisir son propre mot de passe à sa prochaine connexion."
+
+msgid "Make a random password"
+msgstr "Générer un mot de passe aléatoire"
+
+msgid "Work email or username"
+msgstr "Adresse e-mail professionnelle ou nom d'utilisateur"

@@ -6,7 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.messages.views import SuccessMessageMixin
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.utils import translation
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.translation import gettext as _
@@ -46,6 +46,18 @@ class PasswordChangeView(SuccessMessageMixin, auth_views.PasswordChangeView):
     form_class = StyledPasswordChangeForm
     success_url = reverse_lazy("profile")
     success_message = gettext_lazy("Your password is changed.")
+
+    def get_context_data(self, **kwargs):
+        # Someone with a temporary password sees why they are here, and can't go anywhere else
+        return super().get_context_data(forced=self.request.user.must_change_password, **kwargs)
+
+    def form_valid(self, form):
+        self.was_forced = self.request.user.must_change_password  # read it before the new password is saved
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        # After choosing their own password, the first time: the app opens. Otherwise: back to the profile.
+        return reverse("home") if self.was_forced else str(self.success_url)
 
 
 @login_required
