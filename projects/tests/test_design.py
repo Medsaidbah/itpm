@@ -20,8 +20,8 @@ class DesignTests(TeamTestCase):
         self.assertIn("css/theme.css", html)
         self.assertIn("gov-bar", html)
         self.assertIn("Directorate of Development and Interoperability", html)
-        self.assertIn("img/logo.svg", html)
-        self.assertIn("img/favicon.svg", html)
+        self.assertIn("img/logo.png", html)
+        self.assertIn("img/favicon.png", html)
         self.assertIn("MTNMA", html)
 
     def test_ministry_names_are_translated(self):
@@ -40,8 +40,8 @@ class DesignTests(TeamTestCase):
         for url in urls:
             with self.subTest(url=url):
                 self.assertTrue((STATIC / "css" / url).resolve().exists())
-        self.assertTrue((STATIC / "img" / "logo.svg").exists())
-        self.assertTrue((STATIC / "img" / "favicon.svg").exists())
+        self.assertTrue((STATIC / "img" / "logo.png").exists())
+        self.assertTrue((STATIC / "img" / "favicon.png").exists())
 
 
 class LoginDesignTests(TestCase):
