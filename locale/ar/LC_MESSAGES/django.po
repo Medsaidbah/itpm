@@ -15,7 +15,7 @@ msgstr ""
 "Plural-Forms: nplurals=6; plural=n==0 ? 0 : n==1 ? 1 : n==2 ? 2 : n%100>=3 && n%100<=10 ? 3 : n%100>=11 && n%100<=99 ? 4 : 5;\n"
 
 #: accounts/admin.py
-msgid "IT Projects · Django admin (technical)"
+msgid "مشاريعي · Django admin (technical)"
 msgstr "مشاريعي · إدارة Django (تقنية)"
 
 #: accounts/admin.py
@@ -1708,7 +1708,7 @@ msgid "Open the task"
 msgstr "فتح المهمة"
 
 #: templates/emails/assigned.html
-msgid "You get this email when someone assigns a task to you in IT Projects."
+msgid "You get this email when someone assigns a task to you in «مشاريعي»."
 msgstr "تصلك هذه الرسالة عندما يُسند إليك شخص مهمة في «مشاريعي»."
 
 #: templates/emails/assigned.txt
@@ -2534,6 +2534,3 @@ msgstr "وزارة التحول الرقمي وعصرنة الإدارة"
 
 msgid "Directorate of Development and Interoperability"
 msgstr "مديرية التطوير والتشغيل البيني"
-
-msgid "IT Projects"
-msgstr "مشاريعي"

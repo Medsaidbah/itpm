@@ -15,8 +15,8 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: accounts/admin.py
-msgid "IT Projects · Django admin (technical)"
-msgstr "IT Projects · Admin Django (technique)"
+msgid "مشاريعي · Django admin (technical)"
+msgstr "مشاريعي · Admin Django (technique)"
 
 #: accounts/admin.py
 msgid "Personal info"
@@ -1612,8 +1612,8 @@ msgid "Open the task"
 msgstr "Ouvrir la tâche"
 
 #: templates/emails/assigned.html
-msgid "You get this email when someone assigns a task to you in IT Projects."
-msgstr "Vous recevez cet e-mail quand quelqu'un vous assigne une tâche dans IT Projects."
+msgid "You get this email when someone assigns a task to you in «مشاريعي»."
+msgstr "Vous recevez cet e-mail quand quelqu'un vous assigne une tâche dans « مشاريعي »."
 
 #: templates/emails/assigned.txt
 #, python-format
@@ -2382,6 +2382,3 @@ msgstr "Ministère de la Transformation Numérique et de la Modernisation de l'A
 
 msgid "Directorate of Development and Interoperability"
 msgstr "Direction du Développement et de l'Interopérabilité"
-
-msgid "IT Projects"
-msgstr "IT Projects"

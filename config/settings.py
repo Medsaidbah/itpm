@@ -228,7 +228,7 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True") == "True"
 EMAIL_TIMEOUT = 10  # seconds: a slow mail server can't freeze a page for long
-DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "IT Projects <it-projects@example.com>")
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "مشاريعي <it-projects@example.com>")
 
 # Microsoft 365 (Step 15d): used when EMAIL_BACKEND=config.graph_email.GraphEmailBackend.
 # The secret only ever lives in .env / the container's settings, never in git.

@@ -7,7 +7,7 @@ from .models import User
 
 # Django's own admin panel. Since Stage 17b, the app has its own Administration section
 # (in the menu), and this panel stays as a technical tool: its menu link is "Django admin (technical)".
-admin.site.site_header = _("IT Projects · Django admin (technical)")
+admin.site.site_header = _("مشاريعي · Django admin (technical)")
 
 # The admin panel (people, roles, every project) is for the app's admins only.
 # Django already asks for "Staff status"; this also asks for the Admin role, so someone

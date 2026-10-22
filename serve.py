@@ -24,7 +24,7 @@ HOST = os.environ.get("SERVE_HOST", "127.0.0.1")
 PORT = int(os.environ.get("SERVE_PORT", "8000"))
 TRUSTED_PROXY = os.environ.get("TRUSTED_PROXY", "127.0.0.1")
 
-print(f"IT Projects is running on http://{HOST}:{PORT} (press Ctrl+C to stop)", flush=True)
+print(f"مشاريعي is running on http://{HOST}:{PORT} (press Ctrl+C to stop)", flush=True)
 serve(
     application,
     listen=f"{HOST}:{PORT}",

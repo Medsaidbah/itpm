@@ -10,7 +10,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{% block title %}{% translate "IT Projects" %}{% endblock %}</title>
+  <title>{% block title %}مشاريعي{% endblock %}</title>
   <link rel="icon" type="image/png" href="{% static 'img/favicon.png' %}">
   {# The design (Tabler) and its icons. The files are in static/vendor/, see the README.txt there. #}
   {# Arabic uses Tabler's mirrored version (.rtl): what is on the left goes to the right. #}
@@ -60,7 +60,7 @@
           <span class="navbar-toggler-icon"></span>
         </button>
 
-        <a href="{% url 'home' %}" class="navbar-brand pe-0 pe-md-3">{% translate "IT Projects" %}</a>
+        <a href="{% url 'home' %}" class="navbar-brand pe-0 pe-md-3">مشاريعي</a>
 
         {# User menu on the right #}
         <div class="navbar-nav flex-row order-md-last">

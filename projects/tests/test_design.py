@@ -57,10 +57,10 @@ class LoginDesignTests(TestCase):
 class AppNameTests(TeamTestCase):
     def test_app_name_follows_the_language(self):
         self.login(self.omar)
-        for code, name in (("en", "IT Projects"), ("fr", "IT Projects"), ("ar", "مشاريعي")):
+        for code, name in (("en", "مشاريعي"), ("fr", "مشاريعي"), ("ar", "مشاريعي")):
             with self.subTest(code=code):
                 User.objects.filter(pk=self.omar.pk).update(language=code)
                 html = self.client.get("/").content.decode()
                 self.assertIn(f'navbar-brand pe-0 pe-md-3">{name}</a>', html)
                 self.assertIn(f"· {name}</title>", html)
-        self.assertNotIn("IT Projects", html)  # the Arabic page never shows the English name
+                self.assertNotIn("IT Projects", html)  # no language shows the old English name
