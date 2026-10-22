@@ -113,3 +113,32 @@ class NewTaskEmailTests(TeamTestCase):
                 response = self.new_task()
         self.assertTrue(Task.objects.filter(title="Configure the VPN").exists())
         self.assertContains(response, "The task is saved, but the email to Sara Ben couldn&#x27;t be sent.")
+
+
+@override_settings(SITE_URL="https://itpm.example.org", ALLOWED_HOSTS=["testserver", "localhost", "127.0.0.1"])
+class PreviewLinksTests(TeamTestCase):
+    """The preview page's links stay on the address it was opened at (Stage 19a). A browser keeps one login
+    per address: "127.0.0.1" and "localhost" are different, so a link to the other one asks to log in again."""
+
+    def setUp(self):
+        self.login(self.sara)
+
+    def test_links_start_with_the_address_the_page_was_opened_at(self):
+        for host in ("127.0.0.1:8000", "localhost:8000"):
+            with self.subTest(host=host):
+                page = self.client.get("/reminders/preview/", HTTP_HOST=host)
+                self.assertContains(page, f'href="http://{host}/my-tasks/"')
+                self.assertNotContains(page, "itpm.example.org")
+
+    def test_the_text_version_too(self):
+        text = self.client.get("/reminders/preview/?text=1", HTTP_HOST="127.0.0.1:8000").content.decode()
+        self.assertIn("http://127.0.0.1:8000/", text)
+        self.assertNotIn("itpm.example.org", text)
+
+    def test_the_real_reminder_still_uses_site_url(self):
+        Task.objects.create(project=self.project, title="Late one", assignee=self.sara, due_date=days_from_today(-1))
+        call_command("send_reminders", stdout=StringIO())
+        self.assertIn("https://itpm.example.org/my-tasks/", mail.outbox[0].alternatives[0][0])
+
+    def test_an_unknown_address_is_still_refused(self):
+        self.assertEqual(self.client.get("/reminders/preview/", HTTP_HOST="evil.example.com").status_code, 400)

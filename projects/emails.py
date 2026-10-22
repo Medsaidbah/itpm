@@ -37,10 +37,11 @@ MAX_PER_SECTION = 20  # longer lists end with "...and 5 more"
 # ---------- Sending ----------
 
 
-def render_email(template, context, language=None):
+def render_email(template, context, language=None, site_url=None):
     """The plain-text and HTML versions of an email: emails/<template>.txt and .html,
-    written in the given language (the language of the person who gets the email)."""
-    context = {**context, "site_url": settings.SITE_URL}
+    written in the given language (the language of the person who gets the email).
+    site_url: the address the links start with (SITE_URL from settings.py unless told otherwise)."""
+    context = {**context, "site_url": site_url or settings.SITE_URL}
     with translation.override(language or translation.get_language()):
         text = render_to_string(f"emails/{template}.txt", context)
         html = render_to_string(f"emails/{template}.html", context)
@@ -151,8 +152,11 @@ def reminder_preview(request):
     if request.user.is_admin and request.GET.get("user", "").isdigit():
         person = get_object_or_404(get_user_model(), pk=request.GET["user"])
     reminder = reminder_for(person, timezone.localdate())
-    # Shown the way the person will get it: in their language
-    text, html = render_email("reminder", reminder, person.get_language())
+    # Shown the way the person will get it: in their language. The links start with the address this page was
+    # opened at, not with SITE_URL: "127.0.0.1" and "localhost" are two different sites for a browser (each
+    # keeps its own login), so a link to the other one would show the login page. The real emails use SITE_URL.
+    here = f"{request.scheme}://{request.get_host()}"
+    text, html = render_email("reminder", reminder, person.get_language(), site_url=here)
     if request.GET.get("text"):
         return HttpResponse(text, content_type="text/plain; charset=utf-8")
     return HttpResponse(html)
