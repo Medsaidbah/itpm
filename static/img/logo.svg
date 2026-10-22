@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120" role="img" aria-label="DDI">
+  <!-- A neutral placeholder mark for the Directorate (DDI), NOT an official emblem.
+       Replace this file with the official logo (same name, or change the name in templates/base.html). -->
+  <rect x="4" y="4" width="112" height="112" rx="22" fill="#073d26"/>
+  <g stroke="#d4a72c" stroke-width="5" stroke-linecap="round" fill="none">
+    <path d="M36 44 L60 30 L84 44 M36 76 L60 90 L84 76 M36 44 V76 M84 44 V76 M60 30 V90"/>
+  </g>
+  <g fill="#ffffff">
+    <circle cx="36" cy="44" r="7"/><circle cx="84" cy="44" r="7"/>
+    <circle cx="36" cy="76" r="7"/><circle cx="84" cy="76" r="7"/>
+    <circle cx="60" cy="30" r="7"/><circle cx="60" cy="90" r="7"/>
+  </g>
+</svg>

@@ -1,0 +1,114 @@
+/* IT Projects: the look of the Ministry of Digital Transformation and Administrative Modernization (MTNMA),
+   Directorate of Development and Interoperability (DDI) (Stage 20).
+   This file only changes colours, fonts and spacing on top of Tabler (static/vendor/tabler/): no page logic.
+   It uses "logical" properties (inline-start / inline-end), so it works left-to-right and right-to-left alike.
+   Colours: deep green and gold, from the national flag. Every text/background pair below was checked for
+   contrast (WCAG AA, at least 4.5:1): white on green 8.1, green on white 8.1, gold on dark green 5.5. */
+
+/* ---------- Fonts (self-hosted: nothing is downloaded from the internet) ---------- */
+/* One family for both scripts: the browser picks Inter for Latin letters and Noto Sans Arabic for Arabic. */
+@font-face { font-family: "DDI Sans"; font-weight: 400; font-display: swap; src: url("../vendor/fonts/inter-latin-400-normal.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "DDI Sans"; font-weight: 500; font-display: swap; src: url("../vendor/fonts/inter-latin-500-normal.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "DDI Sans"; font-weight: 600; font-display: swap; src: url("../vendor/fonts/inter-latin-600-normal.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "DDI Sans"; font-weight: 700; font-display: swap; src: url("../vendor/fonts/inter-latin-700-normal.woff2") format("woff2"); unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+@font-face { font-family: "DDI Sans"; font-weight: 400; font-display: swap; src: url("../vendor/fonts/noto-sans-arabic-arabic-400-normal.woff2") format("woff2"); unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0898-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC; }
+@font-face { font-family: "DDI Sans"; font-weight: 500; font-display: swap; src: url("../vendor/fonts/noto-sans-arabic-arabic-500-normal.woff2") format("woff2"); unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0898-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC; }
+@font-face { font-family: "DDI Sans"; font-weight: 600; font-display: swap; src: url("../vendor/fonts/noto-sans-arabic-arabic-600-normal.woff2") format("woff2"); unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0898-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC; }
+@font-face { font-family: "DDI Sans"; font-weight: 700; font-display: swap; src: url("../vendor/fonts/noto-sans-arabic-arabic-700-normal.woff2") format("woff2"); unicode-range: U+0600-06FF, U+0750-077F, U+0870-088E, U+0890-0891, U+0898-08E1, U+08E3-08FF, U+200C-200E, U+2010-2011, U+204F, U+2E41, U+FB50-FDFF, U+FE70-FE74, U+FE76-FEFC; }
+
+/* ---------- The palette: change the colours of the whole app here ---------- */
+:root, :root[data-bs-theme], body {
+  --ddi-green-950: #052e1c;
+  --ddi-green-900: #073d26;   /* header, login panel */
+  --ddi-green-700: #0a5c36;   /* main colour: buttons, links */
+  --ddi-green-600: #0e7a47;   /* hover */
+  --ddi-green-100: #e3efe8;   /* light green backgrounds */
+  --ddi-gold: #d4a72c;        /* accent line, active menu item */
+  --ddi-gold-100: #f6ebc7;
+  --ddi-ink: #1d2a24;         /* text */
+  --ddi-muted: #4a5a52;       /* secondary text (contrast 7.3 on white) */
+  --ddi-line: #dbe3de;        /* borders */
+  --ddi-page: #f4f7f5;        /* page background */
+
+  --tblr-primary: var(--ddi-green-700);
+  --tblr-primary-rgb: 10, 92, 54;
+  --tblr-primary-fg: #ffffff;
+  --tblr-primary-darken: #07462a;
+  --tblr-primary-lt: rgba(10, 92, 54, 0.10);
+  --tblr-primary-lt-rgb: 10, 92, 54;
+  --tblr-link-color: var(--ddi-green-700);
+  --tblr-link-color-rgb: 10, 92, 54;
+  --tblr-link-hover-color: #07462a;
+  --tblr-body-bg: var(--ddi-page);
+  --tblr-body-color: var(--ddi-ink);
+  --tblr-secondary: var(--ddi-muted);
+  --tblr-secondary-color: var(--ddi-muted);
+  --tblr-border-color: var(--ddi-line);
+  --tblr-font-sans-serif: "DDI Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --tblr-body-font-family: var(--tblr-font-sans-serif);
+  --tblr-border-radius: 8px;
+}
+body { background: var(--ddi-page); font-feature-settings: "tnum" 1, "cv11" 1; letter-spacing: 0; }
+h1, h2, h3, h4, .page-title, .card-title { color: var(--ddi-green-950); }
+
+/* ---------- The ministry bar and the menu ---------- */
+.gov-bar { background: #ffffff; border-bottom: 1px solid var(--ddi-line); }
+.gov-bar .container-xl { display: flex; align-items: center; gap: 0.85rem; padding-block: 0.6rem; }
+.gov-bar img { height: 48px; width: auto; flex-shrink: 0; }
+.gov-names { line-height: 1.25; min-width: 0; }
+.gov-names .ministry { font-weight: 700; font-size: 0.86rem; color: var(--ddi-green-900); }
+.gov-names .directorate { font-size: 0.78rem; color: var(--ddi-muted); margin-block-start: 0.1rem; }
+
+.app-navbar { background: var(--ddi-green-900); border-bottom: 3px solid var(--ddi-gold); padding-block: 0; --tblr-navbar-border-color: transparent; }
+.app-navbar .navbar-brand { color: #ffffff; font-weight: 700; letter-spacing: 0; }
+.app-navbar .navbar-brand:hover { color: #ffffff; }
+.app-navbar .nav-link { color: rgba(255, 255, 255, 0.88); font-weight: 500; padding-block: 0.85rem; }
+.app-navbar .nav-link:hover, .app-navbar .nav-link:focus { color: #ffffff; background: rgba(255, 255, 255, 0.07); }
+.app-navbar .nav-item.active .nav-link { color: #ffffff; box-shadow: inset 0 -3px 0 var(--ddi-gold); }
+.app-navbar .text-secondary { color: #cfe3d8 !important; }
+.app-navbar .navbar-toggler { border-color: rgba(255, 255, 255, 0.45); }
+.app-navbar .navbar-toggler-icon { filter: invert(1); }
+.app-navbar .badge.bg-red { box-shadow: 0 0 0 2px var(--ddi-green-900); }
+.app-navbar .avatar { background: #ffffff; color: var(--ddi-green-900); }
+.app-navbar .dropdown-menu { --tblr-dropdown-color: var(--ddi-ink); }
+
+.app-footer { border-top: 1px solid var(--ddi-line); color: var(--ddi-muted); font-size: 0.8rem; padding-block: 1rem; margin-block-start: 1.5rem; }
+
+/* ---------- Pages, cards, tables, forms ---------- */
+.page-header { margin-block-end: 1rem; }
+.page-title { font-weight: 700; }
+.card { border-color: var(--ddi-line); border-radius: 10px; box-shadow: 0 1px 2px rgba(7, 61, 38, 0.06); }
+.card-header { background: #ffffff; border-bottom-color: var(--ddi-line); }
+.table thead th, .card-table thead th { background: #f0f5f2; color: var(--ddi-muted); font-weight: 600; text-transform: none; letter-spacing: 0; font-size: 0.8rem; }
+.table-hover > tbody > tr:hover > * { background-color: #f3f8f5; }
+.form-control:focus, .form-select:focus { border-color: var(--ddi-green-700); box-shadow: 0 0 0 0.2rem rgba(10, 92, 54, 0.18); }
+.form-label { font-weight: 600; color: var(--ddi-ink); }
+.btn { font-weight: 600; }
+.btn-primary { --tblr-btn-bg: var(--ddi-green-700); --tblr-btn-border-color: var(--ddi-green-700); --tblr-btn-hover-bg: #07462a; --tblr-btn-hover-border-color: #07462a; --tblr-btn-active-bg: #053a22; --tblr-btn-color: #ffffff; --tblr-btn-hover-color: #ffffff; }
+.list-group-item-action:hover { background: #f3f8f5; }
+:focus-visible { outline: 3px solid var(--ddi-gold); outline-offset: 2px; }
+.alert-warning { --tblr-alert-bg: var(--ddi-gold-100); }
+
+/* ---------- The login page ---------- */
+.auth-shell { min-height: 100vh; display: grid; grid-template-columns: 1fr; background: var(--ddi-page); }
+.auth-brand { background: var(--ddi-green-900); color: #ffffff; padding: 1.75rem 1.5rem; border-bottom: 4px solid var(--ddi-gold); display: flex; flex-direction: column; gap: 1rem; }
+.auth-brand img { height: 64px; width: auto; align-self: flex-start; }
+.auth-brand .ministry { font-weight: 700; font-size: 1rem; line-height: 1.35; }
+.auth-brand .directorate { color: #d9eadf; font-size: 0.9rem; }
+.auth-brand .app-name { font-size: 1.6rem; font-weight: 700; margin-block-start: 0.5rem; }
+.auth-brand .app-tagline { color: #d9eadf; }
+.auth-main { display: flex; flex-direction: column; justify-content: center; padding: 2rem 1.25rem; }
+.auth-card { width: 100%; max-width: 26rem; margin-inline: auto; }
+@media (min-width: 768px) {
+  .auth-shell { grid-template-columns: minmax(20rem, 5fr) 7fr; }
+  .auth-brand { border-bottom: 0; border-inline-end: 4px solid var(--ddi-gold); padding: 3rem 2.5rem; justify-content: space-between; }
+  .auth-brand img { height: 88px; }
+  .auth-brand .app-name { font-size: 2.2rem; }
+}
+
+/* ---------- On paper: the ministry bar stays, the menu and buttons go ---------- */
+@media print {
+  .gov-bar { border-bottom: 2px solid var(--ddi-green-900); }
+  .gov-bar img { height: 40px; }
+  .app-footer { display: none; }
+}

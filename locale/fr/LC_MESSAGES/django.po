@@ -2376,3 +2376,9 @@ msgstr "<bdi>%(actor)s</bdi> vous a assigné la tâche « <bdi>%(task)s</bdi> »
 
 msgid "You were assigned the task “<bdi>%(task)s</bdi>”."
 msgstr "La tâche « <bdi>%(task)s</bdi> » vous a été assignée."
+
+msgid "Ministry of Digital Transformation and Administrative Modernization"
+msgstr "Ministère de la Transformation Numérique et de la Modernisation de l'Administration"
+
+msgid "Directorate of Development and Interoperability"
+msgstr "Direction du Développement et de l'Interopérabilité"

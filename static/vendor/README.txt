@@ -7,6 +7,7 @@ tabler-icons/   @tabler/icons-webfont   3.49.0   MIT      https://github.com/tab
 sortablejs/     sortablejs              1.15.7   MIT      https://github.com/SortableJS/Sortable
 frappe-gantt/   frappe-gantt            1.2.2    MIT      https://github.com/frappe/gantt
 chartjs/        chart.js                4.5.1    MIT      https://github.com/chartjs/Chart.js
+fonts/          @fontsource/inter 5, @fontsource/noto-sans-arabic 5   OFL 1.1   https://fontsource.org (licences in fonts/LICENSE-*.txt)
 
 The license of each library is in its folder (Tabler's is at the top of its .css and .js files).
 tabler/tabler.rtl.min.css (and its .map) is the same design mirrored for right-to-left languages: the app
@@ -16,3 +17,6 @@ The .map files only help browser developer tools; they are kept because the main
 To update a library: download the new version from https://www.npmjs.com/ (or
 https://cdn.jsdelivr.net/npm/<name>@<version>/), replace the files, update this table,
 then run "python manage.py test" and check the pages.
+
+fonts/ holds the self-hosted fonts of the redesign (Step 20): Inter for Latin text, Noto Sans Arabic for Arabic.
+They are used by static/css/theme.css (family "DDI Sans").

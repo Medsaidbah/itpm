@@ -11,7 +11,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}IT Projects{% endblock %}</title>
-  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📋</text></svg>">
+  <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon.svg' %}">
   {# The design (Tabler) and its icons. The files are in static/vendor/, see the README.txt there. #}
   {# Arabic uses Tabler's mirrored version (.rtl): what is on the left goes to the right. #}
   {% if LANGUAGE_BIDI %}
@@ -20,6 +20,8 @@
   <link rel="stylesheet" href="{% static 'vendor/tabler/tabler.min.css' %}">
   {% endif %}
   <link rel="stylesheet" href="{% static 'vendor/tabler-icons/tabler-icons.min.css' %}">
+  {# The look of the Ministry (Stage 20): colours, fonts, header. Loaded after Tabler, so it wins. #}
+  <link rel="stylesheet" href="{% static 'css/theme.css' %}">
   {% if LANGUAGE_BIDI %}
   {# Arrows that mean "back" or "next" turn around too #}
   <style>
@@ -35,9 +37,23 @@
 <body>
   <div class="page">
 
+    {# The ministry bar: the name of the institution. It is also printed at the top of paper reports. #}
+    {% block gov_bar %}
+    <div class="gov-bar">
+      <div class="container-xl">
+        {# Replace static/img/logo.svg with the official logo (see the README in static/img/) #}
+        <img src="{% static 'img/logo.svg' %}" alt="">
+        <div class="gov-names">
+          <div class="ministry">{% translate "Ministry of Digital Transformation and Administrative Modernization" %}</div>
+          <div class="directorate">{% translate "Directorate of Development and Interoperability" %}</div>
+        </div>
+      </div>
+    </div>
+    {% endblock %}
+
     {% if user.is_authenticated %}
-    {# Top bar: only shown to people who are logged in #}
-    <header class="navbar navbar-expand-md d-print-none">
+    {# Top bar (the menu): only shown to people who are logged in #}
+    <header class="navbar navbar-expand-md app-navbar d-print-none">
       <div class="container-xl">
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-menu"
                 aria-controls="main-menu" aria-expanded="false" aria-label="{% translate 'Open menu' %}">
@@ -123,6 +139,7 @@
     </header>
     {% endif %}
 
+    {% block body_layout %}
     <div class="page-wrapper">
       <div class="page-body">
         <div class="container-xl">
@@ -139,7 +156,13 @@
 
         </div>
       </div>
+      {% if user.is_authenticated %}
+      <footer class="app-footer d-print-none">
+        <div class="container-xl">© {% now "Y" %} MTNMA · DDI</div>
+      </footer>
+      {% endif %}
     </div>
+    {% endblock %}
   </div>
 
   <script src="{% static 'vendor/tabler/tabler.min.js' %}"></script>

@@ -2528,3 +2528,9 @@ msgstr "أسند إليك <bdi>%(actor)s</bdi> المهمة «<bdi>%(task)s</bdi
 
 msgid "You were assigned the task “<bdi>%(task)s</bdi>”."
 msgstr "تم إسناد المهمة «<bdi>%(task)s</bdi>» إليك."
+
+msgid "Ministry of Digital Transformation and Administrative Modernization"
+msgstr "وزارة التحول الرقمي وعصرنة الإدارة"
+
+msgid "Directorate of Development and Interoperability"
+msgstr "مديرية التطوير والتشغيل البيني"

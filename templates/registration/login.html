@@ -1,14 +1,31 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n static %}
 
 {% block title %}{% translate "Log in" %} · IT Projects{% endblock %}
 
-{% block content %}
-<div class="container-tight py-4">
-  <div class="text-center mb-4">
-    <h1 class="h2 mb-1">IT Projects</h1>
-    <div class="text-secondary">{% translate "IT department project management" %}</div>
-  </div>
+{# The login page has its own full-width layout: no ministry bar on top (the green panel is the identity) #}
+{% block gov_bar %}{% endblock %}
+
+{% block body_layout %}
+<div class="auth-shell">
+  <aside class="auth-brand">
+    <img src="{% static 'img/logo.svg' %}" alt="">
+    <div>
+      <div class="ministry">{% translate "Ministry of Digital Transformation and Administrative Modernization" %}</div>
+      <div class="directorate">{% translate "Directorate of Development and Interoperability" %}</div>
+    </div>
+    <div>
+      <div class="app-name">IT Projects</div>
+      <div class="app-tagline">{% translate "IT department project management" %}</div>
+    </div>
+  </aside>
+
+  <main class="auth-main">
+  <div class="auth-card">
+  {# Short messages, for example after logging out #}
+  {% for message in messages %}
+  <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %}" role="alert">{{ message }}</div>
+  {% endfor %}
 
   <div class="card card-md">
     <div class="card-body">
@@ -54,5 +71,7 @@
             {% if code == LANGUAGE_CODE %}aria-current="true"{% endif %}>{{ name }}</button>
     {% endfor %}
   </form>
+</div>
+  </main>
 </div>
 {% endblock %}
