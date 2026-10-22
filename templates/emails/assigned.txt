@@ -10,5 +10,5 @@
 {% blocktranslate with link=site_url|add:task.get_absolute_url %}Open the task: {{ link }}{% endblocktranslate %}
 
 --
-IT Projects
+{% translate "IT Projects" %}
 {% endautoescape %}

@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load i18n static %}
 
-{% block title %}{% translate "Log in" %} · IT Projects{% endblock %}
+{% block title %}{% translate "Log in" %} · {% translate "IT Projects" %}{% endblock %}
 
 {# The login page has its own full-width layout: no ministry bar on top (the green panel is the identity) #}
 {% block gov_bar %}{% endblock %}
@@ -15,7 +15,7 @@
       <div class="directorate">{% translate "Directorate of Development and Interoperability" %}</div>
     </div>
     <div>
-      <div class="app-name">IT Projects</div>
+      <div class="app-name">{% translate "IT Projects" %}</div>
       <div class="app-tagline">{% translate "IT department project management" %}</div>
     </div>
   </aside>

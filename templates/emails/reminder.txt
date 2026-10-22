@@ -12,5 +12,5 @@
 {% url 'my_tasks' as my_tasks_url %}{% blocktranslate with link=site_url|add:my_tasks_url %}Open my tasks: {{ link }}{% endblocktranslate %}
 
 --
-IT Projects
+{% translate "IT Projects" %}
 {% endautoescape %}

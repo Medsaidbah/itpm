@@ -52,3 +52,15 @@ class LoginDesignTests(TestCase):
         self.assertNotIn("gov-bar", html)
         for needle in ('id="id_username"', 'id="id_password"', 'name="next"', "csrfmiddlewaretoken"):
             self.assertIn(needle, html)
+
+
+class AppNameTests(TeamTestCase):
+    def test_app_name_follows_the_language(self):
+        self.login(self.omar)
+        for code, name in (("en", "IT Projects"), ("fr", "IT Projects"), ("ar", "مشاريعي")):
+            with self.subTest(code=code):
+                User.objects.filter(pk=self.omar.pk).update(language=code)
+                html = self.client.get("/").content.decode()
+                self.assertIn(f'navbar-brand pe-0 pe-md-3">{name}</a>', html)
+                self.assertIn(f"· {name}</title>", html)
+        self.assertNotIn("IT Projects", html)  # the Arabic page never shows the English name

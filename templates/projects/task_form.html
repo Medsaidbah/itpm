@@ -2,7 +2,7 @@
 {% load i18n %}
 
 {# The same page is used to create a task and to edit one #}
-{% block title %}{% if task %}{% translate "Edit task" %}{% else %}{% translate "New task" %}{% endif %} · IT Projects{% endblock %}
+{% block title %}{% if task %}{% translate "Edit task" %}{% else %}{% translate "New task" %}{% endif %} · {% translate "IT Projects" %}{% endblock %}
 {% block nav_projects %}active{% endblock %}
 
 {% block content %}
