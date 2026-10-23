@@ -199,7 +199,15 @@ def team_event(version, projects, people):
     elif version.history_type == "-":
         icon, color, action = "ti-user-minus", "orange", _("removed %(person)s from the team of") % {"person": name}
     else:
-        return None  # "~": nothing that the feed shows changed
+        # "~": the only change the feed shows is the manager role being given or taken away
+        before = version.prev_record
+        if before is None or before.is_manager == version.is_manager:
+            return None
+        if version.is_manager:
+            icon, color, action = "ti-shield-check", "green", _("made %(person)s a co-manager of") % {"person": name}
+        else:
+            action = _("took the manager role from %(person)s in") % {"person": name}
+            icon, color = "ti-shield-off", "orange"
     return Event(
         when=version.history_date,
         who=version.history_user,

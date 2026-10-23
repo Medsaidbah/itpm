@@ -112,6 +112,8 @@ class EveryAddressTests(TeamTestCase):
              (MOVED, MOVED, FORBIDDEN, FORBIDDEN, HIDDEN)),
             ("team_remove", "post", f"/projects/{p}/team/{self.lina.pk}/remove/", None,
              (MOVED, MOVED, FORBIDDEN, FORBIDDEN, HIDDEN)),
+            ("team_manager", "post", f"/projects/{p}/team/{self.lina.pk}/manager/", {"manager": "1"},
+             (MOVED, MOVED, FORBIDDEN, FORBIDDEN, HIDDEN)),
             ("project_board", "get", f"/projects/{p}/board/", None, (OK, OK, OK, OK, HIDDEN)),
             ("project_gantt", "get", f"/projects/{p}/timeline/", None, (OK, OK, OK, OK, HIDDEN)),
             ("project_report", "get", f"/projects/{p}/report/", None, (OK, OK, OK, OK, HIDDEN)),

@@ -136,8 +136,10 @@ def project_detail(request, pk):
         .annotate(count=Count("id"))
         .order_by()
     )
+    co_managers = project.co_manager_ids()
     for person in team:
         person.open_tasks = open_tasks.get(person.pk, 0)
+        person.is_co_manager = person.pk in co_managers
     can_manage_team = project.can_manage_team(request.user)
     team_form = TeamMemberForm(project=project) if can_manage_team else None
 
@@ -148,6 +150,7 @@ def project_detail(request, pk):
         "tasks": tasks,
         "team": team,
         "can_manage_team": can_manage_team,
+        "can_give_manager_role": project.can_give_manager_role(request.user),
         "team_form": team_form,
         # False when everyone is in the team already
         "people_to_add": team_form is not None and team_form.fields["person"].queryset.exists(),
@@ -273,6 +276,14 @@ def team_remove(request, pk, user_pk):
         )
         return redirect(project)
 
+    if membership.is_manager:
+        messages.error(
+            request,
+            _("%(person)s is a co-manager. Take away the manager role first, then remove them from the team.")
+            % {"person": person},
+        )
+        return redirect(project)
+
     # The person's open tasks must first go to someone else, so nobody is left with tasks
     # in a project they're not part of. Finished tasks don't count: they keep the person's name.
     open_count = project.open_tasks_of(person).count()
@@ -290,6 +301,38 @@ def team_remove(request, pk, user_pk):
     else:
         membership.delete()  # recorded in the history, so the Activity page shows it
         messages.success(request, _("%(person)s is no longer in the team.") % {"person": person})
+    return redirect(project)
+
+
+@login_required
+@require_POST
+def team_manager(request, pk, user_pk):
+    """Gives the manager role to a team member (manager=1), or takes it away (manager=0).
+    The project's own manager and admins do both; a co-manager may only give up their own role."""
+    project = get_object_or_404(visible_projects(request), pk=pk)
+    membership = get_object_or_404(ProjectMember.objects.select_related("user"), project=project, user_id=user_pk)
+    person = membership.user
+    make_manager = request.POST.get("manager") == "1"
+
+    giving_up_own_role = not make_manager and person.pk == request.user.pk and project.is_co_manager(person)
+    if not (project.can_give_manager_role(request.user) or giving_up_own_role):
+        raise PermissionDenied(_("Only the project's manager and admins can give the manager role."))
+    if person.pk == project.manager_id:
+        messages.error(request, _("%(person)s is the project's manager already.") % {"person": person})
+        return redirect(project)
+    if make_manager and not person.is_active:
+        messages.error(
+            request, _("%(person)s's account is deactivated, so they can't be a manager.") % {"person": person}
+        )
+        return redirect(project)
+
+    if membership.is_manager != make_manager:
+        membership.is_manager = make_manager
+        membership.save()  # recorded in the history, so the Activity page shows it
+    if make_manager:
+        messages.success(request, _("%(person)s is now a co-manager of this project.") % {"person": person})
+    else:
+        messages.success(request, _("%(person)s is no longer a co-manager.") % {"person": person})
     return redirect(project)
 
 

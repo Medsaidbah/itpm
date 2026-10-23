@@ -17,6 +17,7 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.mail import EmailMultiAlternatives
+from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.template.loader import render_to_string
@@ -25,7 +26,7 @@ from django.utils.formats import date_format
 from django.utils.translation import gettext as _
 from django.utils.translation import ngettext, pgettext
 
-from .models import Project, Task
+from .models import Project, ProjectMember, Task
 
 # Problems (like a mail server that is down) are written in the server's log
 logger = logging.getLogger(__name__)
@@ -109,7 +110,11 @@ def _reminder_for(person, today):
     due_soon = list(mine.filter(due_date__gte=today, due_date__lt=today + timedelta(days=DUE_SOON_DAYS)))
     # For project managers: late tasks in their projects that are someone else's (or nobody's)
     late_in_my_projects = list(
-        open_tasks.filter(project__manager=person, due_date__lt=today).exclude(assignee=person)
+        open_tasks.filter(
+            Q(project__manager=person)
+            | Q(project__in=ProjectMember.objects.filter(user=person, is_manager=True).values("project")),
+            due_date__lt=today,
+        ).exclude(assignee=person)
     )
 
     sections = []

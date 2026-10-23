@@ -2382,3 +2382,42 @@ msgstr "Ministère de la Transformation Numérique et de la Modernisation de l'A
 
 msgid "Directorate of Development and Interoperability"
 msgstr "Direction du Développement et de l'Interopérabilité"
+
+msgid "Co-manager"
+msgstr "Co-chef de projet"
+
+msgid "Take away the manager role"
+msgstr "Retirer le rôle de chef de projet"
+
+msgid "Take away the manager role from %(person)s"
+msgstr "Retirer le rôle de chef de projet à %(person)s"
+
+msgid "Make co-manager"
+msgstr "Nommer co-chef de projet"
+
+msgid "Make %(person)s a co-manager"
+msgstr "Nommer %(person)s co-chef de projet"
+
+msgid "%(person)s is a co-manager. Take away the manager role first, then remove them from the team."
+msgstr "%(person)s est co-chef de projet. Retirez d'abord le rôle de chef de projet, puis retirez la personne de l'équipe."
+
+msgid "Only the project's manager and admins can give the manager role."
+msgstr "Seuls le chef du projet et les administrateurs peuvent donner le rôle de chef de projet."
+
+msgid "%(person)s is the project's manager already."
+msgstr "%(person)s est déjà le chef du projet."
+
+msgid "%(person)s's account is deactivated, so they can't be a manager."
+msgstr "Le compte de %(person)s est désactivé : la personne ne peut pas être chef de projet."
+
+msgid "%(person)s is now a co-manager of this project."
+msgstr "%(person)s est maintenant co-chef de ce projet."
+
+msgid "%(person)s is no longer a co-manager."
+msgstr "%(person)s n'est plus co-chef de projet."
+
+msgid "made %(person)s a co-manager of"
+msgstr "a nommé %(person)s co-chef de projet de"
+
+msgid "took the manager role from %(person)s in"
+msgstr "a retiré le rôle de chef de projet à %(person)s dans"

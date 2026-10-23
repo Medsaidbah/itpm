@@ -122,6 +122,7 @@ class Project(models.Model):
             Project.objects.filter(pk=self.pk).values_list("manager_id", flat=True).first() if self.pk else None
         )
         super().save(*args, **kwargs)
+        self.__dict__.pop("_co_manager_ids", None)  # forget what was remembered about co-managers
 
         # A new manager: the previous one stays in the team, as a member, so they keep their access.
         # It's done here so that every way of changing the manager does it (pages, admin panel...).
@@ -130,14 +131,34 @@ class Project(models.Model):
             previous_manager = get_user_model().objects.get(pk=previous_manager_id)
             if self.add_to_team(previous_manager, added_by=self.saved_by):
                 self.kept_in_team = previous_manager
+            # The new manager is the manager itself now: a co-manager mark from before no longer applies,
+            # so it doesn't come back if they are replaced later.
+            self.memberships.filter(user_id=self.manager_id, is_manager=True).update(is_manager=False)
 
     def get_absolute_url(self):
         """The address of this project's page."""
         return reverse("project_detail", args=[self.pk])
 
+    def co_manager_ids(self):
+        """The people the manager gave the manager role to (Step 21). One database query per project object."""
+        if "_co_manager_ids" not in self.__dict__:
+            co_managers = self.memberships.filter(is_manager=True).exclude(user_id=self.manager_id)
+            self._co_manager_ids = set(co_managers.values_list("user_id", flat=True))
+        return self._co_manager_ids
+
+    def is_co_manager(self, user):
+        """This person is a team member who was given the manager role."""
+        return user.pk in self.co_manager_ids()
+
     def can_edit(self, user):
-        """Who may change this project, its tasks and its team: admins and the project's manager.
+        """Who may change this project, its tasks and its team: admins, the project's manager
+        and the co-managers (team members the manager gave the manager role to).
         This is the only place the rule is written, so it's easy to change later."""
+        return user.is_admin or user.pk == self.manager_id or self.is_co_manager(user)
+
+    def can_give_manager_role(self, user):
+        """Who may give the manager role to a team member, or take it away: admins and the project's
+        own manager. A co-manager can't do it to others (they may only give up their own role)."""
         return user.is_admin or user.pk == self.manager_id
 
     def can_manage_team(self, user):
@@ -221,6 +242,10 @@ class ProjectMember(models.Model):
     added_by = models.ForeignKey(
         settings.AUTH_USER_MODEL, on_delete=models.SET_NULL, null=True, blank=True, related_name="+"
     )
+
+    # The manager can give the manager role to a team member (Step 21): they get the same rights
+    # (edit the project, its tasks and its team). The project keeps one main manager (Project.manager).
+    is_manager = models.BooleanField(default=False)
 
     # Remembers who added or removed whom, and when
     history = HistoricalRecords()

@@ -2534,3 +2534,42 @@ msgstr "وزارة التحول الرقمي وعصرنة الإدارة"
 
 msgid "Directorate of Development and Interoperability"
 msgstr "مديرية التطوير والتشغيل البيني"
+
+msgid "Co-manager"
+msgstr "مدير مشارك"
+
+msgid "Take away the manager role"
+msgstr "سحب دور مدير المشروع"
+
+msgid "Take away the manager role from %(person)s"
+msgstr "سحب دور مدير المشروع من %(person)s"
+
+msgid "Make co-manager"
+msgstr "تعيين كمدير مشارك"
+
+msgid "Make %(person)s a co-manager"
+msgstr "تعيين %(person)s مديرًا مشاركًا"
+
+msgid "%(person)s is a co-manager. Take away the manager role first, then remove them from the team."
+msgstr "%(person)s مدير مشارك. اسحب دور مدير المشروع أولًا، ثم أزله من الفريق."
+
+msgid "Only the project's manager and admins can give the manager role."
+msgstr "يمكن لمدير المشروع والمسؤولين فقط منح دور مدير المشروع."
+
+msgid "%(person)s is the project's manager already."
+msgstr "%(person)s هو مدير المشروع بالفعل."
+
+msgid "%(person)s's account is deactivated, so they can't be a manager."
+msgstr "حساب %(person)s معطّل، لذلك لا يمكن أن يكون مديرًا."
+
+msgid "%(person)s is now a co-manager of this project."
+msgstr "أصبح %(person)s مديرًا مشاركًا لهذا المشروع."
+
+msgid "%(person)s is no longer a co-manager."
+msgstr "لم يعد %(person)s مديرًا مشاركًا."
+
+msgid "made %(person)s a co-manager of"
+msgstr "عيّن %(person)s مديرًا مشاركًا في"
+
+msgid "took the manager role from %(person)s in"
+msgstr "سحب دور مدير المشروع من %(person)s في"

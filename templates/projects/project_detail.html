@@ -96,10 +96,27 @@
         <div>
           <div>{% person_link person "text-reset" %}{% if not person.is_active %} <span class="badge bg-secondary-lt">{% translate "Account deactivated" %}</span>{% endif %}</div>
           <div class="small text-secondary">
-            {% if person.pk == project.manager_id %}{% translate "Manager" %}{% else %}{% translate "Member" %}{% endif %}
+            {% if person.pk == project.manager_id %}{% translate "Manager" %}{% elif person.is_co_manager %}{% translate "Co-manager" %}{% else %}{% translate "Member" %}{% endif %}
             {% if person.open_tasks %}· {% blocktranslate count counter=person.open_tasks %}{{ counter }} open task{% plural %}{{ counter }} open tasks{% endblocktranslate %}{% endif %}
           </div>
         </div>
+        {# The manager gives the manager role to a team member (or takes it back). A co-manager may give up their own. #}
+        {% if person.pk != project.manager_id and person.is_active %}
+        {% if can_give_manager_role or person.is_co_manager and person.pk == request.user.pk %}
+        <form method="post" action="{% url 'team_manager' project.pk person.pk %}">
+          {% csrf_token %}
+          {% if person.is_co_manager %}
+          <input type="hidden" name="manager" value="0">
+          <button type="submit" class="btn btn-sm btn-ghost-secondary btn-icon" title="{% translate 'Take away the manager role' %}"
+                  aria-label="{% blocktranslate with person=person %}Take away the manager role from {{ person }}{% endblocktranslate %}"><i class="ti ti-shield-off"></i></button>
+          {% else %}
+          <input type="hidden" name="manager" value="1">
+          <button type="submit" class="btn btn-sm btn-ghost-secondary btn-icon" title="{% translate 'Make co-manager' %}"
+                  aria-label="{% blocktranslate with person=person %}Make {{ person }} a co-manager{% endblocktranslate %}"><i class="ti ti-shield-check"></i></button>
+          {% endif %}
+        </form>
+        {% endif %}
+        {% endif %}
         {% if can_manage_team and person.pk != project.manager_id %}
         {# The question is kept in data-confirm, where any name (even with a quote) is written safely #}
         {% blocktranslate asvar question with person=person %}Remove {{ person }} from the team?{% endblocktranslate %}
