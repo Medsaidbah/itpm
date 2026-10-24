@@ -34,7 +34,10 @@ OK, MOVED, FORBIDDEN, HIDDEN = 200, 302, 403, 404
 # Addresses that aren't about projects: logging in and out, the admin panel,
 # and the health check (it has its own tests in test_site.py)
 # (Django lets only admins with "staff status" into the admin panel)
-NOT_ABOUT_PROJECTS = {"login", "logout", "admin", "healthz"}
+NOT_ABOUT_PROJECTS = {
+    "login", "logout", "admin", "healthz",
+    "password_reset", "password_reset_done", "password_reset_confirm", "password_reset_complete",
+}
 
 # What Amina, Omar, Sara, Lina and Karim get from the Administration section (Stage 17b):
 # a page for the admin, "No access" for everyone else, whatever they can see in the projects

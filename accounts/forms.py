@@ -1,7 +1,17 @@
+import logging
+
 from django import forms
 from django.conf import settings
-from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, UserChangeForm
+from django.contrib.auth.forms import (
+    AuthenticationForm,
+    PasswordChangeForm,
+    PasswordResetForm,
+    SetPasswordForm,
+    UserChangeForm,
+)
+from django.core.cache import cache
 from django.core.exceptions import ValidationError
+from django.urls import reverse
 from django.utils.translation import get_language, gettext
 from django.utils.translation import gettext_lazy as _
 
@@ -9,6 +19,8 @@ from projects.forms import BootstrapFormMixin
 
 from .models import NO_ADMIN_LEFT, User, leaves_no_active_admin
 from .pictures import MAX_PICTURE_MB, make_profile_picture
+
+logger = logging.getLogger(__name__)
 
 
 def picture_help_text():
@@ -80,6 +92,41 @@ class StyledPasswordChangeForm(BootstrapFormMixin, PasswordChangeForm):
             self.add_error("new_password1", ValidationError(
                 _("Choose a password that is different from the temporary one."), code="same_password"))
         return cleaned_data
+
+    def save(self, commit=True):
+        self.user.mark_password_as_own()
+        return super().save(commit)
+
+
+# One reset email per account every two minutes: the form can't be used to flood someone's inbox
+RESET_EMAIL_PAUSE_SECONDS = 120
+
+
+class StyledPasswordResetForm(BootstrapFormMixin, PasswordResetForm):
+    """"Forgot my password": the work email address. The email is sent in the language of the person's
+    profile, with a link that starts with SITE_URL (not with the address the browser used)."""
+
+    email = forms.EmailField(label=_("Work email address"), max_length=254, widget=forms.EmailInput(
+        attrs={"autocomplete": "email", "dir": "ltr", "autofocus": True}))
+
+    def send_mail(self, subject_template_name, email_template_name, context, from_email, to_email,
+                  html_email_template_name=None):
+        from projects.emails import email_password_reset  # here, because projects imports accounts
+
+        person = context["user"]
+        if not cache.add(f"password-reset-email-{person.pk}", 1, RESET_EMAIL_PAUSE_SECONDS):
+            return  # one was just sent
+        link = settings.SITE_URL.rstrip("/") + reverse(
+            "password_reset_confirm", kwargs={"uidb64": context["uid"], "token": context["token"]})
+        try:
+            email_password_reset(person, link)
+        except Exception:  # the page answers the same whatever happens, so nobody can probe for accounts
+            logger.exception("Couldn't send the password reset email to %s", to_email)
+
+
+class StyledSetPasswordForm(BootstrapFormMixin, SetPasswordForm):
+    """Choosing a new password from the email link. It is the person's own choice, so a temporary
+    password stops being temporary."""
 
     def save(self, commit=True):
         self.user.mark_password_as_own()

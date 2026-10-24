@@ -1,0 +1,12 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate with name=person.first_name|default:person.username %}Hello {{ name }},{% endblocktranslate %}
+
+{% blocktranslate with title=finished.title project=task.project.name %}The task "{{ title }}" is done in "{{ project }}". You were waiting for it: you can start your task now.{% endblocktranslate %}
+
+  {{ task.title }}
+  {% if task.due_date %}{% blocktranslate with date=task.due_date|date:_("D j M Y") %}Due {{ date }}{% endblocktranslate %}{% else %}{% translate "No due date" %}{% endif %}
+
+{% blocktranslate with link=site_url|add:task.get_absolute_url %}Open the task: {{ link }}{% endblocktranslate %}
+
+--
+مشاريعي
+{% endautoescape %}

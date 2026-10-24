@@ -482,6 +482,8 @@ class Notification(models.Model):
         CO_MANAGER = "co_manager", gettext_lazy("You were given the manager role in a project")
         MANAGER_ENDED = "manager_ended", gettext_lazy("You are no longer a project's manager")
         CO_MANAGER_ENDED = "co_manager_ended", gettext_lazy("Your manager role in a project was taken away")
+        # About a task again (Step 24): the last task it was waiting for is done
+        UNBLOCKED = "unblocked", gettext_lazy("A task you were waiting for is done")
 
     # What the notification is about: a task (ASSIGNED) or a project (the other kinds)
     PROJECT_KINDS = ("added_to_team", "manager", "co_manager", "manager_ended", "co_manager_ended")

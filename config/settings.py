@@ -247,4 +247,7 @@ GRAPH_API_URL = os.environ.get("GRAPH_API_URL", "https://graph.microsoft.com/v1.
 GRAPH_SCOPE = os.environ.get("GRAPH_SCOPE", "https://graph.microsoft.com/.default")
 
 # The app's address, for the links inside emails
+# A "forgot my password" link works for 3 hours (Django's default is 3 days)
+PASSWORD_RESET_TIMEOUT = 3 * 60 * 60
+
 SITE_URL = os.environ.get("SITE_URL", "http://127.0.0.1:8000")

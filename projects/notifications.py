@@ -7,7 +7,7 @@ from django.utils import timezone
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 
-from .emails import email_project_event
+from .emails import email_project_event, email_unblocked
 from .models import Notification
 
 SHOWN = 50  # the list shows the latest ones
@@ -42,6 +42,26 @@ def tell_project_event(request, kind, project, person):
         messages.warning(
             request, _("The change is saved, but the email to %(person)s couldn't be sent.") % {"person": person}
         )
+
+
+def tell_unblocked(request, finished, warn=True):
+    """`finished` has just been marked done: every task that was waiting for it, and has nothing else to wait
+    for, can start now. Tell the person it is assigned to, in the bell and by email. Nothing for tasks
+    that are done already, tasks nobody has, the person who just finished it, or deactivated accounts.
+    warn=False: no warning on the next page if an email fails (for the board's drag and drop)."""
+    for task in finished.blocking.select_related("assignee", "project"):
+        person = task.assignee
+        if person is None or not person.is_active or person.pk == request.user.pk:
+            continue
+        if task.status == task.Status.DONE or task.waiting_for:
+            continue
+        Notification.objects.create(
+            recipient=person, kind=Notification.Kind.UNBLOCKED, task=task, actor=request.user
+        )
+        if not email_unblocked(task, finished, request.user) and warn:
+            messages.warning(
+                request, _("The change is saved, but the email to %(person)s couldn't be sent.") % {"person": person}
+            )
 
 
 def unread_count(request):

@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% load i18n static %}
+
+{# The shared layout of the pages around the login: the green panel on one side, a card on the other #}
+{% block gov_bar %}{% endblock %}
+
+{% block body_layout %}
+<div class="auth-shell">
+  <aside class="auth-brand">
+    <img src="{% static 'img/logo.png' %}" alt="">
+    <div>
+      <div class="ministry">{% translate "Ministry of Digital Transformation and Administrative Modernization" %}</div>
+      <div class="directorate">{% translate "Directorate of Development and Interoperability" %}</div>
+    </div>
+    <div>
+      <div class="app-name">مشاريعي</div>
+      <div class="app-tagline">{% translate "IT department project management" %}</div>
+    </div>
+  </aside>
+
+  <main class="auth-main">
+  <div class="auth-card">
+    <div class="card card-md">
+      <div class="card-body">
+        {% block auth_content %}{% endblock %}
+      </div>
+    </div>
+  </div>
+  </main>
+</div>
+{% endblock %}

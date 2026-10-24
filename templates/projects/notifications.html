@@ -23,10 +23,12 @@
   <div class="list-group list-group-flush">
     {% for note in notifications %}
     <a href="{% url 'notification_open' note.pk %}" class="list-group-item list-group-item-action d-flex align-items-start gap-3">
-      <span class="avatar avatar-sm bg-blue-lt flex-shrink-0"><i class="ti {% if note.task_id %}ti-checklist{% elif note.kind == 'added_to_team' %}ti-user-plus{% elif note.kind == 'manager' or note.kind == 'co_manager' %}ti-shield-check{% else %}ti-shield-off{% endif %}"></i></span>
+      <span class="avatar avatar-sm bg-blue-lt flex-shrink-0"><i class="ti {% if note.kind == 'unblocked' %}ti-player-play{% elif note.task_id %}ti-checklist{% elif note.kind == 'added_to_team' %}ti-user-plus{% elif note.kind == 'manager' or note.kind == 'co_manager' %}ti-shield-check{% else %}ti-shield-off{% endif %}"></i></span>
       <div class="flex-fill">
         <div{% if not note.read_at %} class="fw-bold"{% endif %}>
-          {% if note.task_id %}
+          {% if note.kind == 'unblocked' %}
+          {% blocktranslate with task=note.task.title %}You can start “<bdi>{{ task }}</bdi>”: the task it was waiting for is done.{% endblocktranslate %}
+          {% elif note.task_id %}
           {% if note.actor %}
           {% blocktranslate with actor=note.actor task=note.task.title %}<bdi>{{ actor }}</bdi> assigned you the task “<bdi>{{ task }}</bdi>”.{% endblocktranslate %}
           {% else %}

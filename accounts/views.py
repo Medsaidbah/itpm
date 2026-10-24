@@ -13,9 +13,10 @@ from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 from django.views.decorators.http import require_POST
 
+from projects.emails import email_password_changed
 from projects.models import Project, Task, people_visible_to
 
-from .forms import ProfileForm, StyledPasswordChangeForm
+from .forms import ProfileForm, StyledPasswordChangeForm, StyledPasswordResetForm, StyledSetPasswordForm
 from .middleware import LANGUAGE_CODES, remember_language
 from .models import User
 
@@ -53,7 +54,9 @@ class PasswordChangeView(SuccessMessageMixin, auth_views.PasswordChangeView):
 
     def form_valid(self, form):
         self.was_forced = self.request.user.must_change_password  # read it before the new password is saved
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        email_password_changed(self.request.user)
+        return response
 
     def get_success_url(self):
         # After choosing their own password, the first time: the app opens. Otherwise: back to the profile.
@@ -109,3 +112,33 @@ def set_language(request):
             User.objects.filter(pk=request.user.pk).update(language=language)
         remember_language(response, language)
     return response
+
+
+class PasswordResetView(auth_views.PasswordResetView):
+    """Forgot my password: the page where the work email address is typed."""
+
+    template_name = "registration/password_reset_form.html"
+    form_class = StyledPasswordResetForm
+    success_url = reverse_lazy("password_reset_done")
+
+
+class PasswordResetDoneView(auth_views.PasswordResetDoneView):
+    template_name = "registration/password_reset_done.html"
+
+
+class PasswordResetConfirmView(auth_views.PasswordResetConfirmView):
+    """The page the email link opens: the new password, twice."""
+
+    template_name = "registration/password_reset_confirm.html"
+    form_class = StyledSetPasswordForm
+    success_url = reverse_lazy("password_reset_complete")
+    post_reset_login = False  # the person logs in with the new password
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        email_password_changed(form.user)
+        return response
+
+
+class PasswordResetCompleteView(auth_views.PasswordResetCompleteView):
+    template_name = "registration/password_reset_complete.html"

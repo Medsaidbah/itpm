@@ -262,3 +262,56 @@ def email_project_event(kind, project, person, actor):
         logger.exception("Couldn't send the project email (%s) to %s", kind, person.email)
         return False
     return True
+
+
+# ---------- Passwords (Step 24) ----------
+
+
+def email_password_reset(person, link):
+    """The "forgot my password" email, with the one-time link. Raises an error if it can't be sent."""
+    language = email_language(person)
+    with translation.override(language):
+        subject = _("Reset your password")
+    send_email(person.email, subject, "password_reset", {"person": person, "link": link}, language)
+
+
+def email_password_changed(person):
+    """Tells someone that their password was just changed, so that they notice if it wasn't them.
+    Returns False if the email couldn't be sent (the new password is saved anyway)."""
+    if not person.email:
+        return True
+    language = email_language(person)
+    try:
+        with translation.override(language):
+            subject = _("Your password was changed")
+        send_email(person.email, subject, "password_changed", {"person": person}, language)
+    except Exception:  # like a mail server that is down or refuses the email
+        logger.exception("Couldn't send the password changed email to %s", person.email)
+        return False
+    return True
+
+
+# ---------- A task you were waiting for is done (Step 24) ----------
+
+
+def email_unblocked(task, finished, finished_by):
+    """Tells the person assigned to `task` that `finished` (the last task it waited for) is done, so they
+    can start. Returns False if the email couldn't be sent (the bell entry is saved anyway)."""
+    person = task.assignee
+    if not person.email:
+        return True
+    language = email_language(person)
+    try:
+        with translation.override(language):
+            subject = _("You can start: %(title)s") % {"title": task.title}
+        send_email(
+            person.email,
+            subject,
+            "unblocked",
+            {"task": task, "finished": finished, "finished_by": finished_by, "person": person},
+            language,
+        )
+    except Exception:  # like a mail server that is down or refuses the email
+        logger.exception("Couldn't send the unblocked task email to %s", person.email)
+        return False
+    return True

@@ -28,7 +28,7 @@ from .forms import (
     TeamMemberForm,
 )
 from .models import Attachment, Comment, Notification, Project, ProjectMember, Task
-from .notifications import notify_assigned, tell_project_event
+from .notifications import notify_assigned, tell_project_event, tell_unblocked
 
 # ---------- Who sees what ----------
 # People only see the projects they manage or whose team they are in; admins see all of them
@@ -430,6 +430,7 @@ def task_edit(request, pk):
 
     if request.method == "POST":
         previous_assignee_id = task.assignee_id  # read it now: checking the form changes the task
+        previous_status = task.status
         form = TaskForm(request.POST, instance=task, project=task.project, user=request.user)
         if form.is_valid():
             task.saved_by = request.user
@@ -437,6 +438,8 @@ def task_edit(request, pk):
             messages.success(request, _("Changes saved."))
             tell_if_joined_team(request, task)
             tell_new_assignee(request, task, previous_assignee_id)
+            if task.status == Task.Status.DONE and previous_status != Task.Status.DONE:
+                tell_unblocked(request, task)
             return redirect(task)
     else:
         form = TaskForm(instance=task, project=task.project, user=request.user)
@@ -466,6 +469,8 @@ def task_status(request, pk):
             request, _('"%(title)s" is now %(status)s.') % {"title": task.title, "status": task.get_status_display()}
         )
         tell_if_joined_team(request, task)
+        if new_status == Task.Status.DONE:  # (the status did change: this branch is only for changes)
+            tell_unblocked(request, task)
 
     # A button can ask to come back to its own page (like My tasks) with a "next" field.
     # Only addresses on this site are accepted, so a link can't send people elsewhere.
@@ -605,9 +610,12 @@ def task_move(request, pk):
         return JsonResponse({"error": _("Unknown status.")}, status=400)
 
     if new_status != task.status:
+        was_done = task.status == Task.Status.DONE
         task.status = new_status
         task.saved_by = request.user
         task.save()  # a status change is recorded in the history
+        if new_status == Task.Status.DONE and not was_done:
+            tell_unblocked(request, task, warn=False)
 
     # Save each card's place in the column (0 = top). Only cards of this project and column count.
     order = [int(task_id) for task_id in request.POST.getlist("order") if task_id.isdigit()]

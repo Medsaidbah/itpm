@@ -2660,3 +2660,84 @@ msgstr "سحب <bdi>%(actor)s</bdi> دورك كمدير في «<bdi>%(project)s<
 
 msgid "No notifications yet. You will see here the tasks that are assigned to you and the changes in your projects."
 msgstr "لا توجد إشعارات بعد. سترى هنا المهام المسندة إليك والتغييرات في مشاريعك."
+
+msgid "Reset your password"
+msgstr "إعادة تعيين كلمة المرور"
+
+msgid "Your password was changed"
+msgstr "تم تغيير كلمة المرور الخاصة بك"
+
+#, python-format
+msgid "You can start: %(title)s"
+msgstr "يمكنك البدء: %(title)s"
+
+msgid "A task you were waiting for is done"
+msgstr "اكتملت مهمة كنت تنتظرها"
+
+msgid "The password of your account was just changed."
+msgstr "تم تغيير كلمة مرور حسابك للتو."
+
+msgid "If it was you, there is nothing to do. If it wasn't you, contact an administrator right away."
+msgstr "إذا كنت أنت من قام بذلك فلا يلزمك أي إجراء. وإن لم تكن أنت، فاتصل بمسؤول فورًا."
+
+msgid "You always get this email when your password changes."
+msgstr "تصلك هذه الرسالة دائمًا عند تغيير كلمة المرور."
+
+msgid "Someone asked to reset the password of your account. To choose a new password, open this link:"
+msgstr "طُلب إعادة تعيين كلمة مرور حسابك. لاختيار كلمة مرور جديدة، افتح هذا الرابط:"
+
+msgid "Choose a new password"
+msgstr "اختيار كلمة مرور جديدة"
+
+msgid "The link works once and stops working after a few hours. If it wasn't you, ignore this email: your password stays the same."
+msgstr "يعمل الرابط مرة واحدة فقط وتنتهي صلاحيته بعد ساعات قليلة. إن لم تكن أنت من طلب ذلك فتجاهل هذه الرسالة: ستبقى كلمة مرورك كما هي."
+
+msgid "You get this email because a password reset was asked for your account."
+msgstr "وصلتك هذه الرسالة لأنه طُلب إعادة تعيين كلمة المرور لحسابك."
+
+#, python-format
+msgid "The task \"%(title)s\" is done in \"%(project)s\". You were waiting for it: you can start your task now."
+msgstr "اكتملت المهمة «%(title)s» في «%(project)s». كنت تنتظرها: يمكنك الآن البدء بمهمتك."
+
+msgid "You get this email when a task you were waiting for is finished."
+msgstr "تصلك هذه الرسالة عند اكتمال مهمة كنت تنتظرها."
+
+#, python-format
+msgid "You can start “<bdi>%(task)s</bdi>”: the task it was waiting for is done."
+msgstr "يمكنك البدء بـ «<bdi>%(task)s</bdi>»: اكتملت المهمة التي كانت تنتظرها."
+
+msgid "Forgot my password"
+msgstr "نسيت كلمة المرور"
+
+msgid "Password changed"
+msgstr "تم تغيير كلمة المرور"
+
+msgid "Your password is changed"
+msgstr "تم تغيير كلمة مرورك"
+
+msgid "You can now log in with your new password."
+msgstr "يمكنك الآن تسجيل الدخول بكلمة مرورك الجديدة."
+
+msgid "Save my new password"
+msgstr "حفظ كلمة مروري الجديدة"
+
+msgid "This link doesn't work"
+msgstr "هذا الرابط لا يعمل"
+
+msgid "The link was already used or it is too old. Ask for a new one."
+msgstr "تم استخدام الرابط من قبل أو أنه قديم جدًا. اطلب رابطًا جديدًا."
+
+msgid "Check your email"
+msgstr "تحقق من بريدك الإلكتروني"
+
+msgid "If this address belongs to an account, an email with a link was just sent. The link works for a few hours."
+msgstr "إذا كان هذا العنوان مرتبطًا بحساب، فقد أُرسلت إليه رسالة تحتوي على رابط. يظل الرابط صالحًا لساعات قليلة."
+
+msgid "Nothing arrived? Look in the spam folder, or ask an administrator."
+msgstr "لم يصل شيء؟ تحقق من مجلد الرسائل غير المرغوب فيها أو اطلب المساعدة من مسؤول."
+
+msgid "Type your work email address. If it belongs to an account, we send you a link to choose a new password."
+msgstr "اكتب عنوان بريدك الإلكتروني المهني. إذا كان مرتبطًا بحساب، سنرسل إليك رابطًا لاختيار كلمة مرور جديدة."
+
+msgid "Send me the link"
+msgstr "أرسل لي الرابط"
