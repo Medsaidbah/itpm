@@ -17,7 +17,6 @@ from datetime import timedelta
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.core.mail import EmailMultiAlternatives
 from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
@@ -27,6 +26,7 @@ from django.utils.formats import date_format
 from django.utils.translation import gettext as _
 from django.utils.translation import ngettext, pgettext
 
+from . import outbox
 from .models import Notification, Project, ProjectMember, Task
 
 # Problems (like a mail server that is down) are written in the server's log
@@ -60,14 +60,17 @@ def render_email(template, context, language=None, site_url=None):
     return text, html
 
 
-def send_email(to, subject, template, context, language=None):
-    """Sends one email. If the mail server says no, this raises an error."""
+def send_email(to, subject, template, context, language=None, wait=False):
+    """Writes one email in the outbox and sends it (projects/outbox.py): in a background thread in the app, so
+    nobody waits for the mail server and a failed email is tried again later. wait=True (or tests): it is sent
+    at once, and if the mail server says no, this raises an error."""
     subject = " ".join(str(subject).split())  # an email subject must be on one line
     text, html = render_email(template, {**context, "subject": subject}, language)
-    # The sender is DEFAULT_FROM_EMAIL from settings.py
-    message = EmailMultiAlternatives(subject, text, to=[to])
-    message.attach_alternative(html, "text/html")
-    message.send()
+    row = outbox.queue(to, subject[:255], text, html)
+    if wait:
+        outbox.deliver(row.pk, raise_errors=True)
+    else:
+        outbox.send_now_or_later(row.pk)
 
 
 # ---------- The daily reminder ----------
@@ -185,8 +188,8 @@ def email_new_assignee(task, assigned_by):
     """Tells someone by email that a task was just given to them.
     Returns False if the email couldn't be sent (the task is saved anyway)."""
     person = task.assignee
-    if not person.email:
-        return True  # no address: there is nobody to write to, but nothing went wrong
+    if not person.email or not person.email_assigned:
+        return True  # no address, or the person doesn't want this email: nothing went wrong
     language = email_language(person)
     try:
         with translation.override(language):
@@ -245,8 +248,8 @@ def project_event_texts(kind, project, actor):
 def email_project_event(kind, project, person, actor):
     """Tells someone by email that their place in a project changed.
     Returns False if the email couldn't be sent (the change is saved anyway)."""
-    if not person.email:
-        return True  # nobody to write to, but nothing went wrong
+    if not person.email or not person.email_project:
+        return True  # nobody to write to, or the person doesn't want this email: nothing went wrong
     language = email_language(person)
     try:
         with translation.override(language):
@@ -298,7 +301,7 @@ def email_unblocked(task, finished, finished_by):
     """Tells the person assigned to `task` that `finished` (the last task it waited for) is done, so they
     can start. Returns False if the email couldn't be sent (the bell entry is saved anyway)."""
     person = task.assignee
-    if not person.email:
+    if not person.email or not person.email_unblocked:
         return True
     language = email_language(person)
     try:

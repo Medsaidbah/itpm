@@ -2888,3 +2888,86 @@ msgstr[2] "اثنتان جديدتان"
 msgstr[3] "%(counter)s جديدة"
 msgstr[4] "%(counter)s جديدة"
 msgstr[5] "%(counter)s جديدة"
+
+msgid "A task is given to me"
+msgstr "إسناد مهمة لي"
+
+msgid "A task I was waiting for is done"
+msgstr "اكتمال مهمة كنت أنتظرها"
+
+msgid "My place in a project changes (team, manager role)"
+msgstr "تغيّر موقعي في مشروع (الفريق، دور المدير)"
+
+msgid "The daily reminder of my late tasks and the ones due soon"
+msgstr "التذكير اليومي بمهامي المتأخرة والقريبة الموعد"
+
+msgid "Your email choices are saved."
+msgstr "تم حفظ اختياراتك للبريد الإلكتروني."
+
+msgid "The emails are being sent again. Reload this page in a moment."
+msgstr "جارٍ إعادة إرسال الرسائل. أعد تحميل هذه الصفحة بعد قليل."
+
+msgid "Email notifications"
+msgstr "إشعارات البريد الإلكتروني"
+
+msgid "Choose which emails you get. The bell at the top of the page always shows everything, and the emails about the security of your account (forgot password, password changed) are always sent."
+msgstr "اختر الرسائل التي تريد استلامها. يعرض الجرس في أعلى الصفحة كل شيء دائمًا، وتُرسل دائمًا الرسائل المتعلقة بأمان حسابك (نسيان كلمة المرور، تغيير كلمة المرور)."
+
+msgid "Emails"
+msgstr "الرسائل الإلكترونية"
+
+#, python-format
+msgid "Every email the app sends is written here first and sent in the background. If the mail server says no, the app tries again later. After %(max_attempts)s failed tries, the email is given up: fix the email settings, then press \"Send again\"."
+msgstr "تُكتب كل رسالة يرسلها التطبيق هنا أولًا ثم تُرسل في الخلفية. إذا رفض خادم البريد، يعيد التطبيق المحاولة لاحقًا. بعد %(max_attempts)s محاولات فاشلة يتم التخلي عن الرسالة: أصلح إعدادات البريد ثم اضغط «إعادة الإرسال»."
+
+#, python-format
+msgid "%(count)s waiting"
+msgstr "%(count)s في الانتظار"
+
+#, python-format
+msgid "%(count)s given up"
+msgstr "%(count)s تم التخلي عنها"
+
+msgid "Send again"
+msgstr "إعادة الإرسال"
+
+msgid "To"
+msgstr "إلى"
+
+msgid "Subject"
+msgstr "الموضوع"
+
+msgid "When"
+msgstr "التاريخ"
+
+msgid "Sent"
+msgstr "أُرسل"
+
+msgid "Waiting"
+msgstr "في الانتظار"
+
+msgid "Given up"
+msgstr "تم التخلي عنه"
+
+#, python-format
+msgid "The latest %(count)s emails. Sent emails keep no text, and are deleted after 30 days."
+msgstr "آخر %(count)s رسائل. لا يُحتفظ بنص الرسائل المرسلة، وتُحذف بعد 30 يومًا."
+
+msgid "No email sent yet."
+msgstr "لم تُرسل أي رسالة بعد."
+
+msgid "emails that could not be sent (the mail server said no, or is not set up)"
+msgstr "رسائل تعذّر إرسالها (رفض خادم البريد أو لم يتم إعداده)"
+
+msgid "See the emails"
+msgstr "عرض الرسائل"
+
+#, python-format
+msgid "%(count)d email sent."
+msgid_plural "%(count)d emails sent."
+msgstr[0] "لم تُرسل أي رسالة."
+msgstr[1] "أُرسلت رسالة واحدة."
+msgstr[2] "أُرسلت رسالتان."
+msgstr[3] "أُرسلت %(count)d رسائل."
+msgstr[4] "أُرسلت %(count)d رسالة."
+msgstr[5] "أُرسلت %(count)d رسالة."

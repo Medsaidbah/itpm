@@ -67,6 +67,7 @@ class LoginRequiredTests(TeamTestCase):
             "/administration/tasks/",
             "/administration/logins/",
             "/administration/feedback/",
+            "/administration/emails/",
             "/feedback/",
         ]
         for page in pages:
@@ -182,6 +183,10 @@ class EveryAddressTests(TeamTestCase):
             ("admin_feedback_review", "post", f"/administration/feedback/{self.feedback.pk}/review/", None,
              ADMINS_ONLY_ACTION),
             ("feedback", "get", "/feedback/", None, (OK, OK, OK, OK, OK)),
+            ("notification_settings", "post", "/profile/notifications/", {"email_reminder": "on"},
+             (MOVED, MOVED, MOVED, MOVED, MOVED)),
+            ("admin_emails", "get", "/administration/emails/", None, ADMINS_ONLY_PAGE),
+            ("admin_emails_retry", "post", "/administration/emails/retry/", None, ADMINS_ONLY_ACTION),
             ("admin_unlock", "post", "/administration/logins/unlock/", {"username": "sara"}, ADMINS_ONLY_ACTION),
         ]
 

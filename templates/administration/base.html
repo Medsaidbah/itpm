@@ -2,7 +2,7 @@
 {% load i18n %}
 
 {# The layout of every page of the Administration section: its title and its tabs. #}
-{# Each view says which tab is open with "section" (home, users, projects, tasks, feedback or logins). #}
+{# Each view says which tab is open with "section" (home, users, projects, tasks, feedback, emails or logins). #}
 {% block nav_administration %}active{% endblock %}
 
 {% block content %}
@@ -35,6 +35,11 @@
   <li class="nav-item">
     <a href="{% url 'admin_feedback' %}" class="nav-link{% if section == 'feedback' %} active{% endif %}"{% if section == 'feedback' %} aria-current="page"{% endif %}>
       <i class="ti ti-message-star me-2"></i>{% translate "Feedback" %}
+    </a>
+  </li>
+  <li class="nav-item">
+    <a href="{% url 'admin_emails' %}" class="nav-link{% if section == 'emails' %} active{% endif %}"{% if section == 'emails' %} aria-current="page"{% endif %}>
+      <i class="ti ti-mail me-2"></i>{% translate "Emails" %}
     </a>
   </li>
   <li class="nav-item">

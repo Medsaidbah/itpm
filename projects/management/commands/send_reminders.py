@@ -13,6 +13,7 @@ from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 
+from projects import outbox
 from projects.emails import email_language, reminder_for, send_email
 
 
@@ -44,6 +45,8 @@ class Command(BaseCommand):
             reminder = reminder_for(person, today)
             if not reminder["sections"]:
                 continue  # nothing to remind this person of
+            if not person.email_reminder:
+                continue  # this person chose not to get the daily reminder
             subject = reminder["subject"]
             if not person.email:
                 self.stdout.write(self.style.WARNING(f"{person.username}: no email address, skipped ({subject})"))
@@ -52,7 +55,7 @@ class Command(BaseCommand):
                 self.stdout.write(f'{person.username} <{person.email}>: would get "{subject}"')
                 continue
             try:
-                send_email(person.email, subject, "reminder", reminder, email_language(person))
+                send_email(person.email, subject, "reminder", reminder, email_language(person), wait=True)
             except Exception as error:  # like a mail server that is down: say so, and go on with the others
                 failed += 1
                 self.stderr.write(f"{person.username}: the email couldn't be sent ({error})")
@@ -61,6 +64,8 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.SUCCESS(f'{person.username} <{person.email}>: sent "{subject}"'))
 
         if not options["dry_run"]:
+            outbox.retry_waiting(limit=50)  # a good moment to try again the emails that failed earlier
+            outbox.purge()
             self.stdout.write(f"{sent} email{'' if sent == 1 else 's'} sent.")
         if failed:
             # An error at the end makes the scheduled job show that something went wrong

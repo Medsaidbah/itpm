@@ -36,6 +36,12 @@ class User(AbstractUser):
     # The language of the person's pages and emails (Stage 17c): "en", "fr" or "ar".
     # Empty until they choose one: then the first login saves the language of the login page.
     language = models.CharField(max_length=10, choices=settings.LANGUAGES, blank=True)
+    # Step 26: which emails this person wants. The bell always shows everything, and the emails about the
+    # account's security (password reset, password changed) are always sent.
+    email_assigned = models.BooleanField(default=True)  # a task is given to me
+    email_unblocked = models.BooleanField(default=True)  # the task I was waiting for is done
+    email_project = models.BooleanField(default=True)  # my place in a project changes (team, manager role)
+    email_reminder = models.BooleanField(default=True)  # the daily reminder of late and coming tasks
     # Stage 18a: a password an administrator chose or generated is only a temporary one. Until the person
     # replaces it with their own, they can't use the app (see PasswordChangeRequiredMiddleware), and it
     # stops working after TEMPORARY_PASSWORD_DAYS days if they never log in.

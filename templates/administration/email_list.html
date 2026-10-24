@@ -1,0 +1,59 @@
+{% extends "administration/base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Emails" %} · {% translate "Administration" %} · مشاريعي{% endblock %}
+{% block page_title %}{% translate "Emails" %}{% endblock %}
+
+{% block section_content %}
+<p class="text-secondary">
+  {% blocktranslate %}Every email the app sends is written here first and sent in the background. If the mail server says no, the app tries again later. After {{ max_attempts }} failed tries, the email is given up: fix the email settings, then press "Send again".{% endblocktranslate %}
+</p>
+
+<div class="d-flex flex-wrap align-items-center gap-3 mb-3">
+  <span class="badge bg-yellow-lt">{% blocktranslate with count=waiting_count %}{{ count }} waiting{% endblocktranslate %}</span>
+  <span class="badge {% if failed_count %}bg-red-lt{% else %}bg-secondary-lt{% endif %}">{% blocktranslate with count=failed_count %}{{ count }} given up{% endblocktranslate %}</span>
+  {% if waiting_count or failed_count %}
+  <form method="post" action="{% url 'admin_emails_retry' %}" class="ms-auto">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-primary"><i class="ti ti-send me-2"></i>{% translate "Send again" %}</button>
+  </form>
+  {% endif %}
+</div>
+
+<div class="card">
+  {% if rows %}
+  <div class="table-responsive">
+    <table class="table card-table table-vcenter">
+      <thead>
+        <tr>
+          <th>{% translate "To" %}</th>
+          <th>{% translate "Subject" %}</th>
+          <th>{% translate "State" %}</th>
+          <th class="d-none d-lg-table-cell">{% translate "When" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <td class="text-break" dir="ltr">{{ row.to }}</td>
+          <td class="text-break">{{ row.subject }}</td>
+          <td>
+            {% if row.state == "sent" %}<span class="badge bg-green-lt">{% translate "Sent" %}</span>
+            {% elif row.state == "waiting" %}<span class="badge bg-yellow-lt">{% translate "Waiting" %}</span>
+            {% else %}<span class="badge bg-red-lt">{% translate "Given up" %}</span>{% endif %}
+            {% if row.last_error %}<div class="small text-secondary text-break" dir="ltr">{{ row.last_error }}</div>{% endif %}
+          </td>
+          <td class="d-none d-lg-table-cell text-secondary">{{ row.created_at|date:_("d M Y, H:i") }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="card-footer text-secondary">{% blocktranslate with count=shown %}The latest {{ count }} emails. Sent emails keep no text, and are deleted after 30 days.{% endblocktranslate %}</div>
+  {% else %}
+  <div class="card-body text-secondary text-center py-5">
+    <i class="ti ti-mail-off fs-1 d-block mb-2"></i>{% translate "No email sent yet." %}
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

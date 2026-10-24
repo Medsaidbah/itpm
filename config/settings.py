@@ -8,6 +8,7 @@ Django documentation: https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 import os
+import sys
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -231,6 +232,11 @@ EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True") == "True"
 # chosen a language yet (a new account that has never logged in) get this one: French, the language everyone
 # in the team understands. Put EMAIL_DEFAULT_LANGUAGE=en or ar to change it.
 EMAIL_DEFAULT_LANGUAGE = os.environ.get("EMAIL_DEFAULT_LANGUAGE", "fr")
+# Step 26: emails are written in a small outbox and sent by a background thread, so a page never waits for the
+# mail server, and an email that fails is tried again later (up to EMAIL_MAX_ATTEMPTS times).
+# The automatic tests send them straight away, so they can read them. Put EMAIL_IN_BACKGROUND=False to do the same.
+EMAIL_IN_BACKGROUND = os.environ.get("EMAIL_IN_BACKGROUND", "True") == "True" and "test" not in sys.argv
+EMAIL_MAX_ATTEMPTS = 5
 EMAIL_TIMEOUT = 10  # seconds: a slow mail server can't freeze a page for long
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "مشاريعي <it-projects@example.com>")
 

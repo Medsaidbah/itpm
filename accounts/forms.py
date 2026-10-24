@@ -198,3 +198,18 @@ class FeedbackForm(BootstrapFormMixin, forms.ModelForm):
 
     def clean_message(self):
         return self.cleaned_data.get("message", "").strip()
+
+
+class NotificationPreferencesForm(BootstrapFormMixin, forms.ModelForm):
+    """Which emails I want (My profile). The bell always shows everything, and the emails about the security
+    of the account (forgot password, password changed) are always sent."""
+
+    class Meta:
+        model = User
+        fields = ["email_assigned", "email_unblocked", "email_project", "email_reminder"]
+        labels = {
+            "email_assigned": _("A task is given to me"),
+            "email_unblocked": _("A task I was waiting for is done"),
+            "email_project": _("My place in a project changes (team, manager role)"),
+            "email_reminder": _("The daily reminder of my late tasks and the ones due soon"),
+        }

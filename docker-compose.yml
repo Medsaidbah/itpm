@@ -43,6 +43,7 @@ services:
       EMAIL_BACKEND: ${EMAIL_BACKEND}
       DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL}
       EMAIL_DEFAULT_LANGUAGE: ${EMAIL_DEFAULT_LANGUAGE:-fr}
+      EMAIL_IN_BACKGROUND: ${EMAIL_IN_BACKGROUND:-True}
       # Only for EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend (an SMTP server, like smtp.office365.com)
       EMAIL_HOST: ${EMAIL_HOST:-localhost}
       EMAIL_PORT: ${EMAIL_PORT:-587}

@@ -538,3 +538,34 @@ class Notification(models.Model):
             Q(task__in=Task.objects.visible_to(user)) | Q(project__in=Project.objects.visible_to(user)),
             recipient=user,
         )
+
+
+class EmailOutbox(models.Model):
+    """An email waiting to be sent, being sent, sent, or given up (Step 26). It is written first, then sent by
+    projects/outbox.py. Once an email is sent, its text is erased: only who, what and when stay (a password
+    reset link, for example, must not stay in the database)."""
+
+    to = models.CharField(max_length=254)
+    subject = models.CharField(max_length=255)
+    text = models.TextField(blank=True)
+    html = models.TextField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    attempts = models.PositiveSmallIntegerField(default=0)  # how many times sending failed
+    last_attempt_at = models.DateTimeField(null=True, blank=True)
+    last_error = models.CharField(max_length=500, blank=True)
+    claimed_at = models.DateTimeField(null=True, blank=True)  # set while someone is sending it
+    sent_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+        indexes = [models.Index(fields=["sent_at", "attempts"])]
+
+    def __str__(self):
+        return f"{self.subject} → {self.to}"
+
+    @property
+    def state(self):
+        """"sent", "failed" (given up after too many tries) or "waiting"."""
+        if self.sent_at:
+            return "sent"
+        return "failed" if self.attempts >= settings.EMAIL_MAX_ATTEMPTS else "waiting"

@@ -19,6 +19,7 @@ from projects.models import Project, Task, people_visible_to
 
 from .forms import (
     FeedbackForm,
+    NotificationPreferencesForm,
     ProfileForm,
     StyledPasswordChangeForm,
     StyledPasswordResetForm,
@@ -44,7 +45,19 @@ def profile(request):
             return redirect("profile")
     else:
         form = ProfileForm(instance=me)
-    return render(request, "accounts/profile.html", {"form": form})
+    preferences = NotificationPreferencesForm(instance=me)
+    return render(request, "accounts/profile.html", {"form": form, "preferences": preferences})
+
+
+@login_required
+@require_POST
+def notification_settings(request):
+    """The tick boxes of "Email notifications" in My profile."""
+    me = User.objects.get(pk=request.user.pk)
+    form = NotificationPreferencesForm(request.POST, instance=me)
+    form.save()  # four tick boxes: there is nothing to refuse
+    messages.success(request, _("Your email choices are saved."))
+    return redirect("profile")
 
 
 class PasswordChangeView(SuccessMessageMixin, auth_views.PasswordChangeView):

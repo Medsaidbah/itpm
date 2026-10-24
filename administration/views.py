@@ -21,7 +21,8 @@ from django.utils.translation import ngettext
 from django.views.decorators.http import require_POST
 
 from accounts.models import NO_ADMIN_LEFT, Feedback, User, leaves_no_active_admin
-from projects.models import Notification, Project, ProjectMember, Task
+from projects import outbox
+from projects.models import EmailOutbox, Notification, Project, ProjectMember, Task
 from projects.notifications import tell_project_event
 
 from .forms import (
@@ -73,6 +74,7 @@ def home(request):
         "locked_count": sum(1 for group in failed_logins(request) if group.locked),
         "active_projects": Project.objects.filter(status__in=Project.ACTIVE_STATUSES).count(),
         "finished_projects": Project.objects.exclude(status__in=Project.ACTIVE_STATUSES).count(),
+        "emails_failed": sum(1 for row in EmailOutbox.objects.filter(sent_at__isnull=True) if row.state == "failed"),
         "feedback_total": Feedback.objects.count(),
         "feedback_new": Feedback.objects.filter(reviewed_at__isnull=True).count(),
         "feedback_average": Feedback.objects.aggregate(average=Avg("rating"))["average"],
@@ -575,3 +577,40 @@ def feedback_review(request, pk):
     ):
         return redirect(next_page)
     return redirect("admin_feedback")
+
+
+# ---------- Emails (Step 26) ----------
+
+EMAILS_SHOWN = 50
+
+
+@admin_required
+def email_list(request):
+    """The latest emails of the outbox: sent, waiting for another try, or given up (with the mail server's reason)."""
+    rows = list(EmailOutbox.objects.all()[:EMAILS_SHOWN])
+    unsent = EmailOutbox.objects.filter(sent_at__isnull=True)
+    context = {
+        "section": "emails",
+        "rows": rows,
+        "waiting_count": sum(1 for row in unsent if row.state == "waiting"),
+        "failed_count": sum(1 for row in unsent if row.state == "failed"),
+        "max_attempts": settings.EMAIL_MAX_ATTEMPTS,
+        "shown": EMAILS_SHOWN,
+    }
+    return render(request, "administration/email_list.html", context)
+
+
+@admin_required
+@require_POST
+def email_retry(request):
+    """"Send again": the emails that were given up get new tries, and the ones that wait are tried now."""
+    EmailOutbox.objects.filter(sent_at__isnull=True, attempts__gte=settings.EMAIL_MAX_ATTEMPTS).update(
+        attempts=0, claimed_at=None, last_attempt_at=None, last_error=""
+    )
+    if settings.EMAIL_IN_BACKGROUND:
+        outbox.start_background(everything=True)
+        messages.success(request, _("The emails are being sent again. Reload this page in a moment."))
+    else:
+        sent = sum(outbox.deliver(pk) for pk in outbox.unsent_now())
+        messages.success(request, ngettext("%(count)d email sent.", "%(count)d emails sent.", sent) % {"count": sent})
+    return redirect("admin_emails")

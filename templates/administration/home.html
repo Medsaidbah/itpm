@@ -85,6 +85,20 @@
     </div>
   </div>
 
+  {# The emails the app sends #}
+  <div class="col-md-6 col-xl-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="subheader">{% translate "Emails" %}</div>
+        <div class="h1 mb-1 {% if emails_failed %}text-danger{% endif %}">{{ emails_failed }}</div>
+        <div class="text-secondary">{% translate "emails that could not be sent (the mail server said no, or is not set up)" %}</div>
+      </div>
+      <div class="card-footer">
+        <a href="{% url 'admin_emails' %}" class="btn"><i class="ti ti-mail me-2"></i>{% translate "See the emails" %}</a>
+      </div>
+    </div>
+  </div>
+
   {# What people think of the app #}
   <div class="col-md-6 col-xl-4">
     <div class="card h-100">

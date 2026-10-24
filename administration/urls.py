@@ -20,6 +20,8 @@ urlpatterns = [
     path("tasks/", views.task_list, name="admin_tasks"),
     path("feedback/", views.feedback_list, name="admin_feedback"),
     path("feedback/<int:pk>/review/", views.feedback_review, name="admin_feedback_review"),
+    path("emails/", views.email_list, name="admin_emails"),
+    path("emails/retry/", views.email_retry, name="admin_emails_retry"),
     path("logins/", views.login_list, name="admin_logins"),
     path("logins/unlock/", views.login_unlock, name="admin_unlock"),
 ]

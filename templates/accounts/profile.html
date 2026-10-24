@@ -54,6 +54,24 @@
         <button type="submit" class="btn btn-primary">{% translate "Save" %}</button>
       </div>
     </form>
+
+    {# Which emails I want. The bell always shows everything. #}
+    <form method="post" action="{% url 'notification_settings' %}" class="card mt-4">
+      {% csrf_token %}
+      <div class="card-header">
+        <h3 class="card-title">{% translate "Email notifications" %}</h3>
+      </div>
+      <div class="card-body">
+        <p class="text-secondary">{% translate "Choose which emails you get. The bell at the top of the page always shows everything, and the emails about the security of your account (forgot password, password changed) are always sent." %}</p>
+        {% include "includes/form_field.html" with field=preferences.email_assigned %}
+        {% include "includes/form_field.html" with field=preferences.email_unblocked %}
+        {% include "includes/form_field.html" with field=preferences.email_project %}
+        {% include "includes/form_field.html" with field=preferences.email_reminder %}
+      </div>
+      <div class="card-footer d-flex justify-content-end">
+        <button type="submit" class="btn btn-primary">{% translate "Save" %}</button>
+      </div>
+    </form>
   </div>
 </div>
 {% endblock %}

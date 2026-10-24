@@ -2728,3 +2728,82 @@ msgid "%(counter)s new"
 msgid_plural "%(counter)s new"
 msgstr[0] "%(counter)s nouveau"
 msgstr[1] "%(counter)s nouveaux"
+
+msgid "A task is given to me"
+msgstr "On me confie une tâche"
+
+msgid "A task I was waiting for is done"
+msgstr "Une tâche que j'attendais est terminée"
+
+msgid "My place in a project changes (team, manager role)"
+msgstr "Ma place dans un projet change (équipe, rôle de gestionnaire)"
+
+msgid "The daily reminder of my late tasks and the ones due soon"
+msgstr "Le rappel quotidien de mes tâches en retard et de celles à échéance proche"
+
+msgid "Your email choices are saved."
+msgstr "Vos choix d'e-mails sont enregistrés."
+
+msgid "The emails are being sent again. Reload this page in a moment."
+msgstr "Les e-mails sont en cours de renvoi. Rechargez cette page dans un instant."
+
+msgid "Email notifications"
+msgstr "Notifications par e-mail"
+
+msgid "Choose which emails you get. The bell at the top of the page always shows everything, and the emails about the security of your account (forgot password, password changed) are always sent."
+msgstr "Choisissez les e-mails que vous recevez. La cloche en haut de la page affiche toujours tout, et les e-mails concernant la sécurité de votre compte (mot de passe oublié, mot de passe modifié) sont toujours envoyés."
+
+msgid "Emails"
+msgstr "E-mails"
+
+#, python-format
+msgid "Every email the app sends is written here first and sent in the background. If the mail server says no, the app tries again later. After %(max_attempts)s failed tries, the email is given up: fix the email settings, then press \"Send again\"."
+msgstr "Chaque e-mail envoyé par l'application est d'abord écrit ici puis envoyé en arrière-plan. Si le serveur de messagerie refuse, l'application réessaie plus tard. Après %(max_attempts)s échecs, l'e-mail est abandonné : corrigez les paramètres e-mail, puis appuyez sur « Envoyer à nouveau »."
+
+#, python-format
+msgid "%(count)s waiting"
+msgstr "%(count)s en attente"
+
+#, python-format
+msgid "%(count)s given up"
+msgstr "%(count)s abandonnés"
+
+msgid "Send again"
+msgstr "Envoyer à nouveau"
+
+msgid "To"
+msgstr "À"
+
+msgid "Subject"
+msgstr "Objet"
+
+msgid "When"
+msgstr "Quand"
+
+msgid "Sent"
+msgstr "Envoyé"
+
+msgid "Waiting"
+msgstr "En attente"
+
+msgid "Given up"
+msgstr "Abandonné"
+
+#, python-format
+msgid "The latest %(count)s emails. Sent emails keep no text, and are deleted after 30 days."
+msgstr "Les %(count)s derniers e-mails. Les e-mails envoyés ne gardent pas leur texte et sont supprimés après 30 jours."
+
+msgid "No email sent yet."
+msgstr "Aucun e-mail envoyé pour le moment."
+
+msgid "emails that could not be sent (the mail server said no, or is not set up)"
+msgstr "e-mails qui n'ont pas pu être envoyés (le serveur de messagerie a refusé, ou n'est pas configuré)"
+
+msgid "See the emails"
+msgstr "Voir les e-mails"
+
+#, python-format
+msgid "%(count)d email sent."
+msgid_plural "%(count)d emails sent."
+msgstr[0] "%(count)d e-mail envoyé."
+msgstr[1] "%(count)d e-mails envoyés."
