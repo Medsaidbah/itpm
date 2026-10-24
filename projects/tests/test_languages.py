@@ -33,7 +33,7 @@ from accounts.middleware import LanguageMiddleware, chosen_language
 from accounts.models import User
 from projects import activity
 from projects.activity import Event
-from projects.emails import reminder_for
+from projects.emails import email_language, reminder_for
 from projects.models import Comment, Task
 from scripts.compile_translations import TranslationError, compile_po, read_po
 
@@ -370,6 +370,7 @@ class ProfileLanguageTests(TeamTestCase):
 
 
 @override_settings(SITE_URL="https://itpm.example.org")
+@override_settings(EMAIL_DEFAULT_LANGUAGE="en")  # these tests are about English wording (a blank profile = English)
 class EmailLanguageTests(TeamTestCase):
     """Each email is written in the language of the person who gets it, whoever caused it."""
 
@@ -493,6 +494,7 @@ class ExcelLanguageTests(TeamTestCase):
         self.assertEqual(book.sheetnames, ["Projets"])
 
 
+@override_settings(EMAIL_DEFAULT_LANGUAGE="en")  # these tests are about English wording (a blank profile = English)
 class PagesInEveryLanguageTests(TeamTestCase):
     """Every page opens in French and in Arabic, with the right direction and no broken text."""
 
@@ -711,3 +713,62 @@ class TranslationFilesTests(SimpleTestCase):
         with translation.override("fr"):
             self.assertEqual(date_format(june, gettext("d M Y")), "5 juin 2026")  # not "5 Jui" like July
             self.assertEqual(date_format(july, "l j F Y"), "dimanche 5 juillet 2026")
+
+
+class EmailLanguageRuleTests(TeamTestCase):
+    """Step 23: an email is written in the language of the person's profile. Someone who hasn't chosen a
+    language yet gets settings.EMAIL_DEFAULT_LANGUAGE (French)."""
+
+    def assign_vpn_to_sara(self):
+        mail.outbox.clear()
+        Task.objects.filter(title="Configure the VPN").delete()
+        self.client.post(f"/projects/{self.project.pk}/tasks/new/", {
+            "title": "Configure the VPN", "status": "todo", "priority": "high",
+            "assignee": self.sara.pk, "due_date": days_from_today(4)})
+        self.assertEqual(len(mail.outbox), 1)
+        return mail.outbox[0]
+
+    def test_the_profile_language_wins(self):
+        self.login(self.omar)
+        for language, subject in (("ar", "مهمة جديدة لك: Configure the VPN"),
+                                  ("en", "New task for you: Configure the VPN"),
+                                  ("fr", "Nouvelle tâche pour vous : Configure the VPN")):
+            with self.subTest(profile_language=language):
+                choose(self.sara, language)
+                self.assertEqual(self.assign_vpn_to_sara().subject, subject)
+
+    def test_a_blank_profile_gets_french(self):
+        choose(self.sara, "")
+        self.login(self.omar)
+        email = self.assign_vpn_to_sara()
+        self.assertEqual(email.subject, "Nouvelle tâche pour vous : Configure the VPN")
+        self.assertIn('<html lang="fr" dir="ltr">', email.alternatives[0][0])
+
+    @override_settings(EMAIL_DEFAULT_LANGUAGE="en")
+    def test_the_default_language_can_be_changed(self):
+        choose(self.sara, "")
+        self.login(self.omar)
+        self.assertEqual(self.assign_vpn_to_sara().subject, "New task for you: Configure the VPN")
+
+    @override_settings(EMAIL_DEFAULT_LANGUAGE="klingon")
+    def test_an_unknown_default_falls_back_to_english(self):
+        choose(self.sara, "")
+        self.assertEqual(email_language(User.objects.get(pk=self.sara.pk)), "en")
+
+    def test_the_reminder_follows_the_profile_too(self):
+        Task.objects.create(project=self.project, title="Late", assignee=self.sara, due_date=days_from_today(-2))
+        for language, start in (("ar", None), ("fr", "Vos tâches"), ("", "Vos tâches"), ("en", "Your tasks")):
+            with self.subTest(profile_language=language):
+                choose(self.sara, language)
+                mail.outbox.clear()
+                call_command("send_reminders", "--user", "sara", stdout=io.StringIO())
+                email = mail.outbox[0]
+                if start:
+                    self.assertTrue(email.subject.startswith(start), email.subject)
+                else:
+                    self.assertIn('dir="rtl"', email.alternatives[0][0])
+
+    def test_the_preview_shows_the_email_as_the_person_will_get_it(self):
+        self.login(self.sara)  # logging in saves the language of the login page in the profile...
+        choose(self.sara, "")  # ...so the profile is made blank afterwards
+        self.assertIn('lang="fr"', self.client.get("/reminders/preview/").content.decode())

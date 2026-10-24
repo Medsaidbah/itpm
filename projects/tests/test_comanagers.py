@@ -3,6 +3,8 @@ The co-manager has the manager's rights on the project (edit it, its tasks and i
 delete it, change its main manager, or give the role to others. Only the main manager and admins
 can take the role away; a co-manager may give up their own."""
 
+from django.test import override_settings
+
 from accounts.models import User
 from projects.emails import reminder_for
 from projects.models import Project, ProjectMember, Task
@@ -168,6 +170,7 @@ class ChangingTheMainManagerTests(CoManagerTestCase):
         self.assertEqual(self.client.get(f"{self.url}edit/").status_code, 403)
 
 
+@override_settings(EMAIL_DEFAULT_LANGUAGE="en")  # these tests are about English wording (a blank profile = English)
 class AroundTheRoleTests(CoManagerTestCase):
     def test_visibility_is_unchanged(self):
         self.give_role(self.omar, self.lina)

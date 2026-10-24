@@ -23,16 +23,28 @@
   <div class="list-group list-group-flush">
     {% for note in notifications %}
     <a href="{% url 'notification_open' note.pk %}" class="list-group-item list-group-item-action d-flex align-items-start gap-3">
-      <span class="avatar avatar-sm bg-blue-lt flex-shrink-0"><i class="ti ti-checklist"></i></span>
+      <span class="avatar avatar-sm bg-blue-lt flex-shrink-0"><i class="ti {% if note.task_id %}ti-checklist{% elif note.kind == 'added_to_team' %}ti-user-plus{% elif note.kind == 'manager' or note.kind == 'co_manager' %}ti-shield-check{% else %}ti-shield-off{% endif %}"></i></span>
       <div class="flex-fill">
         <div{% if not note.read_at %} class="fw-bold"{% endif %}>
+          {% if note.task_id %}
           {% if note.actor %}
           {% blocktranslate with actor=note.actor task=note.task.title %}<bdi>{{ actor }}</bdi> assigned you the task “<bdi>{{ task }}</bdi>”.{% endblocktranslate %}
           {% else %}
           {% blocktranslate with task=note.task.title %}You were assigned the task “<bdi>{{ task }}</bdi>”.{% endblocktranslate %}
           {% endif %}
+          {% elif note.kind == 'added_to_team' %}
+          {% blocktranslate with actor=note.actor|default:_("An administrator") project=note.project.name %}<bdi>{{ actor }}</bdi> added you to the team of “<bdi>{{ project }}</bdi>”.{% endblocktranslate %}
+          {% elif note.kind == 'manager' %}
+          {% blocktranslate with actor=note.actor|default:_("An administrator") project=note.project.name %}<bdi>{{ actor }}</bdi> made you the manager of “<bdi>{{ project }}</bdi>”.{% endblocktranslate %}
+          {% elif note.kind == 'co_manager' %}
+          {% blocktranslate with actor=note.actor|default:_("An administrator") project=note.project.name %}<bdi>{{ actor }}</bdi> gave you the manager role in “<bdi>{{ project }}</bdi>”.{% endblocktranslate %}
+          {% elif note.kind == 'manager_ended' %}
+          {% blocktranslate with actor=note.actor|default:_("An administrator") project=note.project.name %}<bdi>{{ actor }}</bdi> chose another manager for “<bdi>{{ project }}</bdi>”. You stay in the team.{% endblocktranslate %}
+          {% else %}
+          {% blocktranslate with actor=note.actor|default:_("An administrator") project=note.project.name %}<bdi>{{ actor }}</bdi> took away your manager role in “<bdi>{{ project }}</bdi>”. You stay in the team.{% endblocktranslate %}
+          {% endif %}
         </div>
-        <div class="text-secondary small">{{ note.task.project.name }} · {{ note.ago }}</div>
+        <div class="text-secondary small">{{ note.project_of_target.name }} · {{ note.ago }}</div>
       </div>
       {% if not note.read_at %}<span class="status-dot bg-blue mt-2" title="{% translate 'Unread' %}"></span>{% endif %}
     </a>
@@ -40,7 +52,7 @@
   </div>
   {% else %}
   <div class="card-body text-secondary text-center py-5">
-    <i class="ti ti-bell-off fs-1 d-block mb-2"></i>{% translate "No notifications yet. You will see here the tasks that are assigned to you." %}
+    <i class="ti ti-bell-off fs-1 d-block mb-2"></i>{% translate "No notifications yet. You will see here the tasks that are assigned to you and the changes in your projects." %}
   </div>
   {% endif %}
 </div>

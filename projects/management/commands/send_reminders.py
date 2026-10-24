@@ -13,7 +13,7 @@ from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand, CommandError
 from django.utils import timezone
 
-from projects.emails import reminder_for, send_email
+from projects.emails import email_language, reminder_for, send_email
 
 
 class Command(BaseCommand):
@@ -52,7 +52,7 @@ class Command(BaseCommand):
                 self.stdout.write(f'{person.username} <{person.email}>: would get "{subject}"')
                 continue
             try:
-                send_email(person.email, subject, "reminder", reminder, person.get_language())
+                send_email(person.email, subject, "reminder", reminder, email_language(person))
             except Exception as error:  # like a mail server that is down: say so, and go on with the others
                 failed += 1
                 self.stderr.write(f"{person.username}: the email couldn't be sent ({error})")

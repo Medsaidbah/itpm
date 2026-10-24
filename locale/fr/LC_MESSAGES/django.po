@@ -2368,9 +2368,6 @@ msgstr "Tout marquer comme lu"
 msgid "Unread"
 msgstr "Non lu"
 
-msgid "No notifications yet. You will see here the tasks that are assigned to you."
-msgstr "Aucune notification pour l'instant. Vous verrez ici les tâches qui vous sont assignées."
-
 msgid "<bdi>%(actor)s</bdi> assigned you the task “<bdi>%(task)s</bdi>”."
 msgstr "<bdi>%(actor)s</bdi> vous a assigné la tâche « <bdi>%(task)s</bdi> »."
 
@@ -2421,3 +2418,93 @@ msgstr "a nommé %(person)s co-chef de projet de"
 
 msgid "took the manager role from %(person)s in"
 msgstr "a retiré le rôle de chef de projet à %(person)s dans"
+
+msgid "An administrator"
+msgstr "Un administrateur"
+
+msgid "You were added to the project: %(project)s"
+msgstr "Vous avez été ajouté(e) au projet : %(project)s"
+
+msgid "%(actor)s added you to the team of the project “%(project)s”."
+msgstr "%(actor)s vous a ajouté(e) à l'équipe du projet « %(project)s »."
+
+msgid "You can now see this project and its tasks."
+msgstr "Vous pouvez maintenant voir ce projet et ses tâches."
+
+msgid "You are now the manager of: %(project)s"
+msgstr "Vous êtes maintenant chef(fe) du projet : %(project)s"
+
+msgid "%(actor)s made you the manager of the project “%(project)s”."
+msgstr "%(actor)s vous a nommé(e) chef(fe) du projet « %(project)s »."
+
+msgid "You can edit the project, its tasks and its team."
+msgstr "Vous pouvez modifier le projet, ses tâches et son équipe."
+
+msgid "You were given the manager role in: %(project)s"
+msgstr "Le rôle de chef de projet vous a été donné dans : %(project)s"
+
+msgid "%(actor)s gave you the manager role in the project “%(project)s”."
+msgstr "%(actor)s vous a donné le rôle de chef de projet dans le projet « %(project)s »."
+
+msgid "You can edit the project, its tasks and its team, like its manager."
+msgstr "Vous pouvez modifier le projet, ses tâches et son équipe, comme son chef de projet."
+
+msgid "You are no longer the manager of: %(project)s"
+msgstr "Vous n'êtes plus chef(fe) du projet : %(project)s"
+
+msgid "%(actor)s chose another manager for the project “%(project)s”."
+msgstr "%(actor)s a choisi un autre chef de projet pour le projet « %(project)s »."
+
+msgid "You stay in the team, as a member."
+msgstr "Vous restez dans l'équipe, comme membre."
+
+msgid "Your manager role was taken away in: %(project)s"
+msgstr "Votre rôle de chef de projet a été retiré dans : %(project)s"
+
+msgid "%(actor)s took away your manager role in the project “%(project)s”."
+msgstr "%(actor)s vous a retiré le rôle de chef de projet dans le projet « %(project)s »."
+
+msgid "You were added to a project's team"
+msgstr "Vous avez été ajouté(e) à l'équipe d'un projet"
+
+msgid "You are now a project's manager"
+msgstr "Vous êtes maintenant chef(fe) d'un projet"
+
+msgid "You were given the manager role in a project"
+msgstr "Le rôle de chef de projet vous a été donné dans un projet"
+
+msgid "You are no longer a project's manager"
+msgstr "Vous n'êtes plus chef(fe) d'un projet"
+
+msgid "Your manager role in a project was taken away"
+msgstr "Votre rôle de chef de projet dans un projet a été retiré"
+
+msgid "The change is saved, but the email to %(person)s couldn't be sent."
+msgstr "La modification est enregistrée, mais l'e-mail à %(person)s n'a pas pu être envoyé."
+
+msgid "Open the project"
+msgstr "Ouvrir le projet"
+
+msgid "You get this email when your place in a project changes (team or manager role)."
+msgstr "Vous recevez cet e-mail quand votre place dans un projet change (équipe ou rôle de chef de projet)."
+
+msgid "Open the project: %(link)s"
+msgstr "Ouvrir le projet : %(link)s"
+
+msgid "<bdi>%(actor)s</bdi> added you to the team of “<bdi>%(project)s</bdi>”."
+msgstr "<bdi>%(actor)s</bdi> vous a ajouté(e) à l'équipe de « <bdi>%(project)s</bdi> »."
+
+msgid "<bdi>%(actor)s</bdi> made you the manager of “<bdi>%(project)s</bdi>”."
+msgstr "<bdi>%(actor)s</bdi> vous a nommé(e) chef(fe) de « <bdi>%(project)s</bdi> »."
+
+msgid "<bdi>%(actor)s</bdi> gave you the manager role in “<bdi>%(project)s</bdi>”."
+msgstr "<bdi>%(actor)s</bdi> vous a donné le rôle de chef de projet dans « <bdi>%(project)s</bdi> »."
+
+msgid "<bdi>%(actor)s</bdi> chose another manager for “<bdi>%(project)s</bdi>”. You stay in the team."
+msgstr "<bdi>%(actor)s</bdi> a choisi un autre chef de projet pour « <bdi>%(project)s</bdi> ». Vous restez dans l'équipe."
+
+msgid "<bdi>%(actor)s</bdi> took away your manager role in “<bdi>%(project)s</bdi>”. You stay in the team."
+msgstr "<bdi>%(actor)s</bdi> vous a retiré le rôle de chef de projet dans « <bdi>%(project)s</bdi> ». Vous restez dans l'équipe."
+
+msgid "No notifications yet. You will see here the tasks that are assigned to you and the changes in your projects."
+msgstr "Aucune notification pour l'instant. Vous verrez ici les tâches qui vous sont confiées et les changements dans vos projets."

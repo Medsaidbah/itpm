@@ -2520,9 +2520,6 @@ msgstr "تحديد الكل كمقروء"
 msgid "Unread"
 msgstr "غير مقروء"
 
-msgid "No notifications yet. You will see here the tasks that are assigned to you."
-msgstr "لا توجد إشعارات بعد. ستظهر هنا المهام التي تُسند إليك."
-
 msgid "<bdi>%(actor)s</bdi> assigned you the task “<bdi>%(task)s</bdi>”."
 msgstr "أسند إليك <bdi>%(actor)s</bdi> المهمة «<bdi>%(task)s</bdi>»."
 
@@ -2573,3 +2570,93 @@ msgstr "عيّن %(person)s مديرًا مشاركًا في"
 
 msgid "took the manager role from %(person)s in"
 msgstr "سحب دور مدير المشروع من %(person)s في"
+
+msgid "An administrator"
+msgstr "أحد المسؤولين"
+
+msgid "You were added to the project: %(project)s"
+msgstr "تمت إضافتك إلى المشروع: %(project)s"
+
+msgid "%(actor)s added you to the team of the project “%(project)s”."
+msgstr "أضافك %(actor)s إلى فريق المشروع «%(project)s»."
+
+msgid "You can now see this project and its tasks."
+msgstr "يمكنك الآن الاطلاع على هذا المشروع ومهامه."
+
+msgid "You are now the manager of: %(project)s"
+msgstr "أصبحت الآن مدير المشروع: %(project)s"
+
+msgid "%(actor)s made you the manager of the project “%(project)s”."
+msgstr "عيّنك %(actor)s مديرًا للمشروع «%(project)s»."
+
+msgid "You can edit the project, its tasks and its team."
+msgstr "يمكنك تعديل المشروع ومهامه وفريقه."
+
+msgid "You were given the manager role in: %(project)s"
+msgstr "مُنحت دور مدير المشروع في: %(project)s"
+
+msgid "%(actor)s gave you the manager role in the project “%(project)s”."
+msgstr "منحك %(actor)s دور مدير المشروع في المشروع «%(project)s»."
+
+msgid "You can edit the project, its tasks and its team, like its manager."
+msgstr "يمكنك تعديل المشروع ومهامه وفريقه، مثل مديره."
+
+msgid "You are no longer the manager of: %(project)s"
+msgstr "لم تعد مدير المشروع: %(project)s"
+
+msgid "%(actor)s chose another manager for the project “%(project)s”."
+msgstr "اختار %(actor)s مديرًا آخر للمشروع «%(project)s»."
+
+msgid "You stay in the team, as a member."
+msgstr "تبقى في الفريق كعضو."
+
+msgid "Your manager role was taken away in: %(project)s"
+msgstr "تم سحب دورك كمدير في المشروع: %(project)s"
+
+msgid "%(actor)s took away your manager role in the project “%(project)s”."
+msgstr "سحب %(actor)s دورك كمدير في المشروع «%(project)s»."
+
+msgid "You were added to a project's team"
+msgstr "تمت إضافتك إلى فريق مشروع"
+
+msgid "You are now a project's manager"
+msgstr "أصبحت مدير مشروع"
+
+msgid "You were given the manager role in a project"
+msgstr "مُنحت دور مدير المشروع في مشروع"
+
+msgid "You are no longer a project's manager"
+msgstr "لم تعد مدير مشروع"
+
+msgid "Your manager role in a project was taken away"
+msgstr "تم سحب دورك كمدير في مشروع"
+
+msgid "The change is saved, but the email to %(person)s couldn't be sent."
+msgstr "تم حفظ التغيير، لكن تعذّر إرسال البريد الإلكتروني إلى %(person)s."
+
+msgid "Open the project"
+msgstr "فتح المشروع"
+
+msgid "You get this email when your place in a project changes (team or manager role)."
+msgstr "تصلك هذه الرسالة عندما يتغيّر موقعك في مشروع (الفريق أو دور المدير)."
+
+msgid "Open the project: %(link)s"
+msgstr "فتح المشروع: %(link)s"
+
+msgid "<bdi>%(actor)s</bdi> added you to the team of “<bdi>%(project)s</bdi>”."
+msgstr "أضافك <bdi>%(actor)s</bdi> إلى فريق «<bdi>%(project)s</bdi>»."
+
+msgid "<bdi>%(actor)s</bdi> made you the manager of “<bdi>%(project)s</bdi>”."
+msgstr "عيّنك <bdi>%(actor)s</bdi> مديرًا لـ«<bdi>%(project)s</bdi>»."
+
+msgid "<bdi>%(actor)s</bdi> gave you the manager role in “<bdi>%(project)s</bdi>”."
+msgstr "منحك <bdi>%(actor)s</bdi> دور مدير المشروع في «<bdi>%(project)s</bdi>»."
+
+msgid "<bdi>%(actor)s</bdi> chose another manager for “<bdi>%(project)s</bdi>”. You stay in the team."
+msgstr "اختار <bdi>%(actor)s</bdi> مديرًا آخر لـ«<bdi>%(project)s</bdi>». تبقى في الفريق."
+
+msgid "<bdi>%(actor)s</bdi> took away your manager role in “<bdi>%(project)s</bdi>”. You stay in the team."
+msgstr "سحب <bdi>%(actor)s</bdi> دورك كمدير في «<bdi>%(project)s</bdi>». تبقى في الفريق."
+
+msgid "No notifications yet. You will see here the tasks that are assigned to you and the changes in your projects."
+msgstr "لا توجد إشعارات بعد. سترى هنا المهام المسندة إليك والتغييرات في مشاريعك."

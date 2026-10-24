@@ -1,0 +1,19 @@
+{% extends "emails/base.html" %}
+{% load i18n %}
+
+{% block content %}
+<p style="margin:0 0 16px;">{% blocktranslate with name=person.first_name|default:person.username %}Hello {{ name }},{% endblocktranslate %}</p>
+<p style="margin:0 0 8px;">{{ headline }}</p>
+<p style="margin:0 0 16px; color:#525252;">{{ detail }}</p>
+
+{# A button made of a colored table cell: it works in every email program, Outlook too #}
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin-top:24px;">
+  <tr>
+    <td bgcolor="#0a5c36" style="padding:10px 18px; border-radius:4px;">
+      <a href="{{ site_url }}{{ project.get_absolute_url }}" style="color:#ffffff; font-weight:bold; text-decoration:none;">{% translate "Open the project" %}</a>
+    </td>
+  </tr>
+</table>
+{% endblock %}
+
+{% block footer %}{% translate "You get this email when your place in a project changes (team or manager role)." %}{% endblock %}

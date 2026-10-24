@@ -411,6 +411,7 @@ class ProjectRightsTests(TeamTestCase):
         self.assertEqual(self.project.name, "Firewall")
 
 
+@override_settings(EMAIL_DEFAULT_LANGUAGE="en")  # these tests are about English wording (a blank profile = English)
 class TaskRightsTests(TeamTestCase):
     def test_members_cannot_create_edit_or_delete_tasks(self):
         self.login(self.sara)

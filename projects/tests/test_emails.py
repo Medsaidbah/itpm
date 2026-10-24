@@ -16,6 +16,7 @@ from .base import TeamTestCase, days_from_today
 
 
 @override_settings(SITE_URL="https://itpm.example.org")
+@override_settings(EMAIL_DEFAULT_LANGUAGE="en")  # these tests are about English wording (a blank profile = English)
 class ReminderTests(TeamTestCase):
     def setUp(self):
         make = Task.objects.create
@@ -79,6 +80,7 @@ class ReminderTests(TeamTestCase):
 
 
 @override_settings(SITE_URL="https://itpm.example.org")
+@override_settings(EMAIL_DEFAULT_LANGUAGE="en")  # these tests are about English wording (a blank profile = English)
 class NewTaskEmailTests(TeamTestCase):
     def new_task(self, **changes):
         data = {"title": "Configure the VPN", "status": "todo", "priority": "high",
@@ -116,6 +118,7 @@ class NewTaskEmailTests(TeamTestCase):
 
 
 @override_settings(SITE_URL="https://itpm.example.org", ALLOWED_HOSTS=["testserver", "localhost", "127.0.0.1"])
+@override_settings(EMAIL_DEFAULT_LANGUAGE="en")  # these tests are about English wording (a blank profile = English)
 class PreviewLinksTests(TeamTestCase):
     """The preview page's links stay on the address it was opened at (Stage 19a). A browser keeps one login
     per address: "127.0.0.1" and "localhost" are different, so a link to the other one asks to log in again."""

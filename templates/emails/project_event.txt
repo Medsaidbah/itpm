@@ -1,0 +1,10 @@
+{% load i18n %}{% autoescape off %}{% blocktranslate with name=person.first_name|default:person.username %}Hello {{ name }},{% endblocktranslate %}
+
+{{ headline }}
+{{ detail }}
+
+{% blocktranslate with link=site_url|add:project.get_absolute_url %}Open the project: {{ link }}{% endblocktranslate %}
+
+--
+مشاريعي
+{% endautoescape %}

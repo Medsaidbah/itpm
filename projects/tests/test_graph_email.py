@@ -265,6 +265,7 @@ class TestEmailCommandTests(GraphTestCase):
                 call_command("send_test_email", "boss@company.mr", stdout=StringIO())
 
 
+@override_settings(EMAIL_DEFAULT_LANGUAGE="en")  # these tests are about English wording (a blank profile = English)
 class AssignmentThroughMicrosoftTests(TeamTestCase):
     """The real workflow: a manager gives a task to someone, and Microsoft 365 is asked to send the email
     from the application's mailbox to that person's address. (Fake Microsoft on this computer, nothing leaves it.)"""

@@ -476,10 +476,22 @@ class Notification(models.Model):
 
     class Kind(models.TextChoices):
         ASSIGNED = "assigned", gettext_lazy("A task was assigned to you")
+        # About a project, not a task (Step 23)
+        ADDED_TO_TEAM = "added_to_team", gettext_lazy("You were added to a project's team")
+        MANAGER = "manager", gettext_lazy("You are now a project's manager")
+        CO_MANAGER = "co_manager", gettext_lazy("You were given the manager role in a project")
+        MANAGER_ENDED = "manager_ended", gettext_lazy("You are no longer a project's manager")
+        CO_MANAGER_ENDED = "co_manager_ended", gettext_lazy("Your manager role in a project was taken away")
+
+    # What the notification is about: a task (ASSIGNED) or a project (the other kinds)
+    PROJECT_KINDS = ("added_to_team", "manager", "co_manager", "manager_ended", "co_manager_ended")
 
     recipient = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications")
     kind = models.CharField(max_length=20, choices=Kind.choices)
-    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="notifications")
+    task = models.ForeignKey(Task, null=True, blank=True, on_delete=models.CASCADE, related_name="notifications")
+    project = models.ForeignKey(
+        Project, null=True, blank=True, on_delete=models.CASCADE, related_name="notifications"
+    )
     actor = models.ForeignKey(  # who did it; empty if that account no longer exists
         settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
     )
@@ -489,6 +501,12 @@ class Notification(models.Model):
     class Meta:
         ordering = ["-created_at", "-id"]
         indexes = [models.Index(fields=["recipient", "read_at"])]
+        constraints = [  # about a task or about a project: exactly one of the two
+            models.CheckConstraint(
+                condition=Q(task__isnull=False, project__isnull=True) | Q(task__isnull=True, project__isnull=False),
+                name="notification_task_or_project",
+            )
+        ]
 
     def __str__(self):
         return f"{self.get_kind_display()} → {self.recipient}"
@@ -500,8 +518,21 @@ class Notification(models.Model):
             return _("just now")
         return _("%(time)s ago") % {"time": timesince(self.created_at)}
 
+    @property
+    def target(self):
+        """What a click opens: the task, or the project."""
+        return self.task or self.project
+
+    @property
+    def project_of_target(self):
+        """The project the notification is about (a task's project for a task notification)."""
+        return self.project or self.task.project
+
     @classmethod
     def for_person(cls, user):
-        """What this person may see: their own notifications, about tasks they can still see
+        """What this person may see: their own notifications, about tasks or projects they can still see
         (someone taken out of a team no longer gets a link to a project they can't open)."""
-        return cls.objects.filter(recipient=user, task__in=Task.objects.visible_to(user))
+        return cls.objects.filter(
+            Q(task__in=Task.objects.visible_to(user)) | Q(project__in=Project.objects.visible_to(user)),
+            recipient=user,
+        )

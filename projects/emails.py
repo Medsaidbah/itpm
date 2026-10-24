@@ -5,8 +5,9 @@ While developing, settings.py prints the emails in the terminal instead of sendi
 Each email has two versions, made from two templates in templates/emails/:
 a plain-text one (.txt) and a nicer HTML one (.html). Email programs show the one they can.
 
-Each email is written in the language saved in the profile of the person who gets it
-(Stage 17c), whatever the language of the person who caused it.
+Each email is written in the language saved in the profile of the person who gets it (Stage 17c),
+whatever the language of the person who caused it. Someone who hasn't chosen a language yet gets the
+language in settings.EMAIL_DEFAULT_LANGUAGE (French unless changed).
 """
 
 import logging
@@ -26,7 +27,7 @@ from django.utils.formats import date_format
 from django.utils.translation import gettext as _
 from django.utils.translation import ngettext, pgettext
 
-from .models import Project, ProjectMember, Task
+from .models import Notification, Project, ProjectMember, Task
 
 # Problems (like a mail server that is down) are written in the server's log
 logger = logging.getLogger(__name__)
@@ -36,6 +37,16 @@ MAX_PER_SECTION = 20  # longer lists end with "...and 5 more"
 
 
 # ---------- Sending ----------
+
+
+def email_language(person):
+    """The language of the emails this person gets: the one in their profile; when they haven't chosen one
+    yet (or it is unknown), settings.EMAIL_DEFAULT_LANGUAGE."""
+    if person.language in dict(settings.LANGUAGES):
+        return person.language
+    if settings.EMAIL_DEFAULT_LANGUAGE in dict(settings.LANGUAGES):
+        return settings.EMAIL_DEFAULT_LANGUAGE
+    return person.get_language()
 
 
 def render_email(template, context, language=None, site_url=None):
@@ -93,7 +104,7 @@ def reminder_for(person, today):
     """Everything the daily reminder tells this person, ready for the email templates.
     "sections" is empty when there is nothing to remind them of.
     The texts are written in the language of the person."""
-    with translation.override(person.get_language()):
+    with translation.override(email_language(person)):
         return _reminder_for(person, today)
 
 
@@ -161,7 +172,7 @@ def reminder_preview(request):
     # opened at, not with SITE_URL: "127.0.0.1" and "localhost" are two different sites for a browser (each
     # keeps its own login), so a link to the other one would show the login page. The real emails use SITE_URL.
     here = f"{request.scheme}://{request.get_host()}"
-    text, html = render_email("reminder", reminder, person.get_language(), site_url=here)
+    text, html = render_email("reminder", reminder, email_language(person), site_url=here)
     if request.GET.get("text"):
         return HttpResponse(text, content_type="text/plain; charset=utf-8")
     return HttpResponse(html)
@@ -176,7 +187,7 @@ def email_new_assignee(task, assigned_by):
     person = task.assignee
     if not person.email:
         return True  # no address: there is nobody to write to, but nothing went wrong
-    language = person.get_language()  # the email is in the language of the person who gets the task
+    language = email_language(person)
     try:
         with translation.override(language):
             subject = _("New task for you: %(title)s") % {"title": task.title}
@@ -189,5 +200,65 @@ def email_new_assignee(task, assigned_by):
         )
     except Exception:  # like a mail server that is down or refuses the email
         logger.exception("Couldn't send the new task email to %s", person.email)
+        return False
+    return True
+
+
+# ---------- Changes in a project's team or roles (Step 23) ----------
+
+
+def project_event_texts(kind, project, actor):
+    """The subject, the sentence and the explanation of a project email, in the current language.
+    Call it inside translation.override(...)."""
+    names = {"actor": actor or _("An administrator"), "project": project.name}
+    if kind == Notification.Kind.ADDED_TO_TEAM:
+        return (
+            _("You were added to the project: %(project)s") % names,
+            _("%(actor)s added you to the team of the project “%(project)s”.") % names,
+            _("You can now see this project and its tasks."),
+        )
+    if kind == Notification.Kind.MANAGER:
+        return (
+            _("You are now the manager of: %(project)s") % names,
+            _("%(actor)s made you the manager of the project “%(project)s”.") % names,
+            _("You can edit the project, its tasks and its team."),
+        )
+    if kind == Notification.Kind.CO_MANAGER:
+        return (
+            _("You were given the manager role in: %(project)s") % names,
+            _("%(actor)s gave you the manager role in the project “%(project)s”.") % names,
+            _("You can edit the project, its tasks and its team, like its manager."),
+        )
+    if kind == Notification.Kind.MANAGER_ENDED:
+        return (
+            _("You are no longer the manager of: %(project)s") % names,
+            _("%(actor)s chose another manager for the project “%(project)s”.") % names,
+            _("You stay in the team, as a member."),
+        )
+    return (  # CO_MANAGER_ENDED
+        _("Your manager role was taken away in: %(project)s") % names,
+        _("%(actor)s took away your manager role in the project “%(project)s”.") % names,
+        _("You stay in the team, as a member."),
+    )
+
+
+def email_project_event(kind, project, person, actor):
+    """Tells someone by email that their place in a project changed.
+    Returns False if the email couldn't be sent (the change is saved anyway)."""
+    if not person.email:
+        return True  # nobody to write to, but nothing went wrong
+    language = email_language(person)
+    try:
+        with translation.override(language):
+            subject, headline, detail = project_event_texts(kind, project, actor)
+        send_email(
+            person.email,
+            subject,
+            "project_event",
+            {"project": project, "person": person, "headline": headline, "detail": detail},
+            language,
+        )
+    except Exception:  # like a mail server that is down or refuses the email
+        logger.exception("Couldn't send the project email (%s) to %s", kind, person.email)
         return False
     return True

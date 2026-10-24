@@ -27,8 +27,8 @@ from .forms import (
     TaskForm,
     TeamMemberForm,
 )
-from .models import Attachment, Comment, Project, ProjectMember, Task
-from .notifications import notify_assigned
+from .models import Attachment, Comment, Notification, Project, ProjectMember, Task
+from .notifications import notify_assigned, tell_project_event
 
 # ---------- Who sees what ----------
 # People only see the projects they manage or whose team they are in; admins see all of them
@@ -170,6 +170,7 @@ def project_create(request):
         if form.is_valid():
             project = form.save()
             messages.success(request, _('Project "%(name)s" created.') % {"name": project.name})
+            tell_project_event(request, Notification.Kind.MANAGER, project, project.manager)
             return redirect(project)
     else:
         # Suggest the person creating the project as its manager
@@ -185,11 +186,15 @@ def project_edit(request, pk):
         raise PermissionDenied(_("Only the project's manager and admins can edit this project."))
 
     if request.method == "POST":
+        previous_manager = project.manager  # read it now: checking the form changes the project
         form = ProjectForm(request.POST, instance=project, user=request.user)
         if form.is_valid():
             project.saved_by = request.user
             form.save()
             messages.success(request, _("Changes saved."))
+            if project.manager_id != previous_manager.pk:  # tell the new manager, and the one who steps down
+                tell_project_event(request, Notification.Kind.MANAGER, project, project.manager)
+                tell_project_event(request, Notification.Kind.MANAGER_ENDED, project, previous_manager)
             # A new manager: the previous one stays in the team, as a member (see Project.save)
             if project.kept_in_team:
                 stays = _("%(person)s stays in the team, as a member.") % {"person": project.kept_in_team}
@@ -254,7 +259,8 @@ def team_add(request, pk):
     form = TeamMemberForm(request.POST, project=project)
     if form.is_valid():
         person = form.cleaned_data["person"]
-        project.add_to_team(person, added_by=request.user)
+        if project.add_to_team(person, added_by=request.user):
+            tell_project_event(request, Notification.Kind.ADDED_TO_TEAM, project, person)
         messages.success(request, _("%(person)s is now in the team.") % {"person": person})
     else:
         messages.error(request, " ".join(form.errors["person"]))
@@ -329,6 +335,8 @@ def team_manager(request, pk, user_pk):
     if membership.is_manager != make_manager:
         membership.is_manager = make_manager
         membership.save()  # recorded in the history, so the Activity page shows it
+        kind = Notification.Kind.CO_MANAGER if make_manager else Notification.Kind.CO_MANAGER_ENDED
+        tell_project_event(request, kind, project, person)  # (nothing when somebody gives up their own role)
     if make_manager:
         messages.success(request, _("%(person)s is now a co-manager of this project.") % {"person": person})
     else:

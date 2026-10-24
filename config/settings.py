@@ -227,6 +227,10 @@ EMAIL_PORT = int(os.environ.get("EMAIL_PORT", "587"))
 EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True") == "True"
+# Emails are written in the language saved in the profile of the person who gets them. People who haven't
+# chosen a language yet (a new account that has never logged in) get this one: French, the language everyone
+# in the team understands. Put EMAIL_DEFAULT_LANGUAGE=en or ar to change it.
+EMAIL_DEFAULT_LANGUAGE = os.environ.get("EMAIL_DEFAULT_LANGUAGE", "fr")
 EMAIL_TIMEOUT = 10  # seconds: a slow mail server can't freeze a page for long
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "مشاريعي <it-projects@example.com>")
 

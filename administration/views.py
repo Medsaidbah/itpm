@@ -21,7 +21,8 @@ from django.utils.translation import ngettext
 from django.views.decorators.http import require_POST
 
 from accounts.models import NO_ADMIN_LEFT, User, leaves_no_active_admin
-from projects.models import Project, ProjectMember, Task
+from projects.models import Notification, Project, ProjectMember, Task
+from projects.notifications import tell_project_event
 
 from .forms import (
     AccountForm,
@@ -321,7 +322,8 @@ def user_add_project(request, pk):
     form = AddToProjectForm(request.POST, person=person)
     if form.is_valid():
         project = form.cleaned_data["project"]
-        project.add_to_team(person, added_by=request.user)  # recorded, so the Activity page shows it
+        if project.add_to_team(person, added_by=request.user):  # recorded, so the Activity page shows it
+            tell_project_event(request, Notification.Kind.ADDED_TO_TEAM, project, person)
         messages.success(
             request, _("%(person)s is now in the team of %(project)s.") % {"person": person, "project": project}
         )
