@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages.views import SuccessMessageMixin
+from django.core.cache import cache
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
@@ -16,7 +17,13 @@ from django.views.decorators.http import require_POST
 from projects.emails import email_password_changed
 from projects.models import Project, Task, people_visible_to
 
-from .forms import ProfileForm, StyledPasswordChangeForm, StyledPasswordResetForm, StyledSetPasswordForm
+from .forms import (
+    FeedbackForm,
+    ProfileForm,
+    StyledPasswordChangeForm,
+    StyledPasswordResetForm,
+    StyledSetPasswordForm,
+)
 from .middleware import LANGUAGE_CODES, remember_language
 from .models import User
 
@@ -142,3 +149,34 @@ class PasswordResetConfirmView(auth_views.PasswordResetConfirmView):
 
 class PasswordResetCompleteView(auth_views.PasswordResetCompleteView):
     template_name = "registration/password_reset_complete.html"
+
+
+FEEDBACK_PER_HOUR = 5  # how many remarks one person can send in an hour (so a mistake or a script can't flood)
+
+
+@login_required
+def feedback(request):
+    """Give feedback: rate the app from 1 to 5 stars and say what you think. Open to everyone who is logged in."""
+    if request.method == "POST":
+        form = FeedbackForm(request.POST)
+        key = f"feedback-sent-{request.user.pk}"
+        if form.is_valid():
+            sent = cache.get(key, 0)
+            if sent >= FEEDBACK_PER_HOUR:
+                form.add_error(None, _("You sent several remarks in the last hour. Please try again later."))
+            else:
+                note = form.save(commit=False)
+                if not form.cleaned_data["anonymous"]:
+                    note.author = request.user
+                note.save()
+                cache.set(key, sent + 1, 3600)
+                messages.success(request, _("Thank you! Your feedback was sent to the administrators."))
+                return redirect(note.page or "home")
+    else:
+        came_from = request.GET.get("from", "")
+        if not url_has_allowed_host_and_scheme(
+            came_from, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+        ):
+            came_from = ""
+        form = FeedbackForm(initial={"page": came_from})
+    return render(request, "accounts/feedback.html", {"form": form})

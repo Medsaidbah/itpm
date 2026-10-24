@@ -17,7 +17,7 @@ from django.utils.translation import gettext_lazy as _
 
 from projects.forms import BootstrapFormMixin
 
-from .models import NO_ADMIN_LEFT, User, leaves_no_active_admin
+from .models import NO_ADMIN_LEFT, Feedback, User, leaves_no_active_admin
 from .pictures import MAX_PICTURE_MB, make_profile_picture
 
 logger = logging.getLogger(__name__)
@@ -111,7 +111,9 @@ class StyledPasswordResetForm(BootstrapFormMixin, PasswordResetForm):
 
     def send_mail(self, subject_template_name, email_template_name, context, from_email, to_email,
                   html_email_template_name=None):
-        from projects.emails import email_password_reset  # here, because projects imports accounts
+        from projects.emails import (
+            email_password_reset,  # here, because projects imports accounts
+        )
 
         person = context["user"]
         if not cache.add(f"password-reset-email-{person.pk}", 1, RESET_EMAIL_PAUSE_SECONDS):
@@ -165,3 +167,34 @@ class UserAdminChangeForm(PictureFormMixin, UserChangeForm):
         if leaves_no_active_admin(self.instance, role, is_active):
             raise forms.ValidationError(NO_ADMIN_LEFT)
         return cleaned_data
+
+
+class FeedbackForm(BootstrapFormMixin, forms.ModelForm):
+    """"Give feedback": the rating (the stars are drawn by the page), the kind of remark, a message."""
+
+    anonymous = forms.BooleanField(required=False, label=_("Send without my name"),
+                                   help_text=_("Admins will read your feedback, but they won't see who sent it."))
+
+    class Meta:
+        model = Feedback
+        fields = ["rating", "kind", "message", "page"]
+        labels = {"kind": _("What is it about?"), "message": _("Your message (optional)")}
+        widgets = {
+            "rating": forms.RadioSelect,
+            "message": forms.Textarea(attrs={"rows": 5, "maxlength": Feedback.MAX_MESSAGE}),
+            "page": forms.HiddenInput,
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["rating"].choices = Feedback.RATINGS  # without the empty choice
+        self.fields["rating"].error_messages["required"] = _("Choose a rating from 1 to 5 stars.")
+        self.fields["page"].required = False
+
+    def clean_page(self):
+        """Only an address of this site (starting with one "/") is kept: it only tells where the person was."""
+        page = self.cleaned_data.get("page", "")
+        return page if page.startswith("/") and not page.startswith("//") else ""
+
+    def clean_message(self):
+        return self.cleaned_data.get("message", "").strip()

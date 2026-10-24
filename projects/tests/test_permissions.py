@@ -20,7 +20,7 @@ from django.test import override_settings
 from django.urls import URLPattern, URLResolver, get_resolver
 from openpyxl import load_workbook
 
-from accounts.models import User
+from accounts.models import Feedback, User
 from accounts.pictures import make_profile_picture
 from projects.emails import reminder_for
 from projects.models import Attachment, Comment, Notification, Project, Task
@@ -66,6 +66,8 @@ class LoginRequiredTests(TeamTestCase):
             "/administration/projects/",
             "/administration/tasks/",
             "/administration/logins/",
+            "/administration/feedback/",
+            "/feedback/",
         ]
         for page in pages:
             with self.subTest(page=page):  # if one page fails, the message says which one
@@ -92,6 +94,7 @@ class EveryAddressTests(TeamTestCase):
             task=self.task, uploaded_by=self.sara, file=SimpleUploadedFile("plan.pdf", b"%PDF-1.4 test")
         )
         self.note = Notification.objects.create(recipient=self.sara, kind="assigned", task=self.task, actor=self.omar)
+        self.feedback = Feedback.objects.create(author=self.sara, rating=4, message="Nice")
         self.sara.picture = make_profile_picture(picture_file())
         self.sara.save()
 
@@ -175,6 +178,10 @@ class EveryAddressTests(TeamTestCase):
             ("admin_projects", "get", "/administration/projects/", None, ADMINS_ONLY_PAGE),
             ("admin_tasks", "get", "/administration/tasks/", None, ADMINS_ONLY_PAGE),
             ("admin_logins", "get", "/administration/logins/", None, ADMINS_ONLY_PAGE),
+            ("admin_feedback", "get", "/administration/feedback/", None, ADMINS_ONLY_PAGE),
+            ("admin_feedback_review", "post", f"/administration/feedback/{self.feedback.pk}/review/", None,
+             ADMINS_ONLY_ACTION),
+            ("feedback", "get", "/feedback/", None, (OK, OK, OK, OK, OK)),
             ("admin_unlock", "post", "/administration/logins/unlock/", {"username": "sara"}, ADMINS_ONLY_ACTION),
         ]
 
@@ -357,6 +364,8 @@ class NoLeakTests(TeamTestCase):
             pages[address] = text = response.content.decode()
             for link in re.findall(r'href="(/[^"#]*)', text):
                 link = link.replace("&amp;", "&")
+                if link.startswith("/feedback/"):
+                    link = "/feedback/"  # the menu link carries the current page: one visit is enough
                 if not link.startswith(("/static/", "/logout/", "/admin/")):
                     to_visit.append(link)
         return pages

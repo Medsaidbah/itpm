@@ -2589,3 +2589,142 @@ msgstr "Saisissez votre adresse e-mail professionnelle. Si elle correspond à un
 
 msgid "Send me the link"
 msgstr "Envoyer le lien"
+
+msgid "Give feedback"
+msgstr "Donner mon avis"
+
+msgid "Feedback"
+msgstr "Avis"
+
+msgid "Something I like"
+msgstr "Quelque chose que j'aime"
+
+msgid "An idea or a suggestion"
+msgstr "Une idée ou une suggestion"
+
+msgid "Something that doesn't work"
+msgstr "Quelque chose qui ne fonctionne pas"
+
+msgid "Something else"
+msgstr "Autre chose"
+
+msgid "Very bad"
+msgstr "Très mauvais"
+
+msgid "Bad"
+msgstr "Mauvais"
+
+msgid "Fine"
+msgstr "Correct"
+
+msgid "Good"
+msgstr "Bon"
+
+msgid "Excellent"
+msgstr "Excellent"
+
+msgid "Send without my name"
+msgstr "Envoyer sans mon nom"
+
+msgid "Admins will read your feedback, but they won't see who sent it."
+msgstr "Les administrateurs liront votre avis, mais ne verront pas qui l'a envoyé."
+
+msgid "What is it about?"
+msgstr "De quoi s'agit-il ?"
+
+msgid "Your message (optional)"
+msgstr "Votre message (facultatif)"
+
+msgid "Choose a rating from 1 to 5 stars."
+msgstr "Choisissez une note de 1 à 5 étoiles."
+
+msgid "You sent several remarks in the last hour. Please try again later."
+msgstr "Vous avez envoyé plusieurs avis durant la dernière heure. Veuillez réessayer plus tard."
+
+msgid "Thank you! Your feedback was sent to the administrators."
+msgstr "Merci ! Votre avis a été envoyé aux administrateurs."
+
+msgid "How is your experience with the app? Your opinion helps us improve it."
+msgstr "Comment se passe votre expérience avec l'application ? Votre avis nous aide à l'améliorer."
+
+msgid "Your rating"
+msgstr "Votre note"
+
+msgid "Send my feedback"
+msgstr "Envoyer mon avis"
+
+msgid "No feedback yet. People can send it from their user menu (Give feedback)."
+msgstr "Aucun avis pour le moment. Les utilisateurs peuvent en envoyer depuis leur menu (Donner mon avis)."
+
+msgid "Average rating"
+msgstr "Note moyenne"
+
+msgid "How the ratings are shared"
+msgstr "Répartition des notes"
+
+msgid "Rating"
+msgstr "Note"
+
+msgid "Every rating"
+msgstr "Toutes les notes"
+
+msgid "Kind"
+msgstr "Type"
+
+msgid "Every kind"
+msgstr "Tous les types"
+
+msgid "State"
+msgstr "État"
+
+msgid "New and read"
+msgstr "Nouveaux et lus"
+
+msgid "New only"
+msgstr "Nouveaux seulement"
+
+msgid "Read only"
+msgstr "Lus seulement"
+
+msgid "Filter"
+msgstr "Filtrer"
+
+msgid "New"
+msgstr "Nouveau"
+
+msgid "(no message)"
+msgstr "(aucun message)"
+
+msgid "Anonymous"
+msgstr "Anonyme"
+
+msgid "an admin"
+msgstr "un administrateur"
+
+#, python-format
+msgid "read by <bdi>%(name)s</bdi>"
+msgstr "lu par <bdi>%(name)s</bdi>"
+
+msgid "Mark as new"
+msgstr "Marquer comme nouveau"
+
+msgid "Mark as read"
+msgstr "Marquer comme lu"
+
+msgid "Nothing matches these filters."
+msgstr "Aucun résultat pour ces filtres."
+
+msgid "Read the feedback"
+msgstr "Lire les avis"
+
+#, python-format
+msgid "%(counter)s remark"
+msgid_plural "%(counter)s remarks"
+msgstr[0] "%(counter)s avis"
+msgstr[1] "%(counter)s avis"
+
+#, python-format
+msgid "%(counter)s new"
+msgid_plural "%(counter)s new"
+msgstr[0] "%(counter)s nouveau"
+msgstr[1] "%(counter)s nouveaux"

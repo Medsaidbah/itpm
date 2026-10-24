@@ -98,6 +98,49 @@ class User(AbstractUser):
 
 
 # Shown when a change would leave the app without any active admin
+class Feedback(models.Model):
+    """What someone thinks of the app (Step 25): a rating from 1 to 5, a kind of remark, and a message.
+    Only admins read it. With "send without my name", nobody is saved as the author."""
+
+    class Kind(models.TextChoices):
+        PRAISE = "praise", gettext_lazy("Something I like")
+        IDEA = "idea", gettext_lazy("An idea or a suggestion")
+        PROBLEM = "problem", gettext_lazy("Something that doesn't work")
+        OTHER = "other", gettext_lazy("Something else")
+
+    RATINGS = (
+        (1, gettext_lazy("Very bad")),
+        (2, gettext_lazy("Bad")),
+        (3, gettext_lazy("Fine")),
+        (4, gettext_lazy("Good")),
+        (5, gettext_lazy("Excellent")),
+    )
+    MAX_MESSAGE = 2000
+
+    author = models.ForeignKey(  # empty when sent without a name, or when that account was deleted
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="feedback"
+    )
+    rating = models.PositiveSmallIntegerField(choices=RATINGS)
+    kind = models.CharField(max_length=10, choices=Kind.choices, default=Kind.OTHER)
+    message = models.TextField(blank=True, max_length=MAX_MESSAGE)
+    page = models.CharField(max_length=200, blank=True)  # the address of the page the person was on
+    created_at = models.DateTimeField(auto_now_add=True)
+    reviewed_at = models.DateTimeField(null=True, blank=True)
+    reviewed_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+        verbose_name_plural = "feedback"
+        constraints = [
+            models.CheckConstraint(condition=models.Q(rating__gte=1, rating__lte=5), name="feedback_rating_1_to_5")
+        ]
+
+    def __str__(self):
+        return f"{self.rating}/5 · {self.get_kind_display()}"
+
+
 NO_ADMIN_LEFT = gettext_lazy("The app needs at least one active admin. Give the Admin role to someone else first.")
 
 

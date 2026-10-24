@@ -1,0 +1,104 @@
+{% extends "administration/base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Feedback" %} · {% translate "Administration" %} · مشاريعي{% endblock %}
+{% block page_title %}{% translate "Feedback" %}{% endblock %}
+
+{% block section_content %}
+{% if not total %}
+<div class="card"><div class="card-body text-secondary text-center py-5">
+  <i class="ti ti-message-star fs-1 d-block mb-2"></i>{% translate "No feedback yet. People can send it from their user menu (Give feedback)." %}
+</div></div>
+{% else %}
+<div class="row row-cards mb-3">
+  <div class="col-md-4">
+    <div class="card h-100"><div class="card-body">
+      <div class="subheader">{% translate "Average rating" %}</div>
+      <div class="h1 mb-1"><span dir="ltr">{{ average|floatformat:1 }} / 5</span></div>
+      <div class="text-secondary">
+        {% blocktranslate count counter=total %}{{ counter }} remark{% plural %}{{ counter }} remarks{% endblocktranslate %}
+        {% if new_count %}· {% blocktranslate count counter=new_count %}{{ counter }} new{% plural %}{{ counter }} new{% endblocktranslate %}{% endif %}
+      </div>
+    </div></div>
+  </div>
+  <div class="col-md-8">
+    <div class="card h-100"><div class="card-body">
+      <div class="subheader mb-2">{% translate "How the ratings are shared" %}</div>
+      {% for row in distribution %}
+      <a href="?rating={{ row.stars }}" class="d-flex align-items-center gap-2 mb-1 text-reset text-decoration-none">
+        <span class="text-nowrap" style="min-width:3rem">{{ row.stars }} <span class="text-yellow" aria-hidden="true">★</span></span>
+        <div class="progress flex-fill" role="progressbar" aria-label="{{ row.label }}" aria-valuenow="{{ row.percent }}" aria-valuemin="0" aria-valuemax="100">
+          <div class="progress-bar bg-green" style="width: {{ row.percent }}%"></div>
+        </div>
+        <span class="text-secondary text-end" style="min-width:2.5rem">{{ row.count }}</span>
+      </a>
+      {% endfor %}
+    </div></div>
+  </div>
+</div>
+
+<form method="get" class="d-flex flex-wrap gap-2 mb-3">
+  <select name="rating" class="form-select w-auto" aria-label="{% translate 'Rating' %}">
+    <option value="">{% translate "Every rating" %}</option>
+    {% for number, label in ratings %}<option value="{{ number }}"{% if rating == number|stringformat:"d" %} selected{% endif %}>{{ number }} ★ · {{ label }}</option>{% endfor %}
+  </select>
+  <select name="kind" class="form-select w-auto" aria-label="{% translate 'Kind' %}">
+    <option value="">{% translate "Every kind" %}</option>
+    {% for value, label in kinds %}<option value="{{ value }}"{% if kind == value %} selected{% endif %}>{{ label }}</option>{% endfor %}
+  </select>
+  <select name="state" class="form-select w-auto" aria-label="{% translate 'State' %}">
+    <option value="">{% translate "New and read" %}</option>
+    <option value="new"{% if state == "new" %} selected{% endif %}>{% translate "New only" %}</option>
+    <option value="reviewed"{% if state == "reviewed" %} selected{% endif %}>{% translate "Read only" %}</option>
+  </select>
+  <button type="submit" class="btn">{% translate "Filter" %}</button>
+</form>
+
+<div class="card">
+  {% if page.object_list %}
+  <div class="list-group list-group-flush">
+    {% for note in page.object_list %}
+    <div class="list-group-item">
+      <div class="d-flex flex-wrap align-items-start gap-3">
+        <div class="flex-fill">
+          <div class="mb-1">
+            <span class="text-nowrap" title="{{ note.get_rating_display }}">
+              {% for i in "12345" %}<span class="{% if forloop.counter <= note.rating %}text-yellow{% else %}text-secondary opacity-50{% endif %}" aria-hidden="true">★</span>{% endfor %}<span class="visually-hidden">{{ note.rating }}/5</span>
+            </span>
+            <span class="badge bg-blue-lt ms-2">{{ note.get_kind_display }}</span>
+            {% if not note.reviewed_at %}<span class="badge bg-green-lt ms-1">{% translate "New" %}</span>{% endif %}
+          </div>
+          {% if note.message %}<div class="text-break" style="white-space: pre-line">{{ note.message }}</div>{% else %}<div class="text-secondary">{% translate "(no message)" %}</div>{% endif %}
+          <div class="text-secondary small mt-1">
+            {% if note.author %}<a href="{% url 'admin_user' note.author.pk %}">{{ note.author }}</a>{% else %}{% translate "Anonymous" %}{% endif %}
+            · {{ note.created_at|date:_("d M Y, H:i") }}
+            {% if note.page %}· <a href="{{ note.page }}" dir="ltr">{{ note.page }}</a>{% endif %}
+            {% if note.reviewed_at %}· {% blocktranslate with name=note.reviewed_by|default:_("an admin") %}read by <bdi>{{ name }}</bdi>{% endblocktranslate %}{% endif %}
+          </div>
+        </div>
+        <form method="post" action="{% url 'admin_feedback_review' note.pk %}">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ request.get_full_path }}">
+          <button type="submit" class="btn btn-sm">
+            {% if note.reviewed_at %}<i class="ti ti-arrow-back-up me-1"></i>{% translate "Mark as new" %}{% else %}<i class="ti ti-check me-1"></i>{% translate "Mark as read" %}{% endif %}
+          </button>
+        </form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% if page.paginator.num_pages > 1 %}
+  <div class="card-footer d-flex justify-content-between align-items-center">
+    <span class="text-secondary">{% blocktranslate with number=page.number total=page.paginator.num_pages %}Page {{ number }} of {{ total }}{% endblocktranslate %}</span>
+    <div class="btn-list">
+      {% if page.has_previous %}<a class="btn btn-sm" href="?rating={{ rating }}&kind={{ kind }}&state={{ state }}&page={{ page.previous_page_number }}">{% translate "Previous" %}</a>{% endif %}
+      {% if page.has_next %}<a class="btn btn-sm" href="?rating={{ rating }}&kind={{ kind }}&state={{ state }}&page={{ page.next_page_number }}">{% translate "Next" %}</a>{% endif %}
+    </div>
+  </div>
+  {% endif %}
+  {% else %}
+  <div class="card-body text-secondary text-center py-4">{% translate "Nothing matches these filters." %}</div>
+  {% endif %}
+</div>
+{% endif %}
+{% endblock %}

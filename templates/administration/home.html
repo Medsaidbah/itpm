@@ -85,6 +85,23 @@
     </div>
   </div>
 
+  {# What people think of the app #}
+  <div class="col-md-6 col-xl-4">
+    <div class="card h-100">
+      <div class="card-body">
+        <div class="subheader">{% translate "Feedback" %}</div>
+        <div class="h1 mb-1">{% if feedback_average %}<span dir="ltr">{{ feedback_average|floatformat:1 }} / 5</span>{% else %}—{% endif %}</div>
+        <div class="text-secondary">
+          {% blocktranslate count counter=feedback_total %}{{ counter }} remark{% plural %}{{ counter }} remarks{% endblocktranslate %}
+          {% if feedback_new %}· <a href="{% url 'admin_feedback' %}?state=new" class="text-primary">{% blocktranslate count counter=feedback_new %}{{ counter }} new{% plural %}{{ counter }} new{% endblocktranslate %}</a>{% endif %}
+        </div>
+      </div>
+      <div class="card-footer">
+        <a href="{% url 'admin_feedback' %}" class="btn"><i class="ti ti-message-star me-2"></i>{% translate "Read the feedback" %}</a>
+      </div>
+    </div>
+  </div>
+
   {# Django's own admin panel: only for admins who also have "staff status" #}
   {% if user.is_staff %}
   <div class="col-md-6 col-xl-4">

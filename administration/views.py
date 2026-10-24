@@ -11,7 +11,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.db import transaction
-from django.db.models import Count, F, Q, Value
+from django.db.models import Avg, Count, F, Q, Value
 from django.db.models.functions import Concat
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -20,7 +20,7 @@ from django.utils.translation import gettext as _
 from django.utils.translation import ngettext
 from django.views.decorators.http import require_POST
 
-from accounts.models import NO_ADMIN_LEFT, User, leaves_no_active_admin
+from accounts.models import NO_ADMIN_LEFT, Feedback, User, leaves_no_active_admin
 from projects.models import Notification, Project, ProjectMember, Task
 from projects.notifications import tell_project_event
 
@@ -73,6 +73,9 @@ def home(request):
         "locked_count": sum(1 for group in failed_logins(request) if group.locked),
         "active_projects": Project.objects.filter(status__in=Project.ACTIVE_STATUSES).count(),
         "finished_projects": Project.objects.exclude(status__in=Project.ACTIVE_STATUSES).count(),
+        "feedback_total": Feedback.objects.count(),
+        "feedback_new": Feedback.objects.filter(reviewed_at__isnull=True).count(),
+        "feedback_average": Feedback.objects.aggregate(average=Avg("rating"))["average"],
     }
     return render(request, "administration/home.html", context)
 
@@ -503,3 +506,72 @@ def login_unlock(request):
     ):
         return redirect(next_page)
     return redirect("admin_logins")
+
+
+# ---------- Feedback (Step 25) ----------
+
+FEEDBACK_PER_PAGE = 20
+
+
+@admin_required
+def feedback_list(request):
+    """What people think of the app: the average rating, how the ratings are shared, and the messages."""
+    everything = Feedback.objects.all()
+    total = everything.count()
+    by_rating = {row["rating"]: row["n"] for row in everything.values("rating").annotate(n=Count("id"))}
+    notes = everything.select_related("author", "reviewed_by")
+
+    rating = request.GET.get("rating", "")
+    kind = request.GET.get("kind", "")
+    state = request.GET.get("state", "")
+    if rating in {str(number) for number, _label in Feedback.RATINGS}:
+        notes = notes.filter(rating=int(rating))
+    else:
+        rating = ""
+    if kind in Feedback.Kind.values:
+        notes = notes.filter(kind=kind)
+    else:
+        kind = ""
+    if state == "new":
+        notes = notes.filter(reviewed_at__isnull=True)
+    elif state == "reviewed":
+        notes = notes.filter(reviewed_at__isnull=False)
+    else:
+        state = ""
+
+    context = {
+        "section": "feedback",
+        "total": total,
+        "average": everything.aggregate(average=Avg("rating"))["average"],
+        "new_count": everything.filter(reviewed_at__isnull=True).count(),
+        "distribution": [
+            {"stars": number, "label": label, "count": by_rating.get(number, 0),
+             "percent": round(100 * by_rating.get(number, 0) / total) if total else 0}
+            for number, label in reversed(Feedback.RATINGS)
+        ],
+        "page": Paginator(notes, FEEDBACK_PER_PAGE).get_page(request.GET.get("page")),
+        "ratings": Feedback.RATINGS,
+        "kinds": Feedback.Kind.choices,
+        "rating": rating,
+        "kind": kind,
+        "state": state,
+    }
+    return render(request, "administration/feedback_list.html", context)
+
+
+@admin_required
+@require_POST
+def feedback_review(request, pk):
+    """Mark a remark as read (or put it back as new)."""
+    note = get_object_or_404(Feedback, pk=pk)
+    if note.reviewed_at is None:
+        note.reviewed_at, note.reviewed_by = timezone.now(), request.user
+    else:
+        note.reviewed_at, note.reviewed_by = None, None
+    note.save(update_fields=["reviewed_at", "reviewed_by"])
+    next_page = request.POST.get("next")
+    if next_page and url_has_allowed_host_and_scheme(
+        next_page, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+    ):
+        return redirect(next_page)
+    return redirect("admin_feedback")

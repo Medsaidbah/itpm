@@ -18,6 +18,8 @@ urlpatterns = [
          name="admin_user_remove_project"),
     path("projects/", views.project_list, name="admin_projects"),
     path("tasks/", views.task_list, name="admin_tasks"),
+    path("feedback/", views.feedback_list, name="admin_feedback"),
+    path("feedback/<int:pk>/review/", views.feedback_review, name="admin_feedback_review"),
     path("logins/", views.login_list, name="admin_logins"),
     path("logins/unlock/", views.login_unlock, name="admin_unlock"),
 ]

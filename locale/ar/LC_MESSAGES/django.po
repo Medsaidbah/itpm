@@ -2741,3 +2741,150 @@ msgstr "اكتب عنوان بريدك الإلكتروني المهني. إذا
 
 msgid "Send me the link"
 msgstr "أرسل لي الرابط"
+
+msgid "Give feedback"
+msgstr "إبداء الرأي"
+
+msgid "Feedback"
+msgstr "الآراء"
+
+msgid "Something I like"
+msgstr "شيء أعجبني"
+
+msgid "An idea or a suggestion"
+msgstr "فكرة أو اقتراح"
+
+msgid "Something that doesn't work"
+msgstr "شيء لا يعمل"
+
+msgid "Something else"
+msgstr "شيء آخر"
+
+msgid "Very bad"
+msgstr "سيئ جدًا"
+
+msgid "Bad"
+msgstr "سيئ"
+
+msgid "Fine"
+msgstr "مقبول"
+
+msgid "Good"
+msgstr "جيد"
+
+msgid "Excellent"
+msgstr "ممتاز"
+
+msgid "Send without my name"
+msgstr "إرسال دون ذكر اسمي"
+
+msgid "Admins will read your feedback, but they won't see who sent it."
+msgstr "سيقرأ المسؤولون رأيك دون أن يعرفوا من أرسله."
+
+msgid "What is it about?"
+msgstr "ما موضوع رأيك؟"
+
+msgid "Your message (optional)"
+msgstr "رسالتك (اختيارية)"
+
+msgid "Choose a rating from 1 to 5 stars."
+msgstr "اختر تقييمًا من 1 إلى 5 نجوم."
+
+msgid "You sent several remarks in the last hour. Please try again later."
+msgstr "أرسلت عدة ملاحظات خلال الساعة الماضية. يرجى المحاولة لاحقًا."
+
+msgid "Thank you! Your feedback was sent to the administrators."
+msgstr "شكرًا لك! تم إرسال رأيك إلى المسؤولين."
+
+msgid "How is your experience with the app? Your opinion helps us improve it."
+msgstr "كيف هي تجربتك مع التطبيق؟ رأيك يساعدنا على تحسينه."
+
+msgid "Your rating"
+msgstr "تقييمك"
+
+msgid "Send my feedback"
+msgstr "إرسال رأيي"
+
+msgid "No feedback yet. People can send it from their user menu (Give feedback)."
+msgstr "لا توجد آراء بعد. يمكن للمستخدمين إرسالها من قائمتهم (إبداء الرأي)."
+
+msgid "Average rating"
+msgstr "متوسط التقييم"
+
+msgid "How the ratings are shared"
+msgstr "توزيع التقييمات"
+
+msgid "Rating"
+msgstr "التقييم"
+
+msgid "Every rating"
+msgstr "كل التقييمات"
+
+msgid "Kind"
+msgstr "النوع"
+
+msgid "Every kind"
+msgstr "كل الأنواع"
+
+msgid "State"
+msgstr "الحالة"
+
+msgid "New and read"
+msgstr "الجديدة والمقروءة"
+
+msgid "New only"
+msgstr "الجديدة فقط"
+
+msgid "Read only"
+msgstr "المقروءة فقط"
+
+msgid "Filter"
+msgstr "تصفية"
+
+msgid "New"
+msgstr "جديد"
+
+msgid "(no message)"
+msgstr "(بلا رسالة)"
+
+msgid "Anonymous"
+msgstr "مجهول"
+
+msgid "an admin"
+msgstr "مسؤول"
+
+#, python-format
+msgid "read by <bdi>%(name)s</bdi>"
+msgstr "قرأه <bdi>%(name)s</bdi>"
+
+msgid "Mark as new"
+msgstr "تعليم كجديد"
+
+msgid "Mark as read"
+msgstr "تعليم كمقروء"
+
+msgid "Nothing matches these filters."
+msgstr "لا توجد نتائج لهذه التصفية."
+
+msgid "Read the feedback"
+msgstr "قراءة الآراء"
+
+#, python-format
+msgid "%(counter)s remark"
+msgid_plural "%(counter)s remarks"
+msgstr[0] "لا ملاحظات"
+msgstr[1] "ملاحظة واحدة"
+msgstr[2] "ملاحظتان"
+msgstr[3] "%(counter)s ملاحظات"
+msgstr[4] "%(counter)s ملاحظة"
+msgstr[5] "%(counter)s ملاحظة"
+
+#, python-format
+msgid "%(counter)s new"
+msgid_plural "%(counter)s new"
+msgstr[0] "لا جديد"
+msgstr[1] "واحدة جديدة"
+msgstr[2] "اثنتان جديدتان"
+msgstr[3] "%(counter)s جديدة"
+msgstr[4] "%(counter)s جديدة"
+msgstr[5] "%(counter)s جديدة"

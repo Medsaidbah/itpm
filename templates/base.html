@@ -82,6 +82,7 @@
             </a>
             <div class="dropdown-menu dropdown-menu-end">
               <a href="{% url 'profile' %}" class="dropdown-item"><i class="ti ti-user me-2"></i>{% translate "My profile" %}</a>
+              <a href="{% url 'feedback' %}?from={{ request.get_full_path|urlencode }}" class="dropdown-item"><i class="ti ti-message-star me-2"></i>{% translate "Give feedback" %}</a>
               <div class="dropdown-divider"></div>
               {# The language switch: the choice is saved in the profile, so emails use it too #}
               <h6 class="dropdown-header">{% translate "Language" %}</h6>

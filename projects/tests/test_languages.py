@@ -22,7 +22,13 @@ from django.contrib.staticfiles import finders
 from django.core import mail
 from django.core.management import call_command
 from django.http import HttpResponse
-from django.test import Client, RequestFactory, SimpleTestCase, TestCase, override_settings
+from django.test import (
+    Client,
+    RequestFactory,
+    SimpleTestCase,
+    TestCase,
+    override_settings,
+)
 from django.utils import timezone, translation
 from django.utils.formats import date_format
 from django.utils.timesince import TIME_STRINGS, timesince

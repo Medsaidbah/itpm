@@ -1,8 +1,9 @@
 """Profiles (Stage 17a): each person can have a phone number and a profile picture.
 Two new columns in the users table, empty for everyone at first. Nothing else changes."""
 
-import accounts.models
 from django.db import migrations, models
+
+import accounts.models
 
 
 class Migration(migrations.Migration):

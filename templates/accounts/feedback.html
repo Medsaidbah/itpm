@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}{% translate "Give feedback" %} · مشاريعي{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+  <div class="col-lg-7">
+    <h2 class="page-title mb-1">{% translate "Give feedback" %}</h2>
+    <p class="text-secondary mb-4">{% translate "How is your experience with the app? Your opinion helps us improve it." %}</p>
+
+    <form method="post" class="card">
+      {% csrf_token %}
+      {{ form.page }}
+      <div class="card-body">
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger" role="alert">{% for error in form.non_field_errors %}{{ error }}{% endfor %}</div>
+        {% endif %}
+
+        <fieldset class="mb-3">
+          <legend class="form-label">{% translate "Your rating" %} <span class="text-danger">*</span></legend>
+          {# Five buttons side by side: the number of stars is the rating #}
+          <div class="form-selectgroup">
+            {% for radio in form.rating %}
+            <label class="form-selectgroup-item">
+              <input type="radio" name="rating" value="{{ radio.data.value }}" class="form-selectgroup-input"
+                     {% if radio.data.selected %}checked{% endif %} required>
+              <span class="form-selectgroup-label" title="{{ radio.choice_label }}">
+                <span class="fw-bold">{{ radio.data.value }}</span> <span class="text-yellow" aria-hidden="true">★</span>
+                <span class="d-none d-sm-inline ms-1">{{ radio.choice_label }}</span>
+              </span>
+            </label>
+            {% endfor %}
+          </div>
+          {% for error in form.rating.errors %}<div class="text-danger small mt-1">{{ error }}</div>{% endfor %}
+        </fieldset>
+
+        {% include "includes/form_field.html" with field=form.kind %}
+        {% include "includes/form_field.html" with field=form.message %}
+        {% include "includes/form_field.html" with field=form.anonymous %}
+      </div>
+      <div class="card-footer d-flex justify-content-end gap-2">
+        <a href="{% url 'home' %}" class="btn">{% translate "Cancel" %}</a>
+        <button type="submit" class="btn btn-primary"><i class="ti ti-send me-2"></i>{% translate "Send my feedback" %}</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}
