@@ -1,0 +1,109 @@
+# ===========================================================================
+# Manifeste de déploiement : مشاريعي (gestion des projets du service informatique)
+# Format Docker Compose. Fourni selon le « Manuel de Livraison des Plateformes Digitales (MTNIMA) », section 3.A.
+#
+# Ce fichier contient : les variables d'environnement, les besoins en ressources, les volumes de stockage.
+# Il ne contient AUCUN secret : les valeurs sensibles (SECRET_KEY, DB_PASSWORD, EMAIL_HOST_PASSWORD...) sont lues dans
+# l'environnement ou dans le coffre de secrets du MTNIMA (fichier docker.env, jamais dans git ni dans l'image).
+# Voir aussi FICHE-TECHNIQUE.md (explications) et DEPLOY-DOCKER.md (guide détaillé, en anglais).
+#
+# Lancer :   docker compose -f manifest.yml --env-file docker.env up -d
+# ===========================================================================
+
+x-app-environment: &app-environment
+  # --- Application (obligatoire) ---
+  SECRET_KEY: ${SECRET_KEY}                # secret long et aléatoire ; le changer déconnecte tout le monde
+  DEBUG: "False"
+  ALLOWED_HOSTS: ${ALLOWED_HOSTS}          # nom(s) de domaine public(s), séparés par des virgules
+  HTTPS: ${HTTPS}                          # True : le site est servi en https:// via le reverse proxy
+  HSTS_SECONDS: ${HSTS_SECONDS:-3600}
+  SITE_URL: ${SITE_URL}                    # adresse publique complète (https://...), utilisée dans les liens des e-mails
+  TRUSTED_PROXY: ${TRUSTED_PROXY}          # adresse du reverse proxy (ou * si seul le proxy atteint le conteneur)
+  # --- Base de données PostgreSQL 16 ou plus récent (obligatoire) ---
+  DB_NAME: ${DB_NAME}
+  DB_USER: ${DB_USER}                      # doit pouvoir créer des tables (migrations)
+  DB_PASSWORD: ${DB_PASSWORD}
+  DB_HOST: ${DB_HOST}
+  DB_PORT: ${DB_PORT:-5432}
+  # --- E-mail (facultatif au début ; sans configuration, les e-mails sont seulement écrits dans les logs) ---
+  EMAIL_BACKEND: ${EMAIL_BACKEND:-django.core.mail.backends.console.EmailBackend}
+  DEFAULT_FROM_EMAIL: ${DEFAULT_FROM_EMAIL:-}
+  EMAIL_DEFAULT_LANGUAGE: ${EMAIL_DEFAULT_LANGUAGE:-fr}
+  EMAIL_IN_BACKGROUND: ${EMAIL_IN_BACKGROUND:-True}
+  #   Serveur SMTP (EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend)
+  EMAIL_HOST: ${EMAIL_HOST:-localhost}
+  EMAIL_PORT: ${EMAIL_PORT:-587}
+  EMAIL_USE_TLS: ${EMAIL_USE_TLS:-True}
+  EMAIL_HOST_USER: ${EMAIL_HOST_USER:-}
+  EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD:-}      # secret
+  #   Microsoft 365 (EMAIL_BACKEND=config.graph_email.GraphEmailBackend), voir EMAIL-M365-SETUP.md
+  GRAPH_TENANT_ID: ${GRAPH_TENANT_ID:-}
+  GRAPH_CLIENT_ID: ${GRAPH_CLIENT_ID:-}
+  GRAPH_CLIENT_SECRET: ${GRAPH_CLIENT_SECRET:-}      # secret
+  GRAPH_SENDER: ${GRAPH_SENDER:-}
+  # --- Premier administrateur (à utiliser une seule fois, puis supprimer DJANGO_SUPERUSER_PASSWORD) ---
+  DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME:-}
+  DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL:-}
+  DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD:-}
+
+services:
+  # --- L'application (un seul conteneur, port 8000, HTTP ; le HTTPS est géré par le reverse proxy du MTNIMA) ---
+  web:
+    # À REMPLACER par le nom réel : registry-mtnima.gov.mr/[NOM_INSTITUTION]/[NOM_APP]:[VERSION]
+    image: registry-mtnima.gov.mr/NOM_INSTITUTION/NOM_APP:1.0.0
+    restart: unless-stopped
+    environment: *app-environment
+    ports:
+      - "8000:8000"          # le reverse proxy du MTNIMA se connecte ici
+    volumes:
+      - itpm_media:/app/media   # fichiers déposés par les utilisateurs (pièces jointes, photos) : À SAUVEGARDER
+    deploy:
+      resources:
+        reservations:        # minimum nécessaire
+          cpus: "0.5"
+          memory: 512M
+        limits:              # plafond conseillé
+          cpus: "1.0"
+          memory: 1G
+    # La vérification de santé est déjà dans l'image (GET /healthz/ : « ok » si la base répond, sinon 503).
+    # Les logs sont écrits sur la sortie standard (stdout/stderr) du conteneur.
+
+  # --- Tâches planifiées (même image, même environnement). Elles ne tournent pas en continu : le planificateur du
+  # --- MTNIMA les lance avec :  docker compose -f manifest.yml --profile jobs run --rm rappels
+  rappels:                   # 1 fois par jour (par exemple à 07:00) : e-mail de rappel des tâches en retard / proches
+    image: registry-mtnima.gov.mr/NOM_INSTITUTION/NOM_APP:1.0.0
+    profiles: ["jobs"]
+    environment: *app-environment
+    command: ["python", "manage.py", "send_reminders"]
+    deploy:
+      resources:
+        limits: {cpus: "0.5", memory: 512M}
+
+  boite-d-envoi:             # toutes les 10 minutes : renvoie les e-mails qui ont échoué et nettoie la boîte d'envoi
+    image: registry-mtnima.gov.mr/NOM_INSTITUTION/NOM_APP:1.0.0
+    profiles: ["jobs"]
+    environment: *app-environment
+    command: ["python", "manage.py", "send_outbox"]
+    deploy:
+      resources:
+        limits: {cpus: "0.5", memory: 512M}
+
+  # --- Base de données : PostgreSQL 16+ du MTNIMA (recommandé). Si le MTNIMA préfère un PostgreSQL dans un conteneur,
+  # --- décommenter le service ci-dessous (et mettre DB_HOST=db).
+  # db:
+  #   image: postgres:16
+  #   restart: unless-stopped
+  #   environment:
+  #     POSTGRES_DB: ${DB_NAME}
+  #     POSTGRES_USER: ${DB_USER}
+  #     POSTGRES_PASSWORD: ${DB_PASSWORD}
+  #   volumes:
+  #     - itpm_db:/var/lib/postgresql/data     # base de données : À SAUVEGARDER (pg_dump)
+  #   deploy:
+  #     resources:
+  #       reservations: {cpus: "0.25", memory: 256M}
+  #       limits: {cpus: "1.0", memory: 1G}
+
+volumes:
+  itpm_media:    # À sauvegarder avec la base de données (les deux ensemble)
+  # itpm_db:     # seulement si PostgreSQL tourne dans un conteneur

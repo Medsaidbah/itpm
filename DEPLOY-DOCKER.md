@@ -75,10 +75,11 @@ run migrations from one place only (`RUN_MIGRATIONS=0` on the others).
 
 ## 6. Known limits (honest list)
 
-- **Email (Step 15d)**: Microsoft 365 sending is built (`config.graph_email.GraphEmailBackend`) and tested against a simulated Microsoft service,
-  **not yet against a real tenant**. Until the four `GRAPH_*` values are set and `EMAIL_BACKEND` is changed, emails are only printed in the log.
+- **Email**: two ways are built: SMTP (`django.core.mail.backends.smtp.EmailBackend`; a test with the ministry's Microsoft 365 SMTP settings was accepted) and
+  Microsoft 365 Graph (`config.graph_email.GraphEmailBackend`, tested against a simulated Microsoft service, **not yet against a real tenant**).
+  Until one of them is configured, emails are only printed in the log. Emails are sent by a background thread and tried again when they fail (see 4a).
   The reminder job sends one email after the other (Exchange Online allows about 30 per minute per mailbox).
-- No two-factor login, no password reset by email (an administrator sets a new password).
+- No two-factor login. Password reset by email exists ("Forgot my password" on the login page) and needs the email settings to work; an administrator can also set a new password.
 - Time zone is fixed to `Africa/Nouakchott`; the interface has English, French and Arabic.
 
 ## 7. Update procedure

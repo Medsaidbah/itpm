@@ -17,3 +17,8 @@ docker-compose.yml
 .dockerignore
 
 docker.env
+# Delivery documents are not needed to run the app (lighter image)
+delivery
+DEPLOY-DOCKER.md
+EMAIL-M365-SETUP.md
+docker.env.example
