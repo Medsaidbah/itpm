@@ -28,6 +28,12 @@ PY
   if [ "${RUN_MIGRATIONS:-1}" = "1" ]; then
     python manage.py migrate --noinput
   fi
+  # First administrator: only when both DJANGO_SUPERUSER_USERNAME and DJANGO_SUPERUSER_PASSWORD are set
+  # (and DJANGO_SUPERUSER_EMAIL, read by Django itself). If the account already exists, nothing changes.
+  if [ -n "${DJANGO_SUPERUSER_USERNAME:-}" ] && [ -n "${DJANGO_SUPERUSER_PASSWORD:-}" ]; then
+    python manage.py createsuperuser --noinput \
+      || echo "Administrator not created (it probably exists already); continuing."
+  fi
 fi
 
 exec "$@"

@@ -22,12 +22,12 @@ services:
 
   web:
     build: .
-    image: itpm:latest
+    image: itpm:1.0.1
     restart: unless-stopped
     depends_on:
       db:
         condition: service_healthy
-    environment:
+    environment: &app-env
       SECRET_KEY: ${SECRET_KEY}
       DEBUG: "False"
       ALLOWED_HOSTS: ${ALLOWED_HOSTS}
@@ -54,10 +54,34 @@ services:
       GRAPH_CLIENT_ID: ${GRAPH_CLIENT_ID:-}
       GRAPH_CLIENT_SECRET: ${GRAPH_CLIENT_SECRET:-}
       GRAPH_SENDER: ${GRAPH_SENDER:-}
+      DJANGO_SUPERUSER_USERNAME: ${DJANGO_SUPERUSER_USERNAME:-}
+      DJANGO_SUPERUSER_EMAIL: ${DJANGO_SUPERUSER_EMAIL:-}
+      DJANGO_SUPERUSER_PASSWORD: ${DJANGO_SUPERUSER_PASSWORD:-}
     ports:
-      - "127.0.0.1:8000:8000"   # this machine only; production traffic goes through the company's proxy
+      - "${BIND_ADDRESS:-127.0.0.1}:${APP_PORT:-8000}:8000"   # default: this machine only. BIND_ADDRESS=0.0.0.0 in docker.env opens it to the network
     volumes:
       - itpm_media:/app/media
+
+  # Scheduled jobs (same image, same settings). They do not run with "up": the scheduler calls them, see DEPLOY-DOCKER.md.
+  #   daily:           docker compose --env-file docker.env --profile jobs run --rm reminders
+  #   every 10 minutes: docker compose --env-file docker.env --profile jobs run --rm outbox
+  reminders:
+    image: itpm:1.0.1
+    profiles: ["jobs"]
+    depends_on:
+      db:
+        condition: service_healthy
+    environment: *app-env
+    command: ["python", "manage.py", "send_reminders"]
+
+  outbox:
+    image: itpm:1.0.1
+    profiles: ["jobs"]
+    depends_on:
+      db:
+        condition: service_healthy
+    environment: *app-env
+    command: ["python", "manage.py", "send_outbox"]
 
 volumes:
   itpm_db:
