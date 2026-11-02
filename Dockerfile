@@ -1,4 +1,4 @@
-# IT Projects - container image (Django + Waitress). See DEPLOY-DOCKER.md.
+# Mchariee - container image (Django + Waitress). See DEPLOY-DOCKER.md.
 # Build:  docker build -t itpm:latest .
 # The image holds the code only. Settings come from environment variables, the database is a separate
 # PostgreSQL, and uploaded files go to the volume /app/media.

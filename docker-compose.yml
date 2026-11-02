@@ -22,7 +22,7 @@ services:
 
   web:
     build: .
-    image: itpm:1.0.1
+    image: itpm:1.0.2
     restart: unless-stopped
     depends_on:
       db:
@@ -66,7 +66,7 @@ services:
   #   daily:           docker compose --env-file docker.env --profile jobs run --rm reminders
   #   every 10 minutes: docker compose --env-file docker.env --profile jobs run --rm outbox
   reminders:
-    image: itpm:1.0.1
+    image: itpm:1.0.2
     profiles: ["jobs"]
     depends_on:
       db:
@@ -75,7 +75,7 @@ services:
     command: ["python", "manage.py", "send_reminders"]
 
   outbox:
-    image: itpm:1.0.1
+    image: itpm:1.0.2
     profiles: ["jobs"]
     depends_on:
       db:

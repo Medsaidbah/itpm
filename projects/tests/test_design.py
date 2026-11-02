@@ -57,7 +57,7 @@ class LoginDesignTests(TestCase):
 class AppNameTests(TeamTestCase):
     def test_app_name_follows_the_language(self):
         self.login(self.omar)
-        for code, name in (("en", "مشاريعي"), ("fr", "مشاريعي"), ("ar", "مشاريعي")):
+        for code, name in (("en", "Mchariee"), ("fr", "Mchariee"), ("ar", "مشاريعي")):
             with self.subTest(code=code):
                 User.objects.filter(pk=self.omar.pk).update(language=code)
                 html = self.client.get("/").content.decode()

@@ -1,5 +1,5 @@
 """
-Settings of the IT Projects app.
+Settings of the Mchariee app.
 
 Everything that is different between your PC and the server (passwords, DEBUG, the app's
 address...) comes from the .env file, not from this file. .env.example lists all of them.
@@ -238,7 +238,7 @@ EMAIL_DEFAULT_LANGUAGE = os.environ.get("EMAIL_DEFAULT_LANGUAGE", "fr")
 EMAIL_IN_BACKGROUND = os.environ.get("EMAIL_IN_BACKGROUND", "True") == "True" and "test" not in sys.argv
 EMAIL_MAX_ATTEMPTS = 5
 EMAIL_TIMEOUT = 10  # seconds: a slow mail server can't freeze a page for long
-DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "مشاريعي <it-projects@example.com>")
+DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "Mchariee <it-projects@example.com>")
 
 # Microsoft 365 (Step 15d): used when EMAIL_BACKEND=config.graph_email.GraphEmailBackend.
 # The secret only ever lives in .env / the container's settings, never in git.

@@ -1,4 +1,4 @@
-# Fiche technique : مشاريعي (gestion des projets du service informatique)
+# Fiche technique : Mchariee (gestion des projets du service informatique)
 
 Livraison selon le « Manuel de Livraison des Plateformes Digitales (MTNIMA) ». Application développée pour la Direction du Développement et de l'Interopérabilité (DDI), MTNMA.
 
@@ -6,7 +6,7 @@ Livraison selon le « Manuel de Livraison des Plateformes Digitales (MTNIMA) ».
 
 | Élément | Valeur |
 |---|---|
-| Application | مشاريعي : suivi des projets, tâches, équipes, rappels par e-mail (interface en français, arabe et anglais) |
+| Application | Mchariee : suivi des projets, tâches, équipes, rappels par e-mail (interface en français, arabe et anglais) |
 | Technologie | Django 5.2, Python 3.13, serveur Waitress, base PostgreSQL |
 | Image | `registry-mtnima.gov.mr/[NOM_INSTITUTION]/[NOM_APP]:[VERSION]` (base `python:3.13-slim-bookworm`), un seul conteneur |
 | Port | 8000 (HTTP). **Le HTTPS et le reverse proxy sont gérés par le MTNIMA** (section 4 du manuel) |

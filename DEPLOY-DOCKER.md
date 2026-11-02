@@ -1,4 +1,4 @@
-# IT Projects – deployment guide for the infrastructure team (Docker)
+# Mchariee – deployment guide for the infrastructure team (Docker)
 
 This file is for the people who run the application. The application is a Django 5.2 web app
 (Python 3.13) served by Waitress, using PostgreSQL. It is packaged as one container image.

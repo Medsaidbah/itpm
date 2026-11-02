@@ -22,8 +22,8 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING(warning))
         try:
             send_mail(
-                "مشاريعي: test email",
-                "If you read this, the email settings of مشاريعي work.",
+                "Mchariee: test email",
+                "If you read this, the email settings of Mchariee work.",
                 None,
                 [options["address"]],
             )

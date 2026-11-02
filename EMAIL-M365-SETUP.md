@@ -1,6 +1,6 @@
-# IT Projects – email through Microsoft 365: setup for the tenant administrator
+# Mchariee – email through Microsoft 365: setup for the tenant administrator
 
-IT Projects sends two kinds of email (a daily reminder, and "a task was assigned to you").
+Mchariee sends two kinds of email (a daily reminder, and "a task was assigned to you").
 It sends them through **Microsoft Graph** with an **app-only** identity: no person signs in, and the
 application can send **only as one mailbox you choose**. Nothing else in the tenant is reachable.
 You need the Entra role *Application Administrator* (or higher) and the Exchange role *Organization Management*.
@@ -12,7 +12,7 @@ Create a mailbox for the application, for example `it-projects@company.mr` (a **
 Emails will show this mailbox's display name. Replies go to it, so someone should read it, or set a reply rule.
 
 ## 2. Register the application (Microsoft Entra admin center)
-1. *Identity → Applications → App registrations → New registration.* Name: `IT Projects mailer`. Account type: **this organizational directory only**. No redirect URI.
+1. *Identity → Applications → App registrations → New registration.* Name: `Mchariee mailer`. Account type: **this organizational directory only**. No redirect URI.
 2. On the *Overview* page copy **Application (client) ID** and **Directory (tenant) ID**.
 
 ## 3. Create the client secret
@@ -29,15 +29,15 @@ Microsoft's current recommended method, which replaces Application Access Polici
 Set-Mailbox it-projects@company.mr -CustomAttribute1 "ITPM"
 New-ManagementScope -Name "ITPM mailbox" -RecipientRestrictionFilter "CustomAttribute1 -eq 'ITPM'"
 
-# b) tell Exchange about the application (ids: Entra → Enterprise applications → IT Projects mailer;
+# b) tell Exchange about the application (ids: Entra → Enterprise applications → Mchariee mailer;
 #    the ObjectId is the ENTERPRISE application's object id, not the app registration's)
-New-ServicePrincipal -AppId <Application (client) ID> -ObjectId <Enterprise application object ID> -DisplayName "IT Projects mailer"
+New-ServicePrincipal -AppId <Application (client) ID> -ObjectId <Enterprise application object ID> -DisplayName "Mchariee mailer"
 
 # c) allow "Application Mail.Send", limited to that scope
-New-ManagementRoleAssignment -App "IT Projects mailer" -Role "Application Mail.Send" -CustomResourceScope "ITPM mailbox"
+New-ManagementRoleAssignment -App "Mchariee mailer" -Role "Application Mail.Send" -CustomResourceScope "ITPM mailbox"
 
 # d) check (this test ignores the delay below)
-Test-ServicePrincipalAuthorization -Identity "IT Projects mailer" -Resource it-projects@company.mr | Format-Table
+Test-ServicePrincipalAuthorization -Identity "Mchariee mailer" -Resource it-projects@company.mr | Format-Table
 ```
 
 **Important (from Microsoft's page):** do **not** leave an organization-wide `Mail.Send` permission with admin consent on this application
@@ -57,7 +57,7 @@ Changes can take **30 minutes to 2 hours** to apply.
 | `GRAPH_CLIENT_ID` | Application (client) ID |
 | `GRAPH_CLIENT_SECRET` | the secret **Value** |
 | `GRAPH_SENDER` | `it-projects@company.mr` |
-| `DEFAULT_FROM_EMAIL` | `IT Projects <it-projects@company.mr>` (informational: Microsoft sends as the mailbox) |
+| `DEFAULT_FROM_EMAIL` | `Mchariee <it-projects@company.mr>` (informational: Microsoft sends as the mailbox) |
 | `GRAPH_SAVE_TO_SENT_ITEMS` | optional, `True` keeps a copy of every email in the mailbox's Sent Items (default `False`) |
 
 ## 7. If something fails (the message is in the application's log and in `send_test_email`)

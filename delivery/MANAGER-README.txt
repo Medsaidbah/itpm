@@ -1,8 +1,8 @@
-IT Projects (Mchariee) - test / interim server pack, version 1.0.1
+Mchariee - test / interim server pack, version 1.0.2
 ===================================================================
 
 Files in this pack
-  mchariee-1.0.1.tar      the application image (Docker)
+  mchariee-1.0.2.tar      the application image (Docker)
   docker-compose.yml      the app + its PostgreSQL 16 database (database runs as a second container)
   docker.env.example      the settings to copy to docker.env and fill in
   DEPLOY-DOCKER.md, EMAIL-M365-SETUP.md   guides
@@ -12,7 +12,7 @@ Nothing in this pack contains a password.
 What you need: a server with Docker and Docker Compose, ~1 GB free RAM, a few GB of disk.
 
 1. Load the image
-     docker load -i mchariee-1.0.1.tar
+     docker load -i mchariee-1.0.2.tar
 
 2. Create the settings file
      copy docker.env.example docker.env      (Windows)   /   cp docker.env.example docker.env   (Linux)

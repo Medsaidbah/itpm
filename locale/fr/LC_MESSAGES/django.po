@@ -1,12 +1,12 @@
-# IT Projects: French translation (Stage 17c).
+# Mchariee: French translation (Stage 17c).
 # The texts to translate come from the app; msgstr is what people read.
 msgid ""
 msgstr ""
-"Project-Id-Version: IT Projects\n"
+"Project-Id-Version: Mchariee\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-10-11 12:04+0000\n"
 "PO-Revision-Date: 2026-10-11 12:00+0000\n"
-"Last-Translator: IT Projects team\n"
+"Last-Translator: Mchariee team\n"
 "Language-Team: French\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
@@ -15,8 +15,8 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
 
 #: accounts/admin.py
-msgid "مشاريعي · Django admin (technical)"
-msgstr "مشاريعي · Admin Django (technique)"
+msgid "Mchariee · Django admin (technical)"
+msgstr "Mchariee · Admin Django (technique)"
 
 #: accounts/admin.py
 msgid "Personal info"
@@ -1612,8 +1612,8 @@ msgid "Open the task"
 msgstr "Ouvrir la tâche"
 
 #: templates/emails/assigned.html
-msgid "You get this email when someone assigns a task to you in «مشاريعي»."
-msgstr "Vous recevez cet e-mail quand quelqu'un vous assigne une tâche dans « مشاريعي »."
+msgid "You get this email when someone assigns a task to you in «Mchariee»."
+msgstr "Vous recevez cet e-mail quand quelqu'un vous assigne une tâche dans « Mchariee »."
 
 #: templates/emails/assigned.txt
 #, python-format
@@ -2807,3 +2807,7 @@ msgid "%(count)d email sent."
 msgid_plural "%(count)d emails sent."
 msgstr[0] "%(count)d e-mail envoyé."
 msgstr[1] "%(count)d e-mails envoyés."
+
+#: templates (application name)
+msgid "Mchariee"
+msgstr "Mchariee"
