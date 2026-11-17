@@ -98,7 +98,8 @@ def project_list(request):
     """The projects people can see, with a search box and a status filter."""
     projects, status, query = filter_projects(request)
     context = {
-        "projects": projects,
+        # The teams come in one extra query for the whole list (the Team column)
+        "projects": projects.prefetch_related("members"),
         "status": status,
         "query": query,
         "status_choices": Project.Status.choices,

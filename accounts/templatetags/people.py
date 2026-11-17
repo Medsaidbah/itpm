@@ -43,6 +43,19 @@ def avatar(context, person, size="sm"):
     }
 
 
+@register.inclusion_tag("includes/team_avatars.html", takes_context=True)
+def team_avatars(context, people, limit=5, size="sm"):
+    """People as overlapping avatars: the first `limit` ones, then "+N" for the others."""
+    people = list(people)
+    return {
+        "request": context.get("request"),  # {% avatar %} needs it to decide which pictures may be shown
+        "people": people,
+        "shown": people[:limit],
+        "hidden": people[limit:],
+        "size": size,
+    }
+
+
 @register.inclusion_tag("includes/person_link.html", takes_context=True)
 def person_link(context, person, css=""):
     """The person's name, as a link to their page when the person who is logged in may see it."""

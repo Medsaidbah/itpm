@@ -1,0 +1,14 @@
+{% load i18n people %}{% comment %}
+  A project's team members as overlapping pictures (or initials), with "+N" for the rest
+  (made by {% team_avatars people limit size %}, see accounts/templatetags/people.py).
+  Hovering a picture shows the name; hovering "+N" lists the names it stands for.
+  Screen readers read the names once, as text, instead of the initials.
+{% endcomment %}{% if people %}
+<div class="avatar-list avatar-list-stacked" aria-hidden="true">
+  {% for person in shown %}{% avatar person size %}{% endfor %}
+  {% if hidden %}<span class="avatar avatar-{{ size }}" title="{{ hidden|join:', ' }}">+{{ hidden|length }}</span>{% endif %}
+</div>
+<span class="visually-hidden">{{ people|join:", " }}</span>
+{% else %}
+<span class="text-secondary">{% translate "Only the manager" %}</span>
+{% endif %}

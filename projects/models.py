@@ -169,13 +169,17 @@ class Project(models.Model):
         """Who may choose the project's manager: admins only."""
         return user.is_admin
 
-    def team(self):
-        """Everyone in the team: the manager first, then the members by name."""
-        members = sorted(
+    def members_besides_manager(self):
+        """The team without its manager, by name. Uses the members fetched with prefetch_related("members")
+        when a list of projects did that, so a long list needs no query per project."""
+        return sorted(
             (person for person in self.members.all() if person.pk != self.manager_id),
             key=lambda person: str(person).lower(),
         )
-        return [self.manager] + members
+
+    def team(self):
+        """Everyone in the team: the manager first, then the members by name."""
+        return [self.manager] + self.members_besides_manager()
 
     def team_queryset(self):
         """The people in the team (the manager and the members), as a database query."""

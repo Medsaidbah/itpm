@@ -47,6 +47,7 @@
           <th>{% translate "Status" %}</th>
           <th class="d-none d-md-table-cell">{% translate "Priority" %}</th>
           <th class="d-none d-md-table-cell">{% translate "Manager" %}</th>
+          <th class="d-none d-lg-table-cell">{% translate "Team" %}</th>
           <th class="d-none d-sm-table-cell">{% translate "End date" %}</th>
           <th class="w-25">{% translate "Progress" %}</th>
         </tr>
@@ -60,6 +61,8 @@
           <td class="d-none d-md-table-cell">
             <span class="d-inline-flex align-items-center gap-2">{% avatar project.manager "xs" %}{{ project.manager }}</span>
           </td>
+          {# The rest of the team (the manager is in the column before), on wide screens only #}
+          <td class="d-none d-lg-table-cell">{% team_avatars project.members_besides_manager 5 "xs" %}</td>
           <td class="d-none d-sm-table-cell {% if project.is_overdue %}text-danger{% endif %}">{{ project.end_date|date:_("d M Y")|default:_("Not set") }}</td>
           <td>
             <div class="d-flex align-items-center gap-2">

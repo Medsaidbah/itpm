@@ -64,14 +64,7 @@
             </div>
           </td>
           <td class="d-none d-lg-table-cell">
-            {% if project.other_members %}
-            <div class="avatar-list avatar-list-stacked">
-              {% for person in project.other_members|slice:":6" %}{% avatar person %}{% endfor %}
-              {% if project.other_members|length > 6 %}<span class="avatar avatar-sm">+{{ project.other_members|length|add:"-6" }}</span>{% endif %}
-            </div>
-            {% else %}
-            <span class="text-secondary">{% translate "Only the manager" %}</span>
-            {% endif %}
+            {% team_avatars project.other_members 6 %}
           </td>
           <td class="text-end text-nowrap">
             <a href="{% url 'project_edit' project.pk %}" class="btn btn-sm btn-ghost-secondary btn-icon"

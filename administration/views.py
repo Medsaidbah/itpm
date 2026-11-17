@@ -395,10 +395,7 @@ def project_list(request):
     for project in projects:
         project.open_count = project.task_total - project.task_done
         # The members, besides the manager (the manager is shown on their own)
-        project.other_members = sorted(
-            (person for person in project.members.all() if person.pk != project.manager_id),
-            key=lambda person: str(person).lower(),
-        )
+        project.other_members = project.members_besides_manager()
     context = {
         "section": "projects",
         "projects": projects,
