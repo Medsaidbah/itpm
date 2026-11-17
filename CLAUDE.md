@@ -19,6 +19,16 @@ Deployment details for the infrastructure team are in DEPLOY-DOCKER.md.
 - The live app runs version 1.0.2, and `master` must match it.
 - New work goes on the `v1.1` branch.
 
+## Roadmap
+
+The approved release plan and the product owner's decisions are in `docs/ROADMAP.md`. Follow it:
+- 1.1 has no database change. Each later release has exactly one database change, and its migration is
+  additive: defaults for old rows, never deleting or rewriting existing data.
+- One feature per commit, with tests, the full suite passing, and en/fr/ar translations (including
+  right to left). Stop and report after each feature.
+- Ask before any change to how people use the app today.
+- Mark a feature "Done" in `docs/ROADMAP.md` once it is committed.
+
 ## Running the tests
 
 The tests use Django's built-in runner (not pytest) and need a running PostgreSQL.
