@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n people %}
+{% load i18n people text %}
 
 {% block title %}{{ project.name }} · {% translate "Mchariee" %}{% endblock %}
 {% block nav_projects %}active{% endblock %}
@@ -59,8 +59,8 @@
         </div>
         {% if project.description %}
         <div class="datagrid-title mt-4">{% translate "Description" %}</div>
-        {# linebreaksbr keeps the line breaks people typed #}
-        <div dir="auto">{{ project.description|linebreaksbr }}</div>
+        {# linkify makes web addresses clickable; linebreaksbr keeps the line breaks people typed #}
+        <div class="text-break" dir="auto">{{ project.description|linkify|linebreaksbr }}</div>
         {% endif %}
       </div>
     </div>

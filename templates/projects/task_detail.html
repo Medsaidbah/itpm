@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n people %}
+{% load i18n people text %}
 
 {% block title %}{{ task.title }} · {% translate "Mchariee" %}{% endblock %}
 {% block nav_projects %}active{% endblock %}
@@ -72,7 +72,7 @@
         </div>
         {% if task.description %}
         <div class="datagrid-title mt-4">{% translate "Description" %}</div>
-        <div dir="auto">{{ task.description|linebreaksbr }}</div>
+        <div class="text-break" dir="auto">{{ task.description|linkify|linebreaksbr }}</div>
         {% endif %}
       </div>
     </div>
@@ -211,7 +211,7 @@
               </form>
               {% endif %}
             </div>
-            <div class="text-break" dir="auto">{{ comment.body|linebreaksbr }}</div>
+            <div class="text-break" dir="auto">{{ comment.body|linkify|linebreaksbr }}</div>
           </div>
         </div>
         {% empty %}
