@@ -29,6 +29,25 @@ The approved release plan and the product owner's decisions are in `docs/ROADMAP
 - Ask before any change to how people use the app today.
 - Mark a feature "Done" in `docs/ROADMAP.md` once it is committed.
 
+## Migration rehearsal
+
+Before sending a release that has a migration, rehearse it on a copy of the live database (a plain SQL `pg_dump`,
+kept outside the repository):
+
+```powershell
+powershell -ExecutionPolicy Bypass -File scripts\rehearse-migrations.ps1 -DumpPath C:\projects\live-copy\backup_itpm.sql
+```
+
+It builds the branch as `itpm-rehearsal:local`, restores the dump with psql into a separate stack
+(`-p itpm-rehearsal`, its own volumes, port 8001, emails only in the log), applies the migrations, and checks
+`migrate --check`, the system check, the row counts before and after, `/healthz/`, the login page and the main pages.
+The report goes to `%TEMP%\itpm-rehearsal` and holds counts and status codes only.
+
+- Never copy a dump into the repository (`*.sql` and other dump files are ignored by Git and Docker).
+- The user runs the restore. Never delete the rehearsal volumes (or any volume) for them: each run empties the
+  rehearsal database itself, so no `down -v` is ever needed.
+- The rehearsal has no uploaded files: "File missing" on attachments is expected there.
+
 ## Running the tests
 
 The tests use Django's built-in runner (not pytest) and need a running PostgreSQL.

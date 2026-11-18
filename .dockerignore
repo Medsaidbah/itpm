@@ -22,3 +22,13 @@ delivery
 DEPLOY-DOCKER.md
 EMAIL-M365-SETUP.md
 docker.env.example
+
+# Database dumps never go into an image, even if one is left in this folder
+*.sql
+*.sql.gz
+*.dump
+*.backup
+live-copy
+backup
+# Only for the migration rehearsal (scripts/rehearse-migrations.ps1)
+docker-compose.rehearsal.yml

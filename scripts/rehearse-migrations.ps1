@@ -1,0 +1,191 @@
+<#
+Migration rehearsal on a copy of the live database (see CLAUDE.md, "Migration rehearsal").
+
+    powershell -ExecutionPolicy Bypass -File scripts\rehearse-migrations.ps1 -DumpPath C:\projects\live-copy\backup_itpm.sql
+
+What it does, in a Docker stack of its own (project "itpm-rehearsal": its own containers, network and volumes,
+port 8001, emails only written to the log), never touching the normal stack:
+  1. builds the current branch as the image itpm-rehearsal:local (your itpm:<version> image is not replaced);
+  2. starts the rehearsal database, empties it (DROP SCHEMA public, then an empty public schema again) and
+     restores the dump with psql;
+  3. counts the rows of every table, lists the migrations still to apply, applies them, and checks:
+     migrate --check, the Django system check, the same row counts afterwards;
+  4. starts the app on http://localhost:8001, checks /healthz/ and the login page, and opens the main pages
+     as an admin and a user of the copy.
+The report (counts, migration names and status codes only, never names or emails) is shown and saved in
+%TEMP%\itpm-rehearsal. The dump is copied into the database container only, never into the project folder.
+The stack keeps running for a look; stop it with the "down" command printed at the end (it keeps the volumes).
+#>
+param(
+    [Parameter(Mandatory = $true)][string]$DumpPath
+)
+
+$ProjectName = "itpm-rehearsal"
+$Port = 8001
+$Repo = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+$Work = Join-Path $env:TEMP "itpm-rehearsal"
+$EnvFile = Join-Path $Work "rehearsal.env"
+$Report = New-Object System.Collections.Generic.List[string]
+$script:Failed = $false
+
+function Say([string]$text, [string]$colour = "Gray") {
+    Write-Host $text -ForegroundColor $colour
+    $Report.Add($text)
+}
+function Check([string]$name, [bool]$pass, [string]$detail = "") {
+    if ($pass) { Say ("[ OK ] " + $name + " " + $detail) "Green" }
+    else { Say ("[FAIL] " + $name + " " + $detail) "Red"; $script:Failed = $true }
+}
+function Save-Report {
+    New-Item -ItemType Directory -Force $Work | Out-Null
+    $file = Join-Path $Work ("report-" + (Get-Date -Format "yyyyMMdd-HHmm") + ".txt")
+    [IO.File]::WriteAllLines($file, $Report)
+    Write-Host ("Report saved: " + $file) -ForegroundColor Cyan
+}
+function Stop-Here([string]$why) {
+    Check $why $false
+    Save-Report
+    exit 1
+}
+# docker compose, always with the rehearsal project name, both compose files and the rehearsal settings
+function Compose {
+    & docker compose -p $ProjectName -f (Join-Path $Repo "docker-compose.yml") -f (Join-Path $Repo "docker-compose.rehearsal.yml") --env-file $EnvFile @args
+}
+function Read-Counts([string[]]$lines) {
+    $table = @{}
+    foreach ($line in $lines) {
+        $parts = "$line".Trim() -split " "
+        if ($parts.Count -eq 2 -and $parts[1] -match '^\d+$') { $table[$parts[0]] = [int]$parts[1] }
+    }
+    return $table
+}
+
+Say ("Migration rehearsal - " + (Get-Date -Format "yyyy-MM-dd HH:mm") + " - branch " + (& git -C $Repo rev-parse --abbrev-ref HEAD) + " at " + (& git -C $Repo rev-parse --short HEAD)) "Cyan"
+
+# ---------- 0. Safety checks ----------
+if (-not (Test-Path -LiteralPath $DumpPath -PathType Leaf)) { Stop-Here ("the dump file exists (" + $DumpPath + ")") }
+$Dump = (Resolve-Path -LiteralPath $DumpPath).Path
+Check "the dump is outside the project folder" (-not $Dump.StartsWith($Repo + "\", [StringComparison]::OrdinalIgnoreCase))
+if ($script:Failed) { Stop-Here "never use a dump inside the project folder" }
+$head = Get-Content -LiteralPath $Dump -TotalCount 5
+Check "the dump is a plain SQL pg_dump" (($head -join "`n") -match "PostgreSQL database dump")
+if ($script:Failed) { Stop-Here "the dump must be a plain SQL file made by pg_dump" }
+Say ("Dump size: {0:N0} bytes" -f (Get-Item -LiteralPath $Dump).Length)
+
+# The rehearsal settings, outside the project folder: random secrets, emails only in the log, port 8001
+New-Item -ItemType Directory -Force $Work | Out-Null
+$secret = [Convert]::ToBase64String((1..48 | ForEach-Object { [byte](Get-Random -Maximum 256) }))
+$dbPassword = -join (1..32 | ForEach-Object { [char[]]"abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789" | Get-Random })
+[IO.File]::WriteAllLines($EnvFile, @(
+    "SECRET_KEY=$secret", "DEBUG=False", "ALLOWED_HOSTS=localhost,127.0.0.1,testserver", "HTTPS=False",
+    "HSTS_SECONDS=0", "SITE_URL=http://localhost:$Port", "TRUSTED_PROXY=127.0.0.1",
+    "DB_NAME=itpm", "DB_USER=itpm_user", "DB_PASSWORD=$dbPassword", "DB_HOST=db", "DB_PORT=5432",
+    "EMAIL_BACKEND=django.core.mail.backends.console.EmailBackend", "DEFAULT_FROM_EMAIL=rehearsal@localhost",
+    "EMAIL_HOST=localhost", "EMAIL_HOST_USER=", "EMAIL_HOST_PASSWORD=",
+    "GRAPH_TENANT_ID=", "GRAPH_CLIENT_ID=", "GRAPH_CLIENT_SECRET=", "GRAPH_SENDER=",
+    "DJANGO_SUPERUSER_USERNAME=", "DJANGO_SUPERUSER_EMAIL=", "DJANGO_SUPERUSER_PASSWORD=",
+    "BIND_ADDRESS=127.0.0.1", "APP_PORT=$Port"))
+
+# A previous rehearsal still running: stop its containers (its volumes are kept; nothing else is touched)
+Compose down 2>$null | Out-Null
+$busy = $false
+try { $probe = New-Object System.Net.Sockets.TcpClient; $probe.Connect("127.0.0.1", $Port); $busy = $true; $probe.Close() } catch { }
+Check ("port " + $Port + " is free") (-not $busy)
+if ($script:Failed) { Stop-Here ("something else uses port " + $Port) }
+
+# ---------- 1. Build the branch ----------
+Say "Building the image itpm-rehearsal:local from this branch..." "Cyan"
+Compose build web | Out-Null
+Check "image built" ($LASTEXITCODE -eq 0)
+if ($script:Failed) { Stop-Here "the image could not be built" }
+
+# ---------- 2. The rehearsal database: start, empty, restore ----------
+Compose up -d db 2>$null | Out-Null
+$dbId = (Compose ps -q db) | Select-Object -First 1
+$dbName = if ($dbId) { (& docker inspect --format "{{.Name}}" $dbId) } else { "" }
+Check "the database container belongs to the rehearsal" ($dbName -like "/$ProjectName-*") $dbName
+if ($script:Failed) { Stop-Here "refusing to touch a database that isn't the rehearsal's" }
+$health = ""
+for ($i = 0; $i -lt 30 -and $health -ne "healthy"; $i++) {
+    Start-Sleep -Seconds 2
+    $health = & docker inspect --format "{{.State.Health.Status}}" $dbId
+}
+Check "rehearsal database ready" ($health -eq "healthy") $health
+if ($script:Failed) { Stop-Here "the rehearsal database didn't start" }
+
+# The dump has \restrict lines (PostgreSQL 16.10 and newer): an older psql can't read it
+$psql = "$(Compose exec -T db psql --version)"
+$psqlOk = $false
+if ($psql -match '(\d+)\.(\d+)') { $psqlOk = ([int]$Matches[1] -gt 16) -or (([int]$Matches[1] -eq 16) -and ([int]$Matches[2] -ge 10)) }
+Check "psql can read the dump (16.10 or newer)" $psqlOk $psql
+if ($script:Failed) { Stop-Here "run: docker pull postgres:16   then run this script again" }
+
+# Empty the rehearsal database: the dump has no CREATE SCHEMA, so the empty public schema is made again
+Compose exec -T db psql -U itpm_user -d itpm -v ON_ERROR_STOP=1 -q -c "DROP SCHEMA IF EXISTS public CASCADE; CREATE SCHEMA public;" | Out-Null
+Check "rehearsal database emptied" ($LASTEXITCODE -eq 0)
+Compose cp $Dump db:/tmp/rehearsal.sql | Out-Null
+Compose exec -T db psql -U itpm_user -d itpm -v ON_ERROR_STOP=1 -q -f /tmp/rehearsal.sql | Out-Null
+$restored = ($LASTEXITCODE -eq 0)
+Compose exec -T db rm -f /tmp/rehearsal.sql | Out-Null
+Check "dump restored with psql" $restored
+if ($script:Failed) { Stop-Here "the dump could not be restored" }
+
+# ---------- 3. Before, migrate, after ----------
+$before = Read-Counts (Compose run --rm --no-deps web python scripts/rehearsal_checks.py counts 2>$null)
+Check "rows counted before migrating" ($before.Count -gt 0) ("(" + $before.Count + " tables)")
+$plan = Compose run --rm --no-deps web python manage.py showmigrations --plan 2>$null
+$pending = @($plan | Where-Object { "$_" -match '^\[ \]' } | ForEach-Object { ("$_" -replace '^\[ \]\s*', '').Trim() })
+Say ("Migrations to apply: " + $(if ($pending.Count) { $pending -join ", " } else { "none" }))
+
+$migrate = Compose run --rm --no-deps web python manage.py migrate --noinput 2>&1
+$migrated = ($LASTEXITCODE -eq 0)
+foreach ($line in $migrate) { if ("$line" -match "Applying|No migrations to apply") { Say ("  " + "$line".Trim()) } }
+Check "migrate" $migrated
+if (-not $migrated) { Stop-Here "the migrations failed on the copy of the live database" }
+
+Compose run --rm --no-deps web python manage.py migrate --check 2>$null | Out-Null
+Check "migrate --check (nothing left to apply)" ($LASTEXITCODE -eq 0)
+Compose run --rm --no-deps web python manage.py check 2>$null | Out-Null
+Check "Django system check" ($LASTEXITCODE -eq 0)
+
+$after = Read-Counts (Compose run --rm --no-deps web python scripts/rehearsal_checks.py counts 2>$null)
+# Django's own bookkeeping grows with new migrations and models; every other table must keep its rows
+$bookkeeping = @("django_migrations", "django_content_type", "auth_permission")
+Say "Rows per table (before -> after):"
+foreach ($table in (@($before.Keys) + @($after.Keys) | Sort-Object -Unique)) {
+    $b = if ($before.ContainsKey($table)) { "" + $before[$table] } else { "new" }
+    $a = if ($after.ContainsKey($table)) { "" + $after[$table] } else { "gone" }
+    $same = ($b -eq $a) -or ($b -eq "new" -and $a -eq "0") -or ($bookkeeping -contains $table)
+    if ($same) { Say ("  {0,-40} {1,8} -> {2}" -f $table, $b, $a) }
+    else { Check ("rows kept in " + $table) $false ("{0} -> {1}" -f $b, $a) }
+}
+
+# ---------- 4. The app ----------
+Compose up -d web 2>$null | Out-Null
+$healthz = ""
+for ($i = 0; $i -lt 30 -and $healthz -ne "ok"; $i++) {
+    Start-Sleep -Seconds 2
+    try { $healthz = (Invoke-WebRequest "http://127.0.0.1:$Port/healthz/" -UseBasicParsing -TimeoutSec 5).Content.Trim() } catch { $healthz = "" }
+}
+Check "app answers on /healthz/" ($healthz -eq "ok") $healthz
+try { $login = (Invoke-WebRequest "http://127.0.0.1:$Port/login/" -UseBasicParsing -TimeoutSec 10).StatusCode } catch { $login = "no answer" }
+Check "login page" ("$login" -eq "200") "$login"
+
+Say "Pages opened as an admin and a user of the copy (status codes):"
+$pages = Compose exec -T web python scripts/rehearsal_checks.py pages 2>$null
+foreach ($line in $pages) {
+    $parts = "$line".Trim() -split " "
+    if ($parts.Count -ne 3) { continue }
+    $ok = ($parts[2] -eq "-") -or ([int]$parts[2] -lt 500)
+    if ($ok) { Say ("  {0,-6} {1,-16} {2}" -f $parts[0], $parts[1], $parts[2]) }
+    else { Check ($parts[0] + " " + $parts[1]) $false $parts[2] }
+}
+Check "pages opened" (@($pages).Count -gt 0)
+
+if ($script:Failed) { Say "REHEARSAL FAILED - do not send this version" "Red" }
+else { Say "REHEARSAL PASSED" "Green" }
+Save-Report
+Write-Host ""
+Write-Host ("The rehearsal app keeps running on http://localhost:" + $Port + " (accounts and passwords of the copy; attachments are missing).") -ForegroundColor Cyan
+Write-Host ("Stop it (keeps its volumes):  docker compose -p " + $ProjectName + " -f docker-compose.yml -f docker-compose.rehearsal.yml --env-file `"" + $EnvFile + "`" down") -ForegroundColor Cyan
+if ($script:Failed) { exit 1 }

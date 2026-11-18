@@ -14,3 +14,11 @@ logs/
 
 # a copy of the container settings under another name
 docker.env
+
+# Database dumps and copies of the live database: never in git (they hold real people's data)
+*.sql
+*.sql.gz
+*.dump
+*.backup
+live-copy/
+backup/

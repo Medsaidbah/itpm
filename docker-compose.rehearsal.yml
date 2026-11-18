@@ -1,0 +1,14 @@
+# Only for scripts/rehearse-migrations.ps1 (the migration rehearsal on a copy of the live database).
+# Used on top of docker-compose.yml, always with its own project name (-p itpm-rehearsal), so its containers,
+# network and volumes are separate from the normal stack.
+#   - The image gets its own name: building the branch never replaces your itpm:<version> image.
+#   - The app doesn't migrate when it starts: the script runs the migrations itself and keeps their output.
+services:
+  web:
+    image: itpm-rehearsal:local
+    environment:
+      RUN_MIGRATIONS: "0"
+  reminders:
+    image: itpm-rehearsal:local
+  outbox:
+    image: itpm-rehearsal:local
