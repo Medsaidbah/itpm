@@ -2855,3 +2855,19 @@ msgstr "Plus de %(margin)s points de retard sur le planning"
 #: templates/home.html
 msgid "At least one task is blocked"
 msgstr "Au moins une tâche est bloquée"
+
+#: templates/projects/task_detail.html
+msgid "Open the picture in a new tab"
+msgstr "Ouvrir l'image dans un nouvel onglet"
+
+#: templates/projects/task_detail.html
+msgid "Open the PDF in a new tab"
+msgstr "Ouvrir le PDF dans un nouvel onglet"
+
+#: templates/projects/task_detail.html
+msgid "Preview"
+msgstr "Aperçu"
+
+#: projects/views.py
+msgid "This file can't be shown in the browser. Download it instead."
+msgstr "Ce fichier ne peut pas être affiché dans le navigateur. Téléchargez-le plutôt."

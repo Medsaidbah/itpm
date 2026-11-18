@@ -112,6 +112,13 @@ h1, h2, h3, h4, .page-title, .card-title { color: var(--ddi-green-950); }
 .project-late > td:first-child { border-inline-start: 3px solid var(--tblr-red); }
 .project-behind > td:first-child { border-inline-start: 3px solid var(--tblr-orange); }
 
+/* ---------- Task files: a picture's thumbnail (the whole picture opens in a new tab) ---------- */
+.file-thumb {
+  display: block; width: 3rem; height: 3rem; object-fit: cover;
+  border: 1px solid var(--tblr-border-color); border-radius: var(--tblr-border-radius);
+  background: var(--tblr-bg-surface-secondary);
+}
+
 /* ---------- On paper: the ministry bar stays, the menu and buttons go ---------- */
 @media print {
   .gov-bar { border-bottom: 2px solid var(--ddi-green-900); }

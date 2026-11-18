@@ -29,6 +29,7 @@ from .forms import (
 )
 from .models import Attachment, Comment, Notification, Project, ProjectMember, Task
 from .notifications import notify_assigned, tell_project_event, tell_unblocked
+from .previews import HEAD_SIZE, PREVIEW_HEADERS, preview_type
 from .schedule import BEHIND_SCHEDULE_MARGIN
 
 # ---------- Who sees what ----------
@@ -621,6 +622,29 @@ def attachment_download(request, path):
     # as_attachment=True: the browser saves the file instead of opening it inside the app,
     # so an uploaded web page can't run inside our site
     return FileResponse(file, as_attachment=True, filename=attachment.filename)
+
+
+@login_required
+def attachment_preview(request, pk):
+    """A PDF or a picture, shown inside the browser (the PDF viewer, or a thumbnail on the task's page).
+    The same people as for the download get it, and only for the five kinds of file of projects/previews.py,
+    recognised from the file's first bytes. Everything else gets "Page not found": it can only be downloaded."""
+    attachment = get_object_or_404(Attachment.objects.filter(task__in=visible_tasks(request)), pk=pk)
+    try:
+        file = attachment.file.storage.open(attachment.file.name, "rb")
+    except OSError:
+        raise Http404(_("This file is missing from the server."))
+    content_type = preview_type(file.read(HEAD_SIZE))  # from what the file contains, never from its name
+    if content_type is None:
+        file.close()
+        raise Http404(_("This file can't be shown in the browser. Download it instead."))
+    file.seek(0)
+    # No as_attachment: "inline", so the browser shows the file instead of saving it. The exact type is given,
+    # so the browser doesn't guess it from the name.
+    response = FileResponse(file, content_type=content_type, filename=attachment.filename)
+    for header, value in PREVIEW_HEADERS.items():
+        response[header] = value
+    return response
 
 
 # ---------- Kanban board ----------

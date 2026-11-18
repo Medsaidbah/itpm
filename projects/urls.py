@@ -35,4 +35,5 @@ urlpatterns = [
     path("comments/<int:pk>/delete/", views.comment_delete, name="comment_delete"),
     path("tasks/<int:task_pk>/files/add/", views.attachment_add, name="attachment_add"),
     path("files/<int:pk>/delete/", views.attachment_delete, name="attachment_delete"),
+    path("files/<int:pk>/preview/", views.attachment_preview, name="attachment_preview"),
 ]

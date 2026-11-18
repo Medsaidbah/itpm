@@ -3019,3 +3019,19 @@ msgstr "متأخر بأكثر من %(margin)s نقاط عن الخطة"
 #: templates/home.html
 msgid "At least one task is blocked"
 msgstr "مهمة واحدة متوقفة على الأقل"
+
+#: templates/projects/task_detail.html
+msgid "Open the picture in a new tab"
+msgstr "فتح الصورة في علامة تبويب جديدة"
+
+#: templates/projects/task_detail.html
+msgid "Open the PDF in a new tab"
+msgstr "فتح ملف PDF في علامة تبويب جديدة"
+
+#: templates/projects/task_detail.html
+msgid "Preview"
+msgstr "معاينة"
+
+#: projects/views.py
+msgid "This file can't be shown in the browser. Download it instead."
+msgstr "لا يمكن عرض هذا الملف في المتصفح. نزّله بدلاً من ذلك."

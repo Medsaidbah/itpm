@@ -16,6 +16,7 @@ from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 from simple_history.models import HistoricalRecords
 
+from .previews import HEAD_SIZE, PDF, preview_type
 from .schedule import schedule_of
 
 
@@ -497,6 +498,24 @@ class Attachment(models.Model):
             return self.file.size
         except OSError:
             return None
+
+    @cached_property
+    def preview_type(self):
+        """The type the browser may show this file as (a PDF or a picture, read from the file's first bytes:
+        see projects/previews.py), or None when it can only be downloaded or is missing from the disk."""
+        try:
+            with self.file.storage.open(self.file.name, "rb") as file:
+                return preview_type(file.read(HEAD_SIZE))
+        except OSError:
+            return None
+
+    @property
+    def is_picture(self):
+        return bool(self.preview_type and self.preview_type.startswith("image/"))
+
+    @property
+    def is_pdf(self):
+        return self.preview_type == PDF
 
     def can_delete(self, user):
         """The person who uploaded a file can delete it, and so can anyone who can edit the task."""

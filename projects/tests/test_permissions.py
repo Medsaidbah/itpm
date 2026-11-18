@@ -144,6 +144,8 @@ class EveryAddressTests(TeamTestCase):
             ("attachment_delete", "post", f"/files/{self.attachment.pk}/delete/", None,  # Sara's file
              (MOVED, MOVED, MOVED, FORBIDDEN, HIDDEN)),
             ("attachment_download", "get", self.attachment.file.url, None, (OK, OK, OK, OK, HIDDEN)),
+            # Shown in the browser (a PDF here): exactly the people who may download it
+            ("attachment_preview", "get", f"/files/{self.attachment.pk}/preview/", None, (OK, OK, OK, OK, HIDDEN)),
             # People: your own profile, and the pages and pictures of the people you share a project with
             ("profile", "get", "/profile/", None, (OK, OK, OK, OK, OK)),
             ("password_change", "get", "/profile/password/", None, (OK, OK, OK, OK, OK)),

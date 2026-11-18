@@ -240,7 +240,20 @@
       <div class="list-group list-group-flush">
         {% for attachment in attachments %}
         <div class="list-group-item d-flex align-items-center gap-2">
+          {% comment %}
+            A picture shows as a thumbnail that opens it full size in a new tab; a PDF gets a Preview button.
+            What can be shown is read from the file itself (projects/previews.py). The name still downloads it.
+          {% endcomment %}
+          {% if attachment.is_picture %}
+          <a href="{% url 'attachment_preview' attachment.pk %}" target="_blank" rel="noopener" class="flex-shrink-0"
+             title="{% translate 'Open the picture in a new tab' %}">
+            <img src="{% url 'attachment_preview' attachment.pk %}" alt="{{ attachment.filename }}" class="file-thumb" loading="lazy">
+          </a>
+          {% elif attachment.is_pdf %}
+          <i class="ti ti-file-type-pdf text-secondary"></i>
+          {% else %}
           <i class="ti ti-file text-secondary"></i>
+          {% endif %}
           <div class="flex-fill" style="min-width: 0">
             <a href="{{ attachment.file.url }}" class="d-block text-truncate" title="{{ attachment.filename }}">{{ attachment.filename }}</a>
             <div class="text-secondary small">
@@ -248,6 +261,10 @@
               · {{ attachment.uploaded_by }} · {% blocktranslate with time=attachment.uploaded_at|timesince %}{{ time }} ago{% endblocktranslate %}
             </div>
           </div>
+          {% if attachment.is_pdf %}
+          <a href="{% url 'attachment_preview' attachment.pk %}" target="_blank" rel="noopener" class="btn btn-sm"
+             title="{% translate 'Open the PDF in a new tab' %}"><i class="ti ti-eye me-1"></i>{% translate "Preview" %}</a>
+          {% endif %}
           {% if attachment.deletable %}
           <form method="post" action="{% url 'attachment_delete' attachment.pk %}"
                 data-confirm="{% translate 'Delete this file?' %}" onsubmit="return confirm(this.dataset.confirm);">
