@@ -65,6 +65,8 @@
   </div>
   {% endfor %}
 </div>
+{# A card dropped into Blocked from another column: this dialog asks why, before the move is sent #}
+{% include "includes/block_dialog.html" %}
 {% endblock %}
 
 {% block scripts %}
@@ -104,32 +106,68 @@
         delayOnTouchOnly: true,
         onEnd: function (event) {
           if (event.from === event.to && event.oldIndex === event.newIndex) return;  // dropped where it was
-
-          var data = new URLSearchParams();
-          data.append("status", event.to.dataset.status);
-          event.to.querySelectorAll(".board-card").forEach(function (card) {
-            data.append("order", card.dataset.id);
-          });
-
-          fetch(event.item.dataset.moveUrl, {
-            method: "POST",
-            headers: { "X-CSRFToken": board.dataset.csrf },
-            body: data,
-          })
-            .then(function (response) {
-              if (!response.ok) throw new Error("The server refused the move");
-              return response.json();
-            })
-            .then(function (answer) {
-              refreshCards(answer);
-              refreshCounts();
-            })
-            .catch(function () {
-              alert(board.dataset.error);
-              location.reload();
-            });
+          // Into Blocked from another column: ask why first (moving inside Blocked needs no reason)
+          if (event.to.dataset.status === "blocked" && event.from !== event.to) {
+            waiting = event;
+            blockDialog.show();
+            return;
+          }
+          sendMove(event, "");
         },
       });
+    });
+
+    // Tell the server the card's new column and the order of that column (and the reason, for Blocked)
+    function sendMove(event, reason) {
+      var data = new URLSearchParams();
+      data.append("status", event.to.dataset.status);
+      if (reason) data.append("blocked_reason", reason);
+      event.to.querySelectorAll(".board-card").forEach(function (card) {
+        data.append("order", card.dataset.id);
+      });
+
+      fetch(event.item.dataset.moveUrl, {
+        method: "POST",
+        headers: { "X-CSRFToken": board.dataset.csrf },
+        body: data,
+      })
+        .then(function (response) {
+          if (response.ok) return response.json();
+          // The server says why it refused (like a missing reason), in the language of the page
+          return response.json().catch(function () { return {}; }).then(function (answer) {
+            throw new Error(answer.error || board.dataset.error);
+          });
+        })
+        .then(function (answer) {
+          refreshCards(answer);
+          refreshCounts();
+        })
+        .catch(function (error) {
+          alert(error.message && error.message !== "Failed to fetch" ? error.message : board.dataset.error);
+          location.reload();
+        });
+    }
+
+    // The dialog that asks why a task is blocked (includes/block_dialog.html)
+    var waiting = null;  // the move that waits for its reason
+    var dialogElement = document.getElementById("block-dialog");
+    var blockDialog = tabler.Modal.getOrCreateInstance(dialogElement);
+    var blockForm = document.getElementById("block-form");
+    blockForm.addEventListener("submit", function (event) {
+      event.preventDefault();  // the move is sent by sendMove, not by the form
+      if (!waiting) return;
+      var move = waiting;
+      waiting = null;  // sent: closing the dialog must not put the card back
+      blockDialog.hide();
+      sendMove(move, document.getElementById("block-reason").value.trim());
+    });
+    // Closed without sending (Cancel, Esc, the cross, a click outside): the card goes back where it was
+    dialogElement.addEventListener("hidden.bs.modal", function () {
+      if (!waiting) return;
+      var move = waiting;
+      waiting = null;
+      move.from.insertBefore(move.item, move.from.children[move.oldIndex] || null);
+      refreshCounts();
     });
   })();
 </script>

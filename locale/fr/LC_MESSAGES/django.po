@@ -2959,3 +2959,36 @@ msgid "%(on_time)s of %(timed)s task with a due date, in the last 90 days"
 msgid_plural "%(on_time)s of %(timed)s tasks with a due date, in the last 90 days"
 msgstr[0] "%(on_time)s sur %(timed)s tâche avec une échéance, ces 90 derniers jours"
 msgstr[1] "%(on_time)s sur %(timed)s tâches avec une échéance, ces 90 derniers jours"
+
+#: projects/blocking.py templates/includes/block_dialog.html projects/views.py
+msgid "Say why the task is blocked. The reason is added to the task's comments."
+msgstr "Indiquez pourquoi la tâche est bloquée. La raison est ajoutée aux commentaires de la tâche."
+
+#: projects/blocking.py templates/includes/block_dialog.html templates/projects/task_detail.html
+msgid "Reason for blocking"
+msgstr "Raison du blocage"
+
+#: projects/blocking.py
+msgid "Needed when the task becomes Blocked. It is added to the task's comments, with your name."
+msgstr "Nécessaire quand la tâche devient bloquée. La raison est ajoutée aux commentaires de la tâche, avec votre nom."
+
+#: templates/includes/block_dialog.html
+msgid "Why is this task blocked?"
+msgstr "Pourquoi cette tâche est-elle bloquée ?"
+
+#: templates/includes/block_dialog.html
+msgid "The reason is added to the task's comments, with your name."
+msgstr "La raison est ajoutée aux commentaires de la tâche, avec votre nom."
+
+#: templates/includes/block_dialog.html
+msgid "Block the task"
+msgstr "Bloquer la tâche"
+
+#: projects/activity.py
+msgid "gave the reason for blocking"
+msgstr "a donné la raison du blocage de"
+
+#: projects/forms.py
+#, python-format
+msgid "A comment can't start with \"%(marker)s\": the app uses it to mark the reasons for blocking."
+msgstr "Un commentaire ne peut pas commencer par « %(marker)s » : l'application l'utilise pour marquer les raisons de blocage."

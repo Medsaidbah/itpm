@@ -3127,3 +3127,36 @@ msgstr[2] "%(on_time)s من مهمتين لهما تاريخ استحقاق، خ
 msgstr[3] "%(on_time)s من %(timed)s مهام لها تاريخ استحقاق، خلال آخر 90 يومًا"
 msgstr[4] "%(on_time)s من %(timed)s مهمة لها تاريخ استحقاق، خلال آخر 90 يومًا"
 msgstr[5] "%(on_time)s من %(timed)s مهمة لها تاريخ استحقاق، خلال آخر 90 يومًا"
+
+#: projects/blocking.py templates/includes/block_dialog.html projects/views.py
+msgid "Say why the task is blocked. The reason is added to the task's comments."
+msgstr "اذكر سبب توقف المهمة. يُضاف السبب إلى تعليقات المهمة."
+
+#: projects/blocking.py templates/includes/block_dialog.html templates/projects/task_detail.html
+msgid "Reason for blocking"
+msgstr "سبب التوقف"
+
+#: projects/blocking.py
+msgid "Needed when the task becomes Blocked. It is added to the task's comments, with your name."
+msgstr "مطلوب عندما تصبح المهمة متوقفة. يُضاف السبب إلى تعليقات المهمة باسمك."
+
+#: templates/includes/block_dialog.html
+msgid "Why is this task blocked?"
+msgstr "لماذا هذه المهمة متوقفة؟"
+
+#: templates/includes/block_dialog.html
+msgid "The reason is added to the task's comments, with your name."
+msgstr "يُضاف السبب إلى تعليقات المهمة باسمك."
+
+#: templates/includes/block_dialog.html
+msgid "Block the task"
+msgstr "إيقاف المهمة"
+
+#: projects/activity.py
+msgid "gave the reason for blocking"
+msgstr "ذكر سبب توقف"
+
+#: projects/forms.py
+#, python-format
+msgid "A comment can't start with \"%(marker)s\": the app uses it to mark the reasons for blocking."
+msgstr "لا يمكن أن يبدأ التعليق بـ «%(marker)s»: يستخدمه التطبيق لتمييز أسباب التوقف."

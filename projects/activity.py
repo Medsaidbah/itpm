@@ -220,16 +220,17 @@ def team_event(version, projects, people):
 
 
 def comment_event(comment):
+    reason = comment.blocking_reason  # the comment written when the task was blocked (projects/blocking.py)
     return Event(
         when=comment.created_at,
         who=comment.author,
-        icon="ti-message",
-        color="azure",
-        action=_("commented on"),
+        icon="ti-message" if reason is None else "ti-hand-stop",
+        color="azure" if reason is None else "red",
+        action=_("commented on") if reason is None else _("gave the reason for blocking"),
         name=comment.task.title,
         url=f"{comment.task.get_absolute_url()}#comments",
         project=comment.task.project,
-        text=comment.body,
+        text=comment.body if reason is None else reason,
     )
 
 

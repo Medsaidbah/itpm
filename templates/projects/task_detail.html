@@ -89,11 +89,15 @@
           {% for value, label in status_choices %}
           {% if value == task.status %}
           <button type="submit" class="btn btn-primary" disabled>{{ label }}</button>
+          {% elif value == "blocked" %}
+          {# Blocking needs a reason: this button opens the dialog below, which sends the status and the reason #}
+          <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#block-dialog">{{ label }}</button>
           {% else %}
           <button type="submit" name="status" value="{{ value }}" class="btn">{{ label }}</button>
           {% endif %}
           {% endfor %}
         </form>
+        {% include "includes/block_dialog.html" with action=task_status_url %}
         {% else %}
         <span class="badge bg-{{ task.status_color }}-lt">{{ task.get_status_display }}</span>
         <div class="text-secondary small mt-2">{% translate "Only the person assigned to this task, the project's manager and admins can change its status." %}</div>
@@ -211,7 +215,12 @@
               </form>
               {% endif %}
             </div>
+            {% if comment.blocking_reason is not None %}
+            {# Why the task was blocked: the label is written in the reader's language (projects/blocking.py) #}
+            <div class="text-break" dir="auto"><span class="badge bg-red-lt me-1"><i class="ti ti-hand-stop me-1"></i>{% translate "Reason for blocking" %}</span> {{ comment.blocking_reason|linkify|linebreaksbr }}</div>
+            {% else %}
             <div class="text-break" dir="auto">{{ comment.body|linkify|linebreaksbr }}</div>
+            {% endif %}
           </div>
         </div>
         {% empty %}

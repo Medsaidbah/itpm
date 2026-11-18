@@ -4,6 +4,7 @@ from django.db.models import Q
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
+from .blocking import BlockingReasonForm
 from .models import Attachment, Comment, Project, Task
 
 # The largest file people can upload, in megabytes
@@ -96,7 +97,7 @@ class ProjectDeleteForm(BootstrapFormMixin, forms.Form):
         return self.cleaned_data["name"]
 
 
-class TaskForm(BootstrapFormMixin, forms.ModelForm):
+class TaskForm(BootstrapFormMixin, BlockingReasonForm):
     class Meta:
         model = Task
         fields = [
@@ -132,6 +133,9 @@ class TaskForm(BootstrapFormMixin, forms.ModelForm):
         super().__init__(*args, **kwargs)
         # The project comes from the page address, not from the form
         self.instance.project = project
+        # For the page only: the reason field is shown when the status is changed to Blocked
+        # (the rule itself is checked on the server, see BlockingReasonForm)
+        self.status_before = self.instance.status if self.instance.pk else ""
 
         # Only this project's tasks can be chosen, and never the task itself
         others = project.tasks.select_related("parent")
@@ -222,6 +226,17 @@ class CommentForm(BootstrapFormMixin, forms.ModelForm):
         fields = ["body"]
         widgets = {"body": forms.Textarea(attrs={"rows": 3, "placeholder": _("Write a comment…")})}
         labels = {"body": _("Comment")}
+        error_messages = {"body": {"required": _("Write something before sending a comment.")}}
+
+    def clean_body(self):
+        # Only blocking a task writes a comment that starts with the marker, so it can't be imitated
+        body = self.cleaned_data["body"]
+        if body.lstrip().startswith(Comment.BLOCKING_MARKER.strip()):
+            raise forms.ValidationError(
+                _('A comment can\'t start with "%(marker)s": the app uses it to mark the reasons for blocking.')
+                % {"marker": Comment.BLOCKING_MARKER.strip()}
+            )
+        return body
 
 
 class AttachmentForm(BootstrapFormMixin, forms.ModelForm):

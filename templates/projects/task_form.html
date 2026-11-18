@@ -27,6 +27,11 @@
           <div class="col-md-4">{% include "includes/form_field.html" with field=form.priority %}</div>
           <div class="col-md-4">{% include "includes/form_field.html" with field=form.assignee %}</div>
         </div>
+        {# Needed when the status becomes Blocked (checked on the server, see projects/blocking.py). The script below #}
+        {# shows it only then; without the script it is always there. #}
+        <div id="blocked-reason-field" data-status-before="{{ form.status_before }}">
+          {% include "includes/form_field.html" with field=form.blocked_reason %}
+        </div>
         <div class="row">
           <div class="col-md-6">{% include "includes/form_field.html" with field=form.start_date %}</div>
           <div class="col-md-6">{% include "includes/form_field.html" with field=form.due_date %}</div>
@@ -42,4 +47,18 @@
     </form>
   </div>
 </div>
+<script>
+  // The reason for blocking is shown when the status is changed to Blocked (not for a task that was already
+  // Blocked), and always when the server asked for it
+  (function () {
+    var status = document.getElementById("{{ form.status.id_for_label }}");
+    var box = document.getElementById("blocked-reason-field");
+    var asked = {{ form.blocked_reason.errors|yesno:"true,false" }};
+    function update() {
+      box.hidden = !asked && !(status.value === "blocked" && box.dataset.statusBefore !== "blocked");
+    }
+    status.addEventListener("change", update);
+    update();
+  })();
+</script>
 {% endblock %}

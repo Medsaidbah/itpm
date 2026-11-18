@@ -1,0 +1,55 @@
+{% load i18n %}{% comment %}
+  The dialog that asks why a task is blocked (projects/blocking.py), on the task's page and on the board.
+  Use: {% include "includes/block_dialog.html" with action=<the task_status address> %}
+  Without "action" (the board), the board's script sends the reason with the card's move itself.
+  It's a Bootstrap modal: Esc or Cancel closes it, the keyboard stays inside it, it is mirrored in Arabic and
+  fits a phone's screen. A reason made only of spaces is refused here, and again by the server.
+{% endcomment %}
+<div class="modal fade" id="block-dialog" tabindex="-1" aria-labelledby="block-dialog-title" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <form class="modal-content" method="post" {% if action %}action="{{ action }}"{% endif %} id="block-form" novalidate
+          data-missing="{% translate "Say why the task is blocked. The reason is added to the task's comments." %}">
+      {% csrf_token %}
+      <input type="hidden" name="status" value="blocked">
+      <div class="modal-header">
+        <h2 class="modal-title h3" id="block-dialog-title">{% translate "Why is this task blocked?" %}</h2>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="{% translate 'Cancel' %}"></button>
+      </div>
+      <div class="modal-body">
+        <label class="form-label required" for="block-reason">{% translate "Reason for blocking" %}</label>
+        <textarea class="form-control" id="block-reason" name="blocked_reason" rows="3" dir="auto" required
+                  aria-describedby="block-reason-hint block-reason-error"></textarea>
+        <div class="invalid-feedback" id="block-reason-error" role="alert"></div>
+        <div class="form-hint" id="block-reason-hint">{% translate "The reason is added to the task's comments, with your name." %}</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" data-bs-dismiss="modal">{% translate "Cancel" %}</button>
+        <button type="submit" class="btn btn-primary">{% translate "Block the task" %}</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+  // Empty the box each time the dialog opens, put the cursor in it, and refuse a reason made only of spaces
+  (function () {
+    var dialog = document.getElementById("block-dialog");
+    var form = document.getElementById("block-form");
+    var reason = document.getElementById("block-reason");
+    var error = document.getElementById("block-reason-error");
+    function showError(text) {
+      error.textContent = text;
+      reason.classList.toggle("is-invalid", Boolean(text));
+    }
+    dialog.addEventListener("show.bs.modal", function () { reason.value = ""; showError(""); });
+    dialog.addEventListener("shown.bs.modal", function () { reason.focus(); });
+    form.addEventListener("submit", function (event) {
+      if (!reason.value.trim()) {
+        event.preventDefault();
+        event.stopImmediatePropagation();  // the board's script doesn't send the move either
+        showError(form.dataset.missing);
+        reason.focus();
+      }
+    });
+    form.showError = showError;  // the board shows the server's answer here
+  })();
+</script>

@@ -29,7 +29,7 @@ One feature per commit, each with its tests, the full test suite passing, and th
 | 5 | Project count cards on the home page | 1 | Done |
 | 6 | Preview attachments (PDF and images) | 3 | Done |
 | 7 | Contribution summary on people's pages | 11 | Done |
-| 8 | A reason is required when a task is blocked | 5 (part) | To do |
+| 8 | A reason is required when a task is blocked | 5 (part) | Done |
 
 ## Later releases: one database change each
 

@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
+from django.db import transaction
 from django.db.models import Count, F, Prefetch, Q
 from django.db.models.functions import TruncWeek
 from django.http import FileResponse, Http404, JsonResponse
@@ -17,6 +18,7 @@ from django.utils.translation import ngettext, pgettext
 from django.views.decorators.http import require_POST
 
 from .activity import get_events
+from .blocking import REASON_FIELD, becomes_blocked, clean_reason, missing_reason_message, record_reason
 from .emails import email_new_assignee
 from .forms import (
     MAX_UPLOAD_MB,
@@ -423,6 +425,7 @@ def task_detail(request, pk):
         "status_choices": Task.Status.choices,
         "can_edit": task.can_edit(request.user),
         "can_update_status": task.can_update_status(request.user),
+        "task_status_url": reverse("task_status", args=[task.pk]),  # where the blocking dialog sends its reason
         "comments": comments,
         "attachments": attachments,
         "comment_form": CommentForm(),
@@ -461,7 +464,10 @@ def task_create(request, project_pk):
         form = TaskForm(request.POST, project=project, user=request.user)
         if form.is_valid():
             form.instance.saved_by = request.user
-            task = form.save()
+            with transaction.atomic():  # the task and the reason it is blocked are saved together, or not at all
+                task = form.save()
+                if form.blocking_reason:
+                    record_reason(task, request.user, form.blocking_reason)
             messages.success(request, _('Task "%(title)s" created.') % {"title": task.title})
             tell_if_joined_team(request, task)
             tell_new_assignee(request, task, previous_assignee_id=None)
@@ -485,7 +491,10 @@ def task_edit(request, pk):
         form = TaskForm(request.POST, instance=task, project=task.project, user=request.user)
         if form.is_valid():
             task.saved_by = request.user
-            form.save()
+            with transaction.atomic():  # the task and the reason it is blocked are saved together, or not at all
+                form.save()
+                if form.blocking_reason:  # only when the status was just changed to Blocked
+                    record_reason(task, request.user, form.blocking_reason)
             messages.success(request, _("Changes saved."))
             tell_if_joined_team(request, task)
             tell_new_assignee(request, task, previous_assignee_id)
@@ -510,12 +519,18 @@ def task_status(request, pk):
         )
 
     new_status = request.POST.get("status")
+    reason = clean_reason(request.POST.get(REASON_FIELD))
     if new_status not in Task.Status.values:
         messages.error(request, _("Unknown status."))
+    elif new_status != task.status and becomes_blocked(task, new_status) and not reason:
+        messages.error(request, missing_reason_message())  # nothing is changed
     elif new_status != task.status:
-        task.status = new_status
-        task.saved_by = request.user
-        task.save()
+        with transaction.atomic():  # the status and the reason it is blocked are saved together, or not at all
+            task.status = new_status
+            task.saved_by = request.user
+            task.save()
+            if new_status == Task.Status.BLOCKED:
+                record_reason(task, request.user, reason)
         messages.success(
             request, _('"%(title)s" is now %(status)s.') % {"title": task.title, "status": task.get_status_display()}
         )
@@ -560,7 +575,7 @@ def comment_add(request, task_pk):
     task = get_object_or_404(visible_tasks(request), pk=task_pk)
     form = CommentForm(request.POST)
     if not form.is_valid():
-        messages.error(request, _("Write something before sending a comment."))
+        messages.error(request, " ".join(form.errors["body"]))  # empty, or starting with the blocking marker
         return redirect(task)
     comment = form.save(commit=False)  # build the comment, but don't save it yet...
     comment.task = task  # ...because the task and the author come from the page, not the form
@@ -684,10 +699,17 @@ def task_move(request, pk):
         return JsonResponse({"error": _("Unknown status.")}, status=400)
 
     if new_status != task.status:
+        reason = clean_reason(request.POST.get(REASON_FIELD))
+        if becomes_blocked(task, new_status) and not reason:
+            # Nothing is changed, not even the order of the cards: the board puts the card back
+            return JsonResponse({"error": missing_reason_message()}, status=400)
         was_done = task.status == Task.Status.DONE
-        task.status = new_status
-        task.saved_by = request.user
-        task.save()  # a status change is recorded in the history
+        with transaction.atomic():  # the status and the reason it is blocked are saved together, or not at all
+            task.status = new_status
+            task.saved_by = request.user
+            task.save()  # a status change is recorded in the history
+            if new_status == Task.Status.BLOCKED:
+                record_reason(task, request.user, reason)
         if new_status == Task.Status.DONE and not was_done:
             tell_unblocked(request, task, warn=False)
 

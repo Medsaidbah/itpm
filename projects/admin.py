@@ -6,13 +6,22 @@ from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 from simple_history.admin import SimpleHistoryAdmin
 
+from .blocking import BlockingReasonForm, record_reason
 from .models import Attachment, Comment, Project, ProjectMember, Task
+
+
+class TaskInlineForm(BlockingReasonForm):
+    """A line of the tasks table of a project's page: like everywhere, a task that becomes Blocked needs a reason."""
+
+    blocked_reason = forms.CharField(label=gettext_lazy("Reason for blocking"), required=False,
+                                     widget=forms.TextInput)
 
 
 class TaskInline(admin.TabularInline):
     model = Task
+    form = TaskInlineForm
     extra = 0
-    fields = ["title", "status", "assignee", "start_date", "due_date"]
+    fields = ["title", "status", "blocked_reason", "assignee", "start_date", "due_date"]
     show_change_link = True
 
 
@@ -94,9 +103,13 @@ class ProjectAdmin(SimpleHistoryAdmin):
         for obj in formset.deleted_objects:
             obj.delete()
         formset.save_m2m()
+        # Tasks of the table that were just blocked: their reason, as a comment by this admin
+        for task_form in formset.forms:
+            if getattr(task_form, "blocking_reason", None) and task_form.instance.pk:
+                record_reason(task_form.instance, request.user, task_form.blocking_reason)
 
 
-class TaskAdminForm(forms.ModelForm):
+class TaskAdminForm(BlockingReasonForm):
     def clean(self):
         cleaned_data = super().clean()
         # Like the task form of the app: a task only waits for tasks of its own project.
@@ -150,6 +163,8 @@ class TaskAdmin(SimpleHistoryAdmin):
         # remembered as added by this admin (see Task.save)
         obj.saved_by = request.user
         super().save_model(request, obj, form, change)
+        if form.blocking_reason:  # just blocked: the reason, as a comment by this admin
+            record_reason(obj, request.user, form.blocking_reason)
 
     def save_formset(self, request, form, formset, change):
         # Fill in the comment author and the file uploader automatically

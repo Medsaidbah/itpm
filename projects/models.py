@@ -464,11 +464,23 @@ class Comment(models.Model):
     body = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
 
+    # The comment written when someone blocks a task starts with this marker (release 1.1, see projects/blocking.py).
+    # It is stored as is, the same in every language; the pages show "Reason for blocking" in the reader's
+    # language instead of it.
+    BLOCKING_MARKER = "[blocked] "
+
     class Meta:
         ordering = ["created_at"]
 
     def __str__(self):
         return _("Comment by %(person)s on %(task)s") % {"person": self.author, "task": self.task}
+
+    @property
+    def blocking_reason(self):
+        """The reason, when this comment says why the task was blocked; None for an ordinary comment."""
+        if self.body.startswith(self.BLOCKING_MARKER):
+            return self.body[len(self.BLOCKING_MARKER):]
+        return None
 
     def can_delete(self, user):
         """The author can delete a comment, and so can anyone who can edit the task."""
