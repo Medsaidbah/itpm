@@ -29,6 +29,12 @@
       {% for value, label in status_choices %}
       <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
       {% endfor %}
+      {# Open projects only: the same as the cards of the home page #}
+      <optgroup label="{% translate 'Projects that need attention' %}">
+        {% for value, label in attention_choices %}
+        <option value="{{ value }}" {% if status == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </optgroup>
     </select>
   </div>
   <div class="col-auto">

@@ -2989,3 +2989,33 @@ msgstr "حسب تواريخ استحقاق المهام"
 
 msgid "Based on the project's start and end dates"
 msgstr "حسب تاريخَي بداية المشروع ونهايته"
+
+#: templates/home.html
+msgid "Projects at a glance"
+msgstr "المشاريع في لمحة"
+
+#: templates/home.html
+msgid "See the dashboard"
+msgstr "عرض لوحة المعلومات"
+
+#: templates/home.html
+msgid "A project counts in its status and also in Late, Behind schedule or Blocked when they apply, so the numbers overlap. Cancelled projects aren't counted."
+msgstr "يُحتسب المشروع في حالته وأيضًا في «متأخرة» أو «متأخر عن الجدول الزمني» أو «متوقف» عند انطباقها، لذا تتداخل الأرقام. لا تُحتسب المشاريع الملغاة."
+
+#: projects/views.py
+msgctxt "projects with a blocked task"
+msgid "Blocked"
+msgstr "متوقف"
+
+#: templates/home.html
+msgid "End date passed"
+msgstr "تجاوز تاريخ النهاية"
+
+#: templates/home.html
+#, python-format
+msgid "More than %(margin)s points behind the plan"
+msgstr "متأخر بأكثر من %(margin)s نقاط عن الخطة"
+
+#: templates/home.html
+msgid "At least one task is blocked"
+msgstr "مهمة واحدة متوقفة على الأقل"

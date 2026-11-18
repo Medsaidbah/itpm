@@ -2825,3 +2825,33 @@ msgstr "D'après les dates d'échéance des tâches"
 
 msgid "Based on the project's start and end dates"
 msgstr "D'après les dates de début et de fin du projet"
+
+#: templates/home.html
+msgid "Projects at a glance"
+msgstr "Projets en un coup d'œil"
+
+#: templates/home.html
+msgid "See the dashboard"
+msgstr "Voir le tableau de bord"
+
+#: templates/home.html
+msgid "A project counts in its status and also in Late, Behind schedule or Blocked when they apply, so the numbers overlap. Cancelled projects aren't counted."
+msgstr "Un projet compte dans son statut et aussi dans En retard, En retard sur le planning ou Bloqué quand c'est le cas : les chiffres se recoupent donc. Les projets annulés ne sont pas comptés."
+
+#: projects/views.py
+msgctxt "projects with a blocked task"
+msgid "Blocked"
+msgstr "Bloqué"
+
+#: templates/home.html
+msgid "End date passed"
+msgstr "Date de fin dépassée"
+
+#: templates/home.html
+#, python-format
+msgid "More than %(margin)s points behind the plan"
+msgstr "Plus de %(margin)s points de retard sur le planning"
+
+#: templates/home.html
+msgid "At least one task is blocked"
+msgstr "Au moins une tâche est bloquée"

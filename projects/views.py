@@ -29,6 +29,7 @@ from .forms import (
 )
 from .models import Attachment, Comment, Notification, Project, ProjectMember, Task
 from .notifications import notify_assigned, tell_project_event, tell_unblocked
+from .schedule import BEHIND_SCHEDULE_MARGIN
 
 # ---------- Who sees what ----------
 # People only see the projects they manage or whose team they are in; admins see all of them
@@ -67,21 +68,50 @@ def home(request):
         "overdue_tasks": my_open_tasks.filter(due_date__lt=today).count(),
         # The next 5 tasks by due date; tasks without a date come last
         "next_tasks": my_open_tasks.order_by(F("due_date").asc(nulls_last=True))[:5],
+        "project_cards": project_cards(request),
+        "margin": BEHIND_SCHEDULE_MARGIN,
     }
     return render(request, "home.html", context)
+
+
+def project_cards(request):
+    """The home page's "Projects at a glance": how many projects the person can see in each status, and how
+    many are late, behind schedule or have a blocked task. Each card links to the project list showing exactly
+    those projects (the same filters as filter_projects). Cancelled projects are never counted.
+    The number of queries doesn't depend on the number of projects."""
+    projects = visible_projects(request)
+    shown = [Project.Status.PLANNED, Project.Status.IN_PROGRESS, Project.Status.ON_HOLD, Project.Status.COMPLETED]
+    per_status = dict(
+        projects.filter(status__in=shown).values_list("status").annotate(count=Count("id")).order_by()
+    )
+    cards = [
+        {"filter": status, "label": Project.Status(status).label, "count": per_status.get(status, 0),
+         "color": Project.STATUS_COLORS[status]}
+        for status in shown
+    ]
+    attention = [("late", "red", "ti-alert-triangle"), ("behind", "orange", "ti-clock-exclamation"),
+                 ("blocked", "red", "ti-hand-stop")]
+    labels = dict(attention_choices())
+    for key, color, icon in attention:
+        cards.append({"filter": key, "label": labels[key], "count": ATTENTION_FILTERS[key](projects).count(),
+                      "color": color, "icon": icon, "attention": True})
+    return cards
 
 
 def filter_projects(request):
     """The search box and status filter of the project list.
     The list page and its Excel export both use this, so they always show the same projects."""
-    projects = visible_projects(request).with_task_counts().select_related("manager")
+    projects = visible_projects(request)
 
-    # ?status=... in the address: "active" (the default), "all", or one status
+    # ?status=... in the address: "active" (the default), "all", one status, or one of the projects that
+    # need attention: "late", "behind" (behind schedule) or "blocked" (the home page's cards link to these)
     status = request.GET.get("status", "active")
     if status == "all":
         pass
     elif status in Project.Status.values:
         projects = projects.filter(status=status)
+    elif status in ATTENTION_FILTERS:
+        projects = ATTENTION_FILTERS[status](projects)
     else:
         status = "active"
         projects = projects.filter(status__in=Project.ACTIVE_STATUSES)
@@ -90,7 +120,25 @@ def filter_projects(request):
     query = request.GET.get("q", "").strip()
     if query:
         projects = projects.filter(name__icontains=query)
-    return projects, status, query
+    # The counts come last: behind_schedule() fetches counts of its own, which can't be added twice
+    return projects.with_task_counts().select_related("manager"), status, query
+
+
+# The list's filters for the projects that need attention (see ProjectQuerySet)
+ATTENTION_FILTERS = {
+    "late": lambda projects: projects.late(),
+    "behind": lambda projects: projects.behind_schedule(),
+    "blocked": lambda projects: projects.with_blocked_task(),
+}
+
+
+def attention_choices():
+    """The list's filters for the projects that need attention, with the words people see."""
+    return [
+        ("late", _("Late")),
+        ("behind", _("Behind schedule")),
+        ("blocked", pgettext("projects with a blocked task", "Blocked")),
+    ]
 
 
 @login_required
@@ -103,6 +151,7 @@ def project_list(request):
         "status": status,
         "query": query,
         "status_choices": Project.Status.choices,
+        "attention_choices": attention_choices(),
         # False when the person isn't in any project yet (and not because of the filters)
         "has_projects": visible_projects(request).exists(),
     }
@@ -851,6 +900,8 @@ def dashboard(request):
         "kpis": [
             {"label": _("Active projects"), "value": active_projects.count()},
             {"label": _("Late projects"), "value": active_projects.filter(end_date__lt=today).count(), "warn": True},
+            # Behind schedule and not late (the same rule as the project list and the home page)
+            {"label": _("Behind schedule"), "value": projects.behind_schedule().count(), "warn": True},
             {"label": _("Open tasks"), "value": open_tasks.count()},
             {"label": _("Overdue tasks"), "value": overdue_tasks.count(), "warn": True},
             {"label": _("Done in the last 30 days"),

@@ -26,7 +26,7 @@ One feature per commit, each with its tests, the full test suite passing, and th
 | 2 | Team pictures in the project list | 10 | Done (9e69d6c) |
 | 3 | Delay detection: expected vs actual progress | 7 | Done |
 | 4 | Highlight late (red) and behind-schedule (amber) projects | 8 | Done |
-| 5 | Project count cards on the home page | 1 | To do |
+| 5 | Project count cards on the home page | 1 | Done |
 | 6 | Preview attachments (PDF and images) | 3 | To do |
 | 7 | Contribution summary on people's pages | 11 | To do |
 | 8 | A reason is required when a task is blocked | 5 (part) | To do |

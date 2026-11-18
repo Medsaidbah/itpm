@@ -44,6 +44,24 @@ class ProjectQuerySet(models.QuerySet):
             task_due=Count("tasks", filter=due),
         )
 
+    # ----- The project list's extra filters, also counted by the home page's cards (release 1.1) -----
+    # Each one only keeps open projects (planned, in progress, on hold), never cancelled or completed ones.
+
+    def late(self):
+        """The end date has passed, but the project isn't finished (Project.is_overdue)."""
+        return self.filter(status__in=Project.ACTIVE_STATUSES, end_date__lt=timezone.localdate())
+
+    def behind_schedule(self):
+        """Behind schedule and not late (Project.delay == "behind": late is the stronger signal).
+        The schedule is worked out in Python from the counts of with_task_counts(): one query for all."""
+        measured = self.filter(status__in=[Project.Status.PLANNED, Project.Status.IN_PROGRESS]).with_task_counts()
+        return self.filter(pk__in=[project.pk for project in measured if project.delay == "behind"])
+
+    def with_blocked_task(self):
+        """Open projects with at least one blocked task (or subtask)."""
+        blocked = Task.objects.filter(status=Task.Status.BLOCKED).values("project")
+        return self.filter(status__in=Project.ACTIVE_STATUSES, pk__in=blocked)
+
     def visible_to(self, user):
         """The projects this person can see and open: all of them for admins;
         for everyone else, the projects they manage or whose team they are in.
