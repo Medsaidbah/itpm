@@ -2811,3 +2811,17 @@ msgstr[1] "%(count)d e-mails envoyés."
 #: templates (application name)
 msgid "Mchariee"
 msgstr "Mchariee"
+
+#: templates/projects/project_detail.html
+msgid "Behind schedule"
+msgstr "En retard sur le planning"
+
+#, python-format
+msgid "Expected by today: %(percent)s%%"
+msgstr "Prévu à ce jour : %(percent)s %%"
+
+msgid "Based on the tasks' due dates"
+msgstr "D'après les dates d'échéance des tâches"
+
+msgid "Based on the project's start and end dates"
+msgstr "D'après les dates de début et de fin du projet"

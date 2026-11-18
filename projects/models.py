@@ -10,10 +10,13 @@ from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.functional import cached_property
 from django.utils.timesince import timesince
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 from simple_history.models import HistoricalRecords
+
+from .schedule import schedule_of
 
 
 class Priority(models.TextChoices):
@@ -31,11 +34,14 @@ class ProjectQuerySet(models.QuerySet):
     def with_task_counts(self):
         """Count every project's tasks in one database query, so long lists stay fast."""
         done = Q(tasks__status=Task.Status.DONE)
-        late = Q(tasks__due_date__lt=timezone.localdate()) & ~done
+        due = Q(tasks__due_date__lt=timezone.localdate())
         return self.annotate(
             task_total=Count("tasks"),
             task_done=Count("tasks", filter=done),
-            task_overdue=Count("tasks", filter=late),
+            task_overdue=Count("tasks", filter=due & ~done),
+            # For the schedule (projects/schedule.py): tasks with a due date, and tasks due before today
+            task_dated=Count("tasks", filter=Q(tasks__due_date__isnull=False)),
+            task_due=Count("tasks", filter=due),
         )
 
     def visible_to(self, user):
@@ -215,6 +221,11 @@ class Project(models.Model):
         if total == 0:
             return 0
         return round(done * 100 / total)
+
+    @cached_property
+    def schedule(self):
+        """Expected vs actual progress, or None when the project isn't measured (see projects/schedule.py)."""
+        return schedule_of(self)
 
     @property
     def is_overdue(self):

@@ -1,0 +1,71 @@
+"""Is a project behind schedule? (release 1.1, see docs/ROADMAP.md)
+
+The progress a project should have by today (the "expected" progress) is compared with its real progress
+(done tasks ÷ all tasks, see Project.progress):
+
+- When at least one task has a due date, the expected progress is the share of the tasks that were due
+  before today. A task due today still has today; a task without a due date isn't expected yet.
+- When no task has a due date, it is the share of the project's days (start day through end day) that have
+  passed before today.
+- A project without tasks, or without any date, isn't measured: nothing is shown.
+
+Only planned and in-progress projects are measured: a project on hold, completed or cancelled is never
+behind schedule. The comparison uses the rounded percentages shown on the page, so what people see always
+agrees with the flag."""
+
+from dataclasses import dataclass
+
+from django.utils import timezone
+
+# A project is "behind schedule" when its progress is more than this many points below the expected progress
+BEHIND_SCHEDULE_MARGIN = 10
+
+BY_TASKS = "tasks"  # from the tasks' due dates
+BY_DATES = "dates"  # from the project's start and end dates
+
+
+@dataclass(frozen=True)
+class Schedule:
+    expected: int  # the percentage that should be done by today (0 to 100)
+    actual: int  # the percentage that is done (Project.progress)
+    basis: str  # BY_TASKS or BY_DATES
+
+    @property
+    def gap(self):
+        """How many points the project is behind (negative when it is ahead)."""
+        return self.expected - self.actual
+
+    @property
+    def is_behind(self):
+        return self.gap > BEHIND_SCHEDULE_MARGIN
+
+
+def time_elapsed(start, end, today):
+    """The share of the project's days that have passed by today, from 0 to 100. The project runs from its
+    start day through its end day, and today isn't over yet: like a task due today, the end day still has
+    today, and 100 % is reached the day after."""
+    days = (end - start).days + 1
+    passed = min(max((today - start).days, 0), days)
+    return round(passed * 100 / days)
+
+
+def schedule_of(project):
+    """The project's Schedule, or None when the project isn't measured (see above)."""
+    if project.status not in (project.Status.PLANNED, project.Status.IN_PROGRESS):
+        return None
+    today = timezone.localdate()
+    if hasattr(project, "task_dated"):
+        # The counts were already fetched by with_task_counts()
+        total, dated, due = project.task_total, project.task_dated, project.task_due
+    else:
+        total = project.tasks.count()
+        dated = project.tasks.filter(due_date__isnull=False).count()
+        due = project.tasks.filter(due_date__lt=today).count()
+    if total == 0:
+        return None
+    if dated:
+        return Schedule(expected=round(due * 100 / total), actual=project.progress, basis=BY_TASKS)
+    if project.start_date and project.end_date:
+        expected = time_elapsed(project.start_date, project.end_date, today)
+        return Schedule(expected=expected, actual=project.progress, basis=BY_DATES)
+    return None

@@ -2975,3 +2975,17 @@ msgstr[5] "أُرسلت %(count)d رسالة."
 #: templates (application name)
 msgid "Mchariee"
 msgstr "مشاريعي"
+
+#: templates/projects/project_detail.html
+msgid "Behind schedule"
+msgstr "متأخر عن الجدول الزمني"
+
+#, python-format
+msgid "Expected by today: %(percent)s%%"
+msgstr "المتوقع حتى اليوم: %(percent)s%%"
+
+msgid "Based on the tasks' due dates"
+msgstr "حسب تواريخ استحقاق المهام"
+
+msgid "Based on the project's start and end dates"
+msgstr "حسب تاريخَي بداية المشروع ونهايته"

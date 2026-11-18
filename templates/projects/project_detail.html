@@ -16,6 +16,7 @@
     <span class="badge bg-{{ project.status_color }}-lt">{{ project.get_status_display }}</span>
     <span class="badge bg-{{ project.priority_color }}-lt">{% blocktranslate with priority=project.get_priority_display %}{{ priority }} priority{% endblocktranslate %}</span>
     {% if project.is_overdue %}<span class="badge bg-red-lt">{% translate "Late" %}</span>{% endif %}
+    {% if project.schedule.is_behind %}<span class="badge bg-orange-lt"><i class="ti ti-clock-exclamation me-1"></i>{% translate "Behind schedule" %}</span>{% endif %}
   </div>
   <a href="{% url 'project_board' project.pk %}" class="btn"><i class="ti ti-layout-kanban me-2"></i>{% translate "Board" %}</a>
   <a href="{% url 'project_gantt' project.pk %}" class="btn"><i class="ti ti-timeline me-2"></i>{% translate "Timeline" %}</a>
@@ -78,6 +79,13 @@
                aria-label="{% blocktranslate with percent=project.progress %}{{ percent }}% done{% endblocktranslate %}"></div>
         </div>
         <div class="text-secondary">{% blocktranslate with done=project.task_done count counter=project.task_total %}{{ done }} of {{ counter }} task done{% plural %}{{ done }} of {{ counter }} tasks done{% endblocktranslate %}</div>
+        {# What should be done by today (projects/schedule.py). Not shown for projects that aren't measured. #}
+        {% with schedule=project.schedule %}{% if schedule %}
+        <div class="mt-3 {% if schedule.is_behind %}fw-bold{% else %}text-secondary{% endif %}" id="schedule">
+          {% blocktranslate with percent=schedule.expected %}Expected by today: {{ percent }}%{% endblocktranslate %}
+        </div>
+        <div class="text-secondary small">{% if schedule.basis == "tasks" %}{% translate "Based on the tasks' due dates" %}{% else %}{% translate "Based on the project's start and end dates" %}{% endif %}</div>
+        {% endif %}{% endwith %}
       </div>
     </div>
   </div>

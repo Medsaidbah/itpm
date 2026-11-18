@@ -24,7 +24,7 @@ One feature per commit, each with its tests, the full test suite passing, and th
 |---|---|---|---|
 | 1 | Clickable web addresses in comments and descriptions | 4 | Done (513c22a) |
 | 2 | Team pictures in the project list | 10 | Done (9e69d6c) |
-| 3 | Delay detection: expected vs actual progress | 7 | To do |
+| 3 | Delay detection: expected vs actual progress | 7 | Done |
 | 4 | Highlight late (red) and behind-schedule (amber) projects | 8 | To do |
 | 5 | Project count cards on the home page | 1 | To do |
 | 6 | Preview attachments (PDF and images) | 3 | To do |
@@ -53,6 +53,11 @@ One feature per commit, each with its tests, the full test suite passing, and th
    below the expected progress. The 10 is one named constant in the code. Expected progress is the share of
    tasks due by today; when the tasks have no due dates, it is the share of time elapsed between the
    project's start and end dates. Projects without dates show no delay.
+   As built (`projects/schedule.py`, `BEHIND_SCHEDULE_MARGIN`): "due by today" means due *before* today
+   (a task due today still has today), and tasks without a due date are not expected yet. The time-based
+   measure counts the start day through the end day, so 100 % is reached the day after the end date.
+   Projects without tasks are not measured. Only planned and in-progress projects are measured: on hold,
+   completed and cancelled projects are never flagged. The comparison uses the rounded percentages shown.
 3. **Who sees contribution figures (item 7):** admins see everyone; a project's managers see the members of
    their own projects; everyone else sees only their own figures. The future read-only role (1.2) sees
    everyone.
