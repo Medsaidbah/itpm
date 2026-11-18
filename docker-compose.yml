@@ -1,7 +1,7 @@
 # Example to try the app (and its database) on one machine:
-#   cp docker.env.example .env.docker      (then edit the secrets)
-#   docker compose --env-file .env.docker up --build
-#   docker compose --env-file .env.docker exec web python manage.py createsuperuser
+#   cp docker.env.example docker.env      (then edit the secrets; docker.env never goes into git)
+#   docker compose --env-file docker.env up -d --build      (builds the image itpm:<version> named below)
+#   docker compose --env-file docker.env exec web python manage.py createsuperuser
 # then open http://localhost:8000
 # In production the infrastructure team uses its own PostgreSQL, proxy and secrets: see DEPLOY-DOCKER.md.
 services:
@@ -22,7 +22,7 @@ services:
 
   web:
     build: .
-    image: itpm:1.0.2
+    image: itpm:1.1.0
     restart: unless-stopped
     depends_on:
       db:
@@ -66,7 +66,7 @@ services:
   #   daily:           docker compose --env-file docker.env --profile jobs run --rm reminders
   #   every 10 minutes: docker compose --env-file docker.env --profile jobs run --rm outbox
   reminders:
-    image: itpm:1.0.2
+    image: itpm:1.1.0
     profiles: ["jobs"]
     depends_on:
       db:
@@ -75,7 +75,7 @@ services:
     command: ["python", "manage.py", "send_reminders"]
 
   outbox:
-    image: itpm:1.0.2
+    image: itpm:1.1.0
     profiles: ["jobs"]
     depends_on:
       db:

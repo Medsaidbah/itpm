@@ -1,5 +1,6 @@
 # Mchariee - container image (Django + Waitress). See DEPLOY-DOCKER.md.
-# Build:  docker build -t itpm:latest .
+# Build:  docker build -t itpm:<version> .      (the version of docker-compose.yml, like itpm:1.1.0)
+#         or: docker compose --env-file docker.env build
 # The image holds the code only. Settings come from environment variables, the database is a separate
 # PostgreSQL, and uploaded files go to the volume /app/media.
 ARG BASE_IMAGE=python:3.13-slim-bookworm
