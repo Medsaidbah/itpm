@@ -41,7 +41,7 @@ The database user must be allowed to create databases, because Django creates a 
 .venv\Scripts\python.exe manage.py test projects.tests.test_permissions
 ```
 
-The full suite has 477 tests and takes about 75 s.
+Run the full suite and expect it to pass (it takes a little over a minute).
 `OSError: down` tracebacks and "Email ... failed" lines in the output come from the email tests, which make sending fail on purpose. They are not failures.
 
 ## Building the image
