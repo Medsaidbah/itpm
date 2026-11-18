@@ -42,6 +42,79 @@
   </div>
 </div>
 
+{% comment %}
+  Their contribution in figures (projects/contributions.py). Only the person, the admins, and a manager of some of
+  their projects see it (the manager: only the work in the projects they manage). Neutral colours only: the figures
+  describe the work, they don't judge the person.
+{% endcomment %}
+{% if figures %}
+<div class="card mb-4" id="contribution">
+  <div class="card-header">
+    <div class="me-auto">
+      <h3 class="card-title">{% translate "Contribution" %}</h3>
+      <div class="card-subtitle">{% if figures_limited %}{% translate "Only the work in the projects you manage" %}{% else %}{% translate "In all projects" %}{% endif %}</div>
+    </div>
+    {% if not figures_limited %}
+    <a href="{% url 'activity' %}?person={{ person.pk }}" class="btn btn-sm"><i class="ti ti-activity me-2"></i>{% translate "See the activity" %}</a>
+    {% endif %}
+  </div>
+  <div class="card-body">
+    <div class="datagrid">
+      <div class="datagrid-item">
+        <div class="datagrid-title">{% translate "Done in the last 30 days" %}</div>
+        <div class="datagrid-content h3 mb-0">{{ figures.done_short }}</div>
+      </div>
+      <div class="datagrid-item">
+        <div class="datagrid-title">{% translate "Done in the last 90 days" %}</div>
+        <div class="datagrid-content h3 mb-0">{{ figures.done_long }}</div>
+      </div>
+      <div class="datagrid-item">
+        <div class="datagrid-title">{% translate "Open tasks" %}</div>
+        <div class="datagrid-content h3 mb-0">{{ figures.open }}</div>
+      </div>
+      <div class="datagrid-item">
+        <div class="datagrid-title">{% translate "Overdue tasks" %}</div>
+        <div class="datagrid-content h3 mb-0">{{ figures.overdue }}</div>
+      </div>
+      <div class="datagrid-item" id="on-time">
+        <div class="datagrid-title">{% translate "Done on time" %}</div>
+        {% if figures.on_time_rate is None %}
+        <div class="datagrid-content h3 mb-0" aria-hidden="true">—</div>
+        <div class="text-secondary small">{% translate "No task with a due date was done in the last 90 days" %}</div>
+        {% else %}
+        <div class="datagrid-content h3 mb-0">{{ figures.on_time_rate }}%</div>
+        <div class="text-secondary small">{% blocktranslate count timed=figures.timed with on_time=figures.on_time %}{{ on_time }} of {{ timed }} task with a due date, in the last 90 days{% plural %}{{ on_time }} of {{ timed }} tasks with a due date, in the last 90 days{% endblocktranslate %}</div>
+        {% endif %}
+      </div>
+      <div class="datagrid-item">
+        <div class="datagrid-title">{% translate "Comments in the last 90 days" %}</div>
+        <div class="datagrid-content h3 mb-0">{{ figures.comments }}</div>
+      </div>
+      <div class="datagrid-item">
+        <div class="datagrid-title">{% translate "Files added in the last 90 days" %}</div>
+        <div class="datagrid-content h3 mb-0">{{ figures.files }}</div>
+      </div>
+      <div class="datagrid-item" id="last-activity">
+        <div class="datagrid-title">{% translate "Last activity" %}</div>
+        {% if figures.last_activity %}
+        <div class="datagrid-content" title="{{ figures.last_activity|date:_('d M Y, H:i') }}">{% blocktranslate with time=figures.last_activity|timesince %}{{ time }} ago{% endblocktranslate %}</div>
+        {% else %}
+        <div class="datagrid-content"><span aria-hidden="true">—</span> <span class="text-secondary small">{% translate "Nothing recorded yet" %}</span></div>
+        {% endif %}
+      </div>
+    </div>
+    {# A manager: the activity in each project they manage with this person, never in other projects #}
+    {% if figures_limited and shared_projects %}
+    <div class="d-flex flex-wrap gap-2 mt-3">
+      {% for project in shared_projects %}
+      <a href="{% url 'activity' %}?person={{ person.pk }}&project={{ project.pk }}" class="btn btn-sm"><i class="ti ti-activity me-2"></i>{% blocktranslate with project=project.name %}Activity in {{ project }}{% endblocktranslate %}</a>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endif %}
+
 <div class="row row-cards">
   {# Their projects: only the ones the person looking at this page can see (admins: all of them) #}
   <div class="col-lg-6">

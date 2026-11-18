@@ -28,7 +28,7 @@ One feature per commit, each with its tests, the full test suite passing, and th
 | 4 | Highlight late (red) and behind-schedule (amber) projects | 8 | Done |
 | 5 | Project count cards on the home page | 1 | Done |
 | 6 | Preview attachments (PDF and images) | 3 | Done |
-| 7 | Contribution summary on people's pages | 11 | To do |
+| 7 | Contribution summary on people's pages | 11 | Done |
 | 8 | A reason is required when a task is blocked | 5 (part) | To do |
 
 ## Later releases: one database change each
@@ -67,3 +67,11 @@ One feature per commit, each with its tests, the full test suite passing, and th
 
 Also agreed: for the attachment preview (item 6), the results in the browsers MTNIMA uses are listed
 before the feature is committed.
+
+For item 7, also agreed: co-managers see the same limited figures as the project's main manager; the
+existing "Open tasks" card on a person's page stays as it is; a manager's figures include past work in the
+projects they manage, while the person is in one of their teams.
+
+## Later decisions
+
+- Activity page: any teammate can see a person's actions in shared projects; decide whether to restrict it.

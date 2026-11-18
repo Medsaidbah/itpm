@@ -16,6 +16,7 @@ urlpatterns = [
     path("users/<int:pk>/projects/add/", views.user_add_project, name="admin_user_add_project"),
     path("users/<int:pk>/projects/<int:project_pk>/remove/", views.user_remove_project,
          name="admin_user_remove_project"),
+    path("people/", views.people_overview, name="admin_people"),
     path("projects/", views.project_list, name="admin_projects"),
     path("tasks/", views.task_list, name="admin_tasks"),
     path("feedback/", views.feedback_list, name="admin_feedback"),

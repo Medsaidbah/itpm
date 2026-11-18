@@ -1,0 +1,62 @@
+{% extends "administration/base.html" %}
+{% load i18n people %}
+
+{% block title %}{% translate "People overview" %} · {% translate "Administration" %} · {% translate "Mchariee" %}{% endblock %}
+{% block page_title %}{% translate "People overview" %}{% endblock %}
+
+{% block section_content %}
+{% comment %}
+  Every active person's contribution in figures (projects/contributions.py), for admins only. Sorted by name, with
+  neutral colours: an overview of the work, not a ranking.
+{% endcomment %}
+<p class="text-secondary">{% translate "Active people, sorted by name. Done: tasks assigned to them and finished in the period. Open and overdue: their unfinished tasks in open projects. On time: the share of the tasks with a due date that they finished in the last 90 days on or before that date. A dash means there is nothing to measure." %}</p>
+
+<div class="card">
+  {% if rows %}
+  <div class="table-responsive">
+    <table class="table card-table table-vcenter">
+      <thead>
+        <tr>
+          <th>{% translate "Person" %}</th>
+          <th class="text-end">{% translate "Done, 30 days" %}</th>
+          <th class="text-end">{% translate "Done, 90 days" %}</th>
+          <th class="text-end">{% translate "Open" %}</th>
+          <th class="text-end">{% translate "Overdue" %}</th>
+          <th class="text-end">{% translate "On time" %}</th>
+          <th class="text-end">{% translate "Comments, 90 days" %}</th>
+          <th class="text-end">{% translate "Files, 90 days" %}</th>
+          <th>{% translate "Last activity" %}</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for person, figures in rows %}
+        <tr>
+          <td>
+            <a href="{% url 'person_detail' person.pk %}" class="d-inline-flex align-items-center gap-2 text-reset">{% avatar person "xs" %}<bdi>{{ person }}</bdi></a>
+          </td>
+          <td class="text-end">{{ figures.done_short }}</td>
+          <td class="text-end">{{ figures.done_long }}</td>
+          <td class="text-end">{{ figures.open }}</td>
+          <td class="text-end">{{ figures.overdue }}</td>
+          {% if figures.on_time_rate is None %}
+          <td class="text-end"><span aria-hidden="true">—</span><span class="visually-hidden">{% translate "Nothing to measure" %}</span></td>
+          {% else %}
+          <td class="text-end" title="{% blocktranslate count timed=figures.timed with on_time=figures.on_time %}{{ on_time }} of {{ timed }} task with a due date, in the last 90 days{% plural %}{{ on_time }} of {{ timed }} tasks with a due date, in the last 90 days{% endblocktranslate %}">{{ figures.on_time_rate }}%</td>
+          {% endif %}
+          <td class="text-end">{{ figures.comments }}</td>
+          <td class="text-end">{{ figures.files }}</td>
+          {% if figures.last_activity %}
+          <td title="{{ figures.last_activity|date:_('d M Y, H:i') }}">{% blocktranslate with time=figures.last_activity|timesince %}{{ time }} ago{% endblocktranslate %}</td>
+          {% else %}
+          <td><span aria-hidden="true">—</span><span class="visually-hidden">{% translate "Nothing recorded yet" %}</span></td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <div class="card-body text-secondary">{% translate "No active accounts." %}</div>
+  {% endif %}
+</div>
+{% endblock %}

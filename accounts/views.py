@@ -5,6 +5,7 @@ from django.contrib.auth import views as auth_views
 from django.contrib.auth.decorators import login_required
 from django.contrib.messages.views import SuccessMessageMixin
 from django.core.cache import cache
+from django.db.models import Q
 from django.http import FileResponse, Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse, reverse_lazy
@@ -14,6 +15,7 @@ from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 from django.views.decorators.http import require_POST
 
+from projects.contributions import figures_for, figures_scope
 from projects.emails import email_password_changed
 from projects.models import Project, Task, people_visible_to
 
@@ -90,7 +92,20 @@ def person_detail(request, pk):
     person = get_object_or_404(people_visible_to(request.user), pk=pk)
     # Their projects, among the ones the person who is logged in can see (admins: all of them)
     projects = Project.objects.visible_to(request.user).select_related("manager").order_by("name")
+
+    # Their contribution in figures, only for the people allowed to see it (projects/contributions.py):
+    # themselves and admins (all their work), a manager of some of their projects (only those projects)
+    scope = figures_scope(request.user, person)
+    figures = figures_for([person.pk], scope)[person.pk] if scope.shows_figures else None
+    # For a manager: the projects they manage with this person in the team (one activity link each)
+    shared_projects = (
+        scope.projects.filter(Q(manager=person) | Q(memberships__user=person)).distinct().order_by("name")
+        if figures and not scope.everything else None
+    )
     context = {
+        "figures": figures,
+        "figures_limited": figures is not None and not scope.everything,
+        "shared_projects": shared_projects,
         "person": person,
         "managed_projects": projects.filter(manager=person),
         "member_projects": projects.filter(memberships__user=person).exclude(manager=person),

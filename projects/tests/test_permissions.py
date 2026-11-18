@@ -178,6 +178,7 @@ class EveryAddressTests(TeamTestCase):
              {"project": p}, ADMINS_ONLY_ACTION),
             ("admin_user_remove_project", "post", f"/administration/users/{self.lina.pk}/projects/{p}/remove/", None,
              ADMINS_ONLY_ACTION),
+            ("admin_people", "get", "/administration/people/", None, ADMINS_ONLY_PAGE),
             ("admin_projects", "get", "/administration/projects/", None, ADMINS_ONLY_PAGE),
             ("admin_tasks", "get", "/administration/tasks/", None, ADMINS_ONLY_PAGE),
             ("admin_logins", "get", "/administration/logins/", None, ADMINS_ONLY_PAGE),

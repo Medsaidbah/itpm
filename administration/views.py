@@ -22,6 +22,7 @@ from django.views.decorators.http import require_POST
 
 from accounts.models import NO_ADMIN_LEFT, Feedback, User, leaves_no_active_admin
 from projects import outbox
+from projects.contributions import figures_for
 from projects.models import EmailOutbox, Notification, Project, ProjectMember, Task
 from projects.notifications import tell_project_event
 
@@ -368,6 +369,22 @@ def user_remove_project(request, pk, project_pk):
         membership.delete()  # recorded, so the Activity page shows it
         messages.success(request, _("%(person)s is no longer in the team of %(project)s.") % names)
     return redirect("admin_user", pk)
+
+
+# ---------- People overview (release 1.1) ----------
+
+
+@admin_required
+def people_overview(request):
+    """Every active person's contribution in figures (projects/contributions.py), for admins only.
+    Sorted by name: it is an overview, not a ranking."""
+    people = list(User.objects.filter(is_active=True).order_by("first_name", "last_name", "username"))
+    figures = figures_for(person.pk for person in people)
+    context = {
+        "section": "people",
+        "rows": [(person, figures[person.pk]) for person in people],
+    }
+    return render(request, "administration/people_overview.html", context)
 
 
 # ---------- Projects and tasks ----------

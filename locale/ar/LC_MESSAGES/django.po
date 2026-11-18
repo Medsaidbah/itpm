@@ -3035,3 +3035,95 @@ msgstr "معاينة"
 #: projects/views.py
 msgid "This file can't be shown in the browser. Download it instead."
 msgstr "لا يمكن عرض هذا الملف في المتصفح. نزّله بدلاً من ذلك."
+
+#: templates/accounts/person_detail.html
+msgid "Contribution"
+msgstr "المساهمة"
+
+#: templates/accounts/person_detail.html
+msgid "In all projects"
+msgstr "في جميع المشاريع"
+
+#: templates/accounts/person_detail.html
+msgid "Only the work in the projects you manage"
+msgstr "العمل في المشاريع التي تديرها فقط"
+
+#: templates/accounts/person_detail.html
+msgid "See the activity"
+msgstr "عرض النشاط"
+
+#: templates/accounts/person_detail.html
+msgid "Done in the last 90 days"
+msgstr "المنجزة خلال آخر 90 يومًا"
+
+#: templates/accounts/person_detail.html
+msgid "Done on time"
+msgstr "المنجزة في الموعد"
+
+#: templates/accounts/person_detail.html
+msgid "No task with a due date was done in the last 90 days"
+msgstr "لم تُنجز أي مهمة لها تاريخ استحقاق خلال آخر 90 يومًا"
+
+#: templates/accounts/person_detail.html
+msgid "Comments in the last 90 days"
+msgstr "التعليقات خلال آخر 90 يومًا"
+
+#: templates/accounts/person_detail.html
+msgid "Files added in the last 90 days"
+msgstr "الملفات المضافة خلال آخر 90 يومًا"
+
+#: templates/accounts/person_detail.html
+msgid "Last activity"
+msgstr "آخر نشاط"
+
+#: templates/accounts/person_detail.html
+msgid "Nothing recorded yet"
+msgstr "لا شيء مسجل بعد"
+
+#: templates/accounts/person_detail.html
+#, python-format
+msgid "Activity in %(project)s"
+msgstr "النشاط في %(project)s"
+
+#: templates/administration/people_overview.html
+msgid "People overview"
+msgstr "نظرة عامة على الأشخاص"
+
+#: templates/administration/people_overview.html
+msgid "Done, 30 days"
+msgstr "المنجزة، 30 يومًا"
+
+#: templates/administration/people_overview.html
+msgid "Done, 90 days"
+msgstr "المنجزة، 90 يومًا"
+
+#: templates/administration/people_overview.html
+msgid "Comments, 90 days"
+msgstr "التعليقات، 90 يومًا"
+
+#: templates/administration/people_overview.html
+msgid "Files, 90 days"
+msgstr "الملفات، 90 يومًا"
+
+#: templates/administration/people_overview.html
+msgid "Nothing to measure"
+msgstr "لا شيء للقياس"
+
+#: templates/administration/people_overview.html
+msgid "No active accounts."
+msgstr "لا توجد حسابات نشطة."
+
+#: templates/administration/people_overview.html
+msgid "Active people, sorted by name. Done: tasks assigned to them and finished in the period. Open and overdue: their unfinished tasks in open projects. On time: the share of the tasks with a due date that they finished in the last 90 days on or before that date. A dash means there is nothing to measure."
+msgstr "الأشخاص النشطون، مرتبون حسب الاسم. المنجزة: المهام المسندة إليهم والتي أُنجزت خلال الفترة. المفتوحة والمتأخرة: مهامهم غير المنجزة في المشاريع المفتوحة. في الموعد: نسبة المهام ذات تاريخ الاستحقاق التي أنجزوها خلال آخر 90 يومًا في ذلك التاريخ أو قبله. تعني الشرطة أنه لا يوجد ما يمكن قياسه."
+
+#: templates/accounts/person_detail.html templates/administration/people_overview.html
+#, python-format
+msgid "%(on_time)s of %(timed)s task with a due date, in the last 90 days"
+msgid_plural "%(on_time)s of %(timed)s tasks with a due date, in the last 90 days"
+msgstr[0] "%(on_time)s من %(timed)s مهمة لها تاريخ استحقاق، خلال آخر 90 يومًا"
+msgstr[1] "%(on_time)s من مهمة واحدة لها تاريخ استحقاق، خلال آخر 90 يومًا"
+msgstr[2] "%(on_time)s من مهمتين لهما تاريخ استحقاق، خلال آخر 90 يومًا"
+msgstr[3] "%(on_time)s من %(timed)s مهام لها تاريخ استحقاق، خلال آخر 90 يومًا"
+msgstr[4] "%(on_time)s من %(timed)s مهمة لها تاريخ استحقاق، خلال آخر 90 يومًا"
+msgstr[5] "%(on_time)s من %(timed)s مهمة لها تاريخ استحقاق، خلال آخر 90 يومًا"
