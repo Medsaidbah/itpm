@@ -425,6 +425,7 @@ def task_detail(request, pk):
         "status_choices": Task.Status.choices,
         "can_edit": task.can_edit(request.user),
         "can_update_status": task.can_update_status(request.user),
+        "can_contribute": task.can_contribute(request.user),
         "task_status_url": reverse("task_status", args=[task.pk]),  # where the blocking dialog sends its reason
         "comments": comments,
         "attachments": attachments,
@@ -573,6 +574,8 @@ def task_delete(request, pk):
 @require_POST
 def comment_add(request, task_pk):
     task = get_object_or_404(visible_tasks(request), pk=task_pk)
+    if not task.can_contribute(request.user):
+        raise PermissionDenied(_("Your role can only read: nothing was changed."))
     form = CommentForm(request.POST)
     if not form.is_valid():
         messages.error(request, " ".join(form.errors["body"]))  # empty, or starting with the blocking marker
@@ -601,6 +604,8 @@ def comment_delete(request, pk):
 @require_POST
 def attachment_add(request, task_pk):
     task = get_object_or_404(visible_tasks(request), pk=task_pk)
+    if not task.can_contribute(request.user):
+        raise PermissionDenied(_("Your role can only read: nothing was changed."))
     # Files arrive in request.FILES, separately from the other form fields
     form = AttachmentForm(request.POST, request.FILES)
     if not form.is_valid():

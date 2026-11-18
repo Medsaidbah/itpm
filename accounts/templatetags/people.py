@@ -19,7 +19,7 @@ def can_see(request, person):
     if request is None or person is None:
         return False
     viewer = request.user
-    if viewer.is_authenticated and (viewer.is_admin or viewer.pk == person.pk):
+    if viewer.is_authenticated and (viewer.sees_everything or viewer.pk == person.pk):
         return True
     if not hasattr(request, "_people_visible"):
         request._people_visible = set(people_visible_to(viewer).values_list("pk", flat=True))

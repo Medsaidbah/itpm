@@ -9,6 +9,8 @@ The pages are opened with Django's test client, logged in as an admin and as a u
 own password: someone who still has a temporary password is sent to "change my password" on every page. If the copy
 has no such user, the flag is cleared for one of them, in the rehearsal database only, and a "note" line says so.
 Every page of the list must answer 200; the rehearsal script counts anything else as a failure.
+From release 1.2, an executive made for the check (and deleted afterwards) opens the read pages (200 each), tries
+every kind of change ("write-..." lines: each must be refused, 403) and checks that nothing changed.
 This adds sessions to the rehearsal database only.
 """
 
@@ -88,9 +90,91 @@ def pages():
         if who == "admin":
             addresses += [("administration", "/administration/"), ("admin-users", "/administration/users/"),
                           ("admin-projects", "/administration/projects/"), ("admin-tasks", "/administration/tasks/"),
-                          ("admin-people", "/administration/people/")]
+                          ("people-overview", "/people/overview/")]
         for label, address in addresses:
             print(who, label, describe(client.get(address)))
+    if "executive" in User.Role.values:  # release 1.2 and later
+        executive_pages()
+
+
+def snapshot():
+    """What an executive must never change, as numbers only: rows per table that matter, and the latest changes."""
+    from django.db.models import Max
+
+    from accounts.models import User
+    from projects.models import Attachment, Comment, Project, ProjectMember, Task
+
+    return (Project.objects.count(), Task.objects.count(), Comment.objects.count(), Attachment.objects.count(),
+            ProjectMember.objects.count(), User.objects.count(),
+            Project.objects.aggregate(last=Max("updated_at"))["last"], Task.objects.aggregate(last=Max("updated_at"))["last"],
+            sorted(Task.objects.values_list("pk", "status")), sorted(ProjectMember.objects.values_list("pk", "is_manager")))
+
+
+def executive_pages():
+    """Release 1.2: an executive, made here for the check only (in the rehearsal database) and deleted afterwards.
+    Every read page must answer 200; every change must be refused (403) and change nothing.
+    Lines: "executive <page> <status>", "executive write-<change> <status>", "executive nothing-changed ok|changed"."""
+    from django.core.files.uploadedfile import SimpleUploadedFile
+
+    from accounts.models import User
+    from projects.models import Attachment, Comment, Project, Task
+
+    User.objects.filter(username="rehearsal-executive").delete()
+    executive = User.objects.create_user("rehearsal-executive", role=User.Role.EXECUTIVE)
+    client = Client(raise_request_exception=False)
+    try:
+        client.force_login(executive)
+        project = Project.objects.order_by("pk").first()
+        task = Task.objects.order_by("pk").first()
+        other = User.objects.filter(is_active=True).exclude(pk=executive.pk).order_by("pk").first()
+        reads = [("home", "/"), ("my-tasks", "/my-tasks/"), ("projects", "/projects/?status=all"),
+                 ("dashboard", "/dashboard/"), ("activity", "/activity/"), ("notifications", "/notifications/"),
+                 ("own-page", f"/people/{executive.pk}/"), ("profile", "/profile/"),
+                 ("people-overview", "/people/overview/"), ("projects-excel", "/projects/export.xlsx")]
+        if other:
+            reads.append(("person-page", f"/people/{other.pk}/"))
+        if project:
+            reads += [("project", f"/projects/{project.pk}/"), ("board", f"/projects/{project.pk}/board/"),
+                      ("timeline", f"/projects/{project.pk}/timeline/"), ("report", f"/projects/{project.pk}/report/"),
+                      ("project-excel", f"/projects/{project.pk}/export.xlsx")]
+        if task:
+            reads.append(("task", f"/tasks/{task.pk}/"))
+        for label, address in reads:
+            print("executive", label, describe(client.get(address)))
+
+        before = snapshot()
+        writes = [("write-project-create", "/projects/new/", {"name": "x"}),
+                  ("write-admin-user-create", "/administration/users/new/", {"username": "x"})]
+        if project:
+            p = project.pk
+            writes += [("write-project-edit", f"/projects/{p}/edit/", {"name": "x"}),
+                       ("write-project-delete", f"/projects/{p}/delete/", {"name": project.name}),
+                       ("write-team-add", f"/projects/{p}/team/add/", {"person": executive.pk}),
+                       ("write-task-create", f"/projects/{p}/tasks/new/", {"title": "x", "status": "todo"})]
+            if other:
+                writes += [("write-team-remove", f"/projects/{p}/team/{other.pk}/remove/", {}),
+                           ("write-team-manager", f"/projects/{p}/team/{other.pk}/manager/", {"manager": "1"})]
+        if task:
+            t = task.pk
+            writes += [("write-task-status", f"/tasks/{t}/status/", {"status": "blocked", "blocked_reason": "x"}),
+                       ("write-task-move", f"/tasks/{t}/move/", {"status": "in_progress", "order": [t]}),
+                       ("write-task-dates", f"/tasks/{t}/dates/", {"start_date": "2030-01-01", "due_date": "2030-01-02"}),
+                       ("write-task-edit", f"/tasks/{t}/edit/", {"title": "x", "status": "todo"}),
+                       ("write-task-delete", f"/tasks/{t}/delete/", {}),
+                       ("write-comment-add", f"/tasks/{t}/comments/add/", {"body": "x"}),
+                       ("write-file-add", f"/tasks/{t}/files/add/", {"file": SimpleUploadedFile("x.txt", b"x")})]
+        comment = Comment.objects.order_by("pk").first()
+        if comment:
+            writes.append(("write-comment-delete", f"/comments/{comment.pk}/delete/", {}))
+        attachment = Attachment.objects.order_by("pk").first()
+        if attachment:
+            writes.append(("write-file-delete", f"/files/{attachment.pk}/delete/", {}))
+        for label, address, data in writes:
+            print("executive", label, describe(client.post(address, data)))
+        print("executive", "nothing-changed", "ok" if snapshot() == before else "changed")
+    finally:
+        client.logout()  # their session goes
+        executive.delete()  # and so does the account: the copy is left as it was
 
 
 if __name__ == "__main__":

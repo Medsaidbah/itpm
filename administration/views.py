@@ -185,7 +185,7 @@ def user_detail(request, pk):
     for project in managed + member:
         project.open_count = open_per_project.get(project.pk, 0)
 
-    add_form = AddToProjectForm(person=person) if person.is_active else None
+    add_form = AddToProjectForm(person=person) if person.is_active and not person.is_executive else None
     context = {
         "section": "users",
         "person": person,
@@ -374,17 +374,27 @@ def user_remove_project(request, pk, project_pk):
 # ---------- People overview (release 1.1) ----------
 
 
-@admin_required
+def sees_everything_required(view):
+    """For the pages that admins and executives may read (release 1.2), like the People overview."""
+
+    @wraps(view)
+    def check(request, *args, **kwargs):
+        if not request.user.sees_everything:
+            raise PermissionDenied(_("Only admins and executives can open this page."))
+        return view(request, *args, **kwargs)
+
+    return login_required(check)
+
+
+@sees_everything_required
 def people_overview(request):
-    """Every active person's contribution in figures (projects/contributions.py), for admins only.
-    Sorted by name: it is an overview, not a ranking."""
-    people = list(User.objects.filter(is_active=True).order_by("first_name", "last_name", "username"))
+    """Every active person's contribution in figures (projects/contributions.py), for admins and executives.
+    Executives aren't listed: they do no project work. Sorted by name: it is an overview, not a ranking."""
+    people = list(User.objects.filter(is_active=True).exclude(role=User.Role.EXECUTIVE)
+                  .order_by("first_name", "last_name", "username"))
     figures = figures_for(person.pk for person in people)
-    context = {
-        "section": "people",
-        "rows": [(person, figures[person.pk]) for person in people],
-    }
-    return render(request, "administration/people_overview.html", context)
+    context = {"rows": [(person, figures[person.pk]) for person in people]}
+    return render(request, "accounts/people_overview.html", context)
 
 
 # ---------- Projects and tasks ----------

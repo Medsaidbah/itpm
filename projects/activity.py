@@ -274,7 +274,7 @@ def get_events(viewer, project=None, task=None, person=None, before=None, limit=
 
     # 2. Only what happened in the projects the viewer can see. Admins see everything,
     #    even what happened in projects deleted since.
-    if not viewer.is_admin:
+    if not viewer.sees_everything:
         visible = Project.objects.visible_to(viewer).values("pk")
         project_versions = project_versions.filter(id__in=visible)
         task_versions = task_versions.filter(project_id__in=visible)
@@ -394,7 +394,7 @@ def activity_feed(request):
     # The people in the filter: everyone for admins. For everyone else, the people who can act
     # in their projects: the people in their teams, and the admins.
     User = get_user_model()
-    if request.user.is_admin:
+    if request.user.sees_everything:
         people = User.objects.all()
     else:
         people = User.objects.filter(Q(pk__in=projects.people().values("pk")) | Q(role=User.Role.ADMIN))

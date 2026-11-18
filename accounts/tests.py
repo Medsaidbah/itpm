@@ -20,11 +20,16 @@ class RoleTests(TestCase):
         boss = User.objects.create_superuser("boss", "boss@example.com", role="user")
         self.assertEqual(boss.role, "admin")
 
-    def test_two_roles_admin_and_user(self):
-        self.assertEqual(User.Role.values, ["admin", "user"])
+    def test_three_roles_admin_user_and_executive(self):
+        self.assertEqual(User.Role.values, ["admin", "user", "executive"])
         self.assertEqual(User().role, "user")  # new people are users
         self.assertTrue(User(role="admin").is_admin)
         self.assertFalse(User(role="user").is_admin)
+        # Release 1.2: an executive sees everything like an admin, but isn't one, and changes nothing
+        executive = User(role="executive")
+        self.assertEqual((executive.is_admin, executive.sees_everything, executive.is_read_only), (False, True, True))
+        self.assertEqual((User(role="admin").sees_everything, User(role="admin").is_read_only), (True, False))
+        self.assertEqual((User(role="user").sees_everything, User(role="user").is_read_only), (False, False))
 
     def test_the_old_manager_and_member_roles_become_user(self):
         # Like the data before Stage 16c

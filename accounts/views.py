@@ -96,7 +96,9 @@ def person_detail(request, pk):
     # Their contribution in figures, only for the people allowed to see it (projects/contributions.py):
     # themselves and admins (all their work), a manager of some of their projects (only those projects)
     scope = figures_scope(request.user, person)
-    figures = figures_for([person.pk], scope)[person.pk] if scope.shows_figures else None
+    # An executive does no project work (release 1.2): no figures for them, they would always be zero
+    shown = scope.shows_figures and not person.is_executive
+    figures = figures_for([person.pk], scope)[person.pk] if shown else None
     # For a manager: the projects they manage with this person in the team (one activity link each)
     shared_projects = (
         scope.projects.filter(Q(manager=person) | Q(memberships__user=person)).distinct().order_by("name")

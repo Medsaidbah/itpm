@@ -128,6 +128,12 @@
             <li class="nav-item {% block nav_dashboard %}{% endblock %}">
               <a class="nav-link" href="{% url 'dashboard' %}"><i class="ti ti-chart-bar me-2"></i>{% translate "Dashboard" %}</a>
             </li>
+            {# Admins and executives (release 1.2): everyone's contribution in figures #}
+            {% if user.sees_everything %}
+            <li class="nav-item {% block nav_people %}{% endblock %}">
+              <a class="nav-link" href="{% url 'people_overview' %}"><i class="ti ti-chart-dots me-2"></i>{% translate "People overview" %}</a>
+            </li>
+            {% endif %}
             {# Only admins see this item (and only they can open the pages behind it) #}
             {% if user.is_admin %}
             <li class="nav-item {% block nav_administration %}{% endblock %}">

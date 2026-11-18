@@ -8,7 +8,7 @@ from django.db import models, transaction
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.utils import timezone
-from django.utils.translation import gettext, gettext_lazy
+from django.utils.translation import gettext, gettext_lazy, pgettext
 
 from .middleware import chosen_language
 
@@ -28,6 +28,8 @@ class User(AbstractUser):
     class Role(models.TextChoices):
         ADMIN = "admin", gettext_lazy("Admin")
         USER = "user", gettext_lazy("User")
+        # Release 1.2: sees every project, team, figure and activity, and changes nothing (see is_read_only)
+        EXECUTIVE = "executive", gettext_lazy("Executive (read-only)")
 
     role = models.CharField(max_length=20, choices=Role.choices, default=Role.USER)
     phone = models.CharField(max_length=30, blank=True, validators=[validate_phone])
@@ -53,8 +55,23 @@ class User(AbstractUser):
 
     @property
     def is_admin(self):
-        # Admins can do everything, in every project
+        # Admins can do everything, in every project. This is the rule for changing things.
         return self.role == self.Role.ADMIN
+
+    @property
+    def is_executive(self):
+        return self.role == self.Role.EXECUTIVE
+
+    @property
+    def sees_everything(self):
+        """Admins and executives see every project, task, team, person and activity. This is the rule for reading
+        (it is never enough to change anything: that needs is_admin, or a place in the project)."""
+        return self.role in (self.Role.ADMIN, self.Role.EXECUTIVE)
+
+    @property
+    def is_read_only(self):
+        """An executive changes nothing: accounts.middleware.ReadOnlyRoleMiddleware refuses their changes."""
+        return self.is_executive
 
     def mark_password_as_temporary(self):
         """Call after set_password() when somebody else chose the password: the person must replace it.
@@ -156,6 +173,43 @@ def leaves_no_active_admin(person, role, is_active):
     if role == User.Role.ADMIN and is_active:
         return False
     return not User.objects.filter(role=User.Role.ADMIN, is_active=True).exclude(pk=person.pk).exists()
+
+
+def people_who_can_work():
+    """The people who can manage a project, be in a team or be given tasks: active accounts, never executives."""
+    return User.objects.filter(is_active=True).exclude(role=User.Role.EXECUTIVE)
+
+
+def why_not_executive(person):
+    """What stops this person from becoming an executive (who changes nothing): the projects they manage or
+    co-manage, and their open tasks. An empty list when nothing does."""
+    from projects.models import Project, ProjectMember, Task
+
+    reasons = []
+    managed = Project.objects.filter(manager=person).count()
+    co_managed = ProjectMember.objects.filter(user=person, is_manager=True).count()
+    open_tasks = Task.objects.filter(assignee=person).exclude(status=Task.Status.DONE).count()
+    if managed:
+        reasons.append(gettext("they manage %(count)s project(s)") % {"count": managed})
+    if co_managed:
+        reasons.append(gettext("they co-manage %(count)s project(s)") % {"count": co_managed})
+    if open_tasks:
+        reasons.append(gettext("they have %(count)s open task(s)") % {"count": open_tasks})
+    return reasons
+
+
+def executive_role_error(person, role, is_superuser=False):
+    """The message when giving this role is refused, or None. A superuser is always an admin; someone who manages
+    a project, co-manages one or has open tasks must hand them over before becoming an executive."""
+    if role != User.Role.EXECUTIVE:
+        return None
+    if is_superuser:
+        return gettext("This account was made with the createsuperuser command, so it is always an admin.")
+    reasons = why_not_executive(person) if person.pk else []
+    if reasons:
+        return gettext("%(person)s can't become an executive yet: %(reasons)s. Give them to someone else first.") % {
+            "person": person, "reasons": pgettext("separator between items of a list", ", ").join(reasons)}
+    return None
 
 
 @receiver(user_logged_in)

@@ -6,7 +6,7 @@ from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
 from accounts.forms import PictureFormMixin
-from accounts.models import NO_ADMIN_LEFT, User, leaves_no_active_admin
+from accounts.models import NO_ADMIN_LEFT, User, executive_role_error, leaves_no_active_admin
 from accounts.pictures import MAX_PICTURE_MB
 from projects.forms import BootstrapFormMixin
 from projects.models import Project
@@ -127,6 +127,9 @@ class AccountForm(AccountFormMixin, BootstrapFormMixin, forms.ModelForm):
         role = cleaned_data.get("role", self.instance.role)
         if leaves_no_active_admin(self.instance, role, self.instance.is_active):
             raise forms.ValidationError(NO_ADMIN_LEFT)
+        refused = executive_role_error(self.instance, role, self.instance.is_superuser)
+        if refused:
+            self.add_error("role", refused)
         return cleaned_data
 
 
@@ -167,6 +170,8 @@ class AddToProjectForm(BootstrapFormMixin, forms.Form):
 
     def clean(self):
         cleaned_data = super().clean()
+        if self.person.is_executive:
+            raise forms.ValidationError(_("An executive reads every project but is in no team."))
         if not self.person.is_active:
             raise forms.ValidationError(
                 _("This account is deactivated. Reactivate it before adding the person to a project.")

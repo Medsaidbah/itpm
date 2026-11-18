@@ -79,7 +79,7 @@ def figures_scope(viewer, person):
     """Which of the person's work the viewer may see in figures (the rules at the top of this file)."""
     if not viewer.is_authenticated:
         return NOTHING
-    if viewer.is_admin or viewer.pk == person.pk:
+    if viewer.sees_everything or viewer.pk == person.pk:
         return EVERYTHING
     managed = managed_by(viewer)
     # Only when the person is in the team of one of those projects: their manager, or a member

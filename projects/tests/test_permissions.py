@@ -39,10 +39,10 @@ NOT_ABOUT_PROJECTS = {
     "password_reset", "password_reset_done", "password_reset_confirm", "password_reset_complete",
 }
 
-# What Amina, Omar, Sara, Lina and Karim get from the Administration section (Stage 17b):
+# What Amina, Omar, Sara, Lina, Karim and Eva (the executive) get from the Administration section (Stage 17b):
 # a page for the admin, "No access" for everyone else, whatever they can see in the projects
-ADMINS_ONLY_PAGE = (OK, FORBIDDEN, FORBIDDEN, FORBIDDEN, FORBIDDEN)
-ADMINS_ONLY_ACTION = (MOVED, FORBIDDEN, FORBIDDEN, FORBIDDEN, FORBIDDEN)
+ADMINS_ONLY_PAGE = (OK, FORBIDDEN, FORBIDDEN, FORBIDDEN, FORBIDDEN, FORBIDDEN)
+ADMINS_ONLY_ACTION = (MOVED, FORBIDDEN, FORBIDDEN, FORBIDDEN, FORBIDDEN, FORBIDDEN)
 
 
 class LoginRequiredTests(TeamTestCase):
@@ -76,9 +76,10 @@ class LoginRequiredTests(TeamTestCase):
 
 
 class EveryAddressTests(TeamTestCase):
-    """Every address of the app, opened by five people:
+    """Every address of the app, opened by six people:
     Amina (admin), Omar (the project's manager), Sara (in the team, the task is hers),
-    Lina (in the team, the task isn't hers) and Karim (outside the team).
+    Lina (in the team, the task isn't hers), Karim (outside the team) and Eva (an executive, release 1.2:
+    she reads everything, in no team, and every change she tries is refused).
     The list must name every address of the app: a new page without a line here fails the test."""
 
     def setUp(self):
@@ -90,6 +91,7 @@ class EveryAddressTests(TeamTestCase):
 
         self.lina = User.objects.create_user("lina", "lina@example.com", first_name="Lina")
         self.project.add_to_team(self.lina)
+        self.eva = User.objects.create_user("eva", "eva@example.com", first_name="Eva", role=User.Role.EXECUTIVE)
         self.comment = Comment.objects.create(task=self.task, author=self.sara, body="Rack ready")
         self.attachment = Attachment.objects.create(
             task=self.task, uploaded_by=self.sara, file=SimpleUploadedFile("plan.pdf", b"%PDF-1.4 test")
@@ -101,66 +103,66 @@ class EveryAddressTests(TeamTestCase):
 
     def rules(self):
         """(name of the address, method, address, data sent,
-            what Amina, Omar, Sara, Lina and Karim get)"""
+            what Amina, Omar, Sara, Lina, Karim and Eva get)"""
         p, t = self.project.pk, self.task.pk
         dates = {"start_date": days_from_today(1).isoformat(), "due_date": days_from_today(3).isoformat()}
         return [
-            ("home", "get", "/", None, (OK, OK, OK, OK, OK)),
-            ("my_tasks", "get", "/my-tasks/", None, (OK, OK, OK, OK, OK)),
-            ("dashboard", "get", "/dashboard/", None, (OK, OK, OK, OK, OK)),
-            ("activity", "get", f"/activity/?project={p}", None, (OK, OK, OK, OK, HIDDEN)),
-            ("reminder_preview", "get", "/reminders/preview/", None, (OK, OK, OK, OK, OK)),
-            ("project_list", "get", "/projects/", None, (OK, OK, OK, OK, OK)),
-            ("projects_excel", "get", "/projects/export.xlsx", None, (OK, OK, OK, OK, OK)),
-            ("project_create", "get", "/projects/new/", None, (OK, FORBIDDEN, FORBIDDEN, FORBIDDEN, FORBIDDEN)),
-            ("project_detail", "get", f"/projects/{p}/", None, (OK, OK, OK, OK, HIDDEN)),
-            ("project_edit", "get", f"/projects/{p}/edit/", None, (OK, OK, FORBIDDEN, FORBIDDEN, HIDDEN)),
+            ("home", "get", "/", None, (OK, OK, OK, OK, OK, OK)),
+            ("my_tasks", "get", "/my-tasks/", None, (OK, OK, OK, OK, OK, OK)),
+            ("dashboard", "get", "/dashboard/", None, (OK, OK, OK, OK, OK, OK)),
+            ("activity", "get", f"/activity/?project={p}", None, (OK, OK, OK, OK, HIDDEN, OK)),
+            ("reminder_preview", "get", "/reminders/preview/", None, (OK, OK, OK, OK, OK, OK)),
+            ("project_list", "get", "/projects/", None, (OK, OK, OK, OK, OK, OK)),
+            ("projects_excel", "get", "/projects/export.xlsx", None, (OK, OK, OK, OK, OK, OK)),
+            ("project_create", "get", "/projects/new/", None, (OK, FORBIDDEN, FORBIDDEN, FORBIDDEN, FORBIDDEN, FORBIDDEN)),
+            ("project_detail", "get", f"/projects/{p}/", None, (OK, OK, OK, OK, HIDDEN, OK)),
+            ("project_edit", "get", f"/projects/{p}/edit/", None, (OK, OK, FORBIDDEN, FORBIDDEN, HIDDEN, FORBIDDEN)),
             ("team_add", "post", f"/projects/{p}/team/add/", {"person": self.karim.pk},
-             (MOVED, MOVED, FORBIDDEN, FORBIDDEN, HIDDEN)),
+             (MOVED, MOVED, FORBIDDEN, FORBIDDEN, HIDDEN, FORBIDDEN)),
             ("team_remove", "post", f"/projects/{p}/team/{self.lina.pk}/remove/", None,
-             (MOVED, MOVED, FORBIDDEN, FORBIDDEN, HIDDEN)),
+             (MOVED, MOVED, FORBIDDEN, FORBIDDEN, HIDDEN, FORBIDDEN)),
             ("team_manager", "post", f"/projects/{p}/team/{self.lina.pk}/manager/", {"manager": "1"},
-             (MOVED, MOVED, FORBIDDEN, FORBIDDEN, HIDDEN)),
-            ("project_board", "get", f"/projects/{p}/board/", None, (OK, OK, OK, OK, HIDDEN)),
-            ("project_gantt", "get", f"/projects/{p}/timeline/", None, (OK, OK, OK, OK, HIDDEN)),
-            ("project_report", "get", f"/projects/{p}/report/", None, (OK, OK, OK, OK, HIDDEN)),
-            ("project_tasks_excel", "get", f"/projects/{p}/export.xlsx", None, (OK, OK, OK, OK, HIDDEN)),
-            ("task_create", "get", f"/projects/{p}/tasks/new/", None, (OK, OK, FORBIDDEN, FORBIDDEN, HIDDEN)),
-            ("task_detail", "get", f"/tasks/{t}/", None, (OK, OK, OK, OK, HIDDEN)),
-            ("task_edit", "get", f"/tasks/{t}/edit/", None, (OK, OK, FORBIDDEN, FORBIDDEN, HIDDEN)),
+             (MOVED, MOVED, FORBIDDEN, FORBIDDEN, HIDDEN, FORBIDDEN)),
+            ("project_board", "get", f"/projects/{p}/board/", None, (OK, OK, OK, OK, HIDDEN, OK)),
+            ("project_gantt", "get", f"/projects/{p}/timeline/", None, (OK, OK, OK, OK, HIDDEN, OK)),
+            ("project_report", "get", f"/projects/{p}/report/", None, (OK, OK, OK, OK, HIDDEN, OK)),
+            ("project_tasks_excel", "get", f"/projects/{p}/export.xlsx", None, (OK, OK, OK, OK, HIDDEN, OK)),
+            ("task_create", "get", f"/projects/{p}/tasks/new/", None, (OK, OK, FORBIDDEN, FORBIDDEN, HIDDEN, FORBIDDEN)),
+            ("task_detail", "get", f"/tasks/{t}/", None, (OK, OK, OK, OK, HIDDEN, OK)),
+            ("task_edit", "get", f"/tasks/{t}/edit/", None, (OK, OK, FORBIDDEN, FORBIDDEN, HIDDEN, FORBIDDEN)),
             ("task_status", "post", f"/tasks/{t}/status/", {"status": "in_progress"},
-             (MOVED, MOVED, MOVED, FORBIDDEN, HIDDEN)),
-            ("task_delete", "get", f"/tasks/{t}/delete/", None, (OK, OK, FORBIDDEN, FORBIDDEN, HIDDEN)),
+             (MOVED, MOVED, MOVED, FORBIDDEN, HIDDEN, FORBIDDEN)),
+            ("task_delete", "get", f"/tasks/{t}/delete/", None, (OK, OK, FORBIDDEN, FORBIDDEN, HIDDEN, FORBIDDEN)),
             ("task_move", "post", f"/tasks/{t}/move/", {"status": "in_progress", "order": [t]},
-             (OK, OK, OK, FORBIDDEN, HIDDEN)),
-            ("task_dates", "post", f"/tasks/{t}/dates/", dates, (OK, OK, FORBIDDEN, FORBIDDEN, HIDDEN)),
+             (OK, OK, OK, FORBIDDEN, HIDDEN, FORBIDDEN)),
+            ("task_dates", "post", f"/tasks/{t}/dates/", dates, (OK, OK, FORBIDDEN, FORBIDDEN, HIDDEN, FORBIDDEN)),
             ("comment_add", "post", f"/tasks/{t}/comments/add/", {"body": "Hello"},
-             (MOVED, MOVED, MOVED, MOVED, HIDDEN)),
+             (MOVED, MOVED, MOVED, MOVED, HIDDEN, FORBIDDEN)),
             ("comment_delete", "post", f"/comments/{self.comment.pk}/delete/", None,  # Sara's comment
-             (MOVED, MOVED, MOVED, FORBIDDEN, HIDDEN)),
+             (MOVED, MOVED, MOVED, FORBIDDEN, HIDDEN, FORBIDDEN)),
             ("attachment_add", "post", f"/tasks/{t}/files/add/",
              lambda: {"file": SimpleUploadedFile("quote.pdf", b"%PDF-1.4 quote")},  # a new file each time
-             (MOVED, MOVED, MOVED, MOVED, HIDDEN)),
+             (MOVED, MOVED, MOVED, MOVED, HIDDEN, FORBIDDEN)),
             ("attachment_delete", "post", f"/files/{self.attachment.pk}/delete/", None,  # Sara's file
-             (MOVED, MOVED, MOVED, FORBIDDEN, HIDDEN)),
-            ("attachment_download", "get", self.attachment.file.url, None, (OK, OK, OK, OK, HIDDEN)),
+             (MOVED, MOVED, MOVED, FORBIDDEN, HIDDEN, FORBIDDEN)),
+            ("attachment_download", "get", self.attachment.file.url, None, (OK, OK, OK, OK, HIDDEN, OK)),
             # Shown in the browser (a PDF here): exactly the people who may download it
-            ("attachment_preview", "get", f"/files/{self.attachment.pk}/preview/", None, (OK, OK, OK, OK, HIDDEN)),
+            ("attachment_preview", "get", f"/files/{self.attachment.pk}/preview/", None, (OK, OK, OK, OK, HIDDEN, OK)),
             # People: your own profile, and the pages and pictures of the people you share a project with
-            ("profile", "get", "/profile/", None, (OK, OK, OK, OK, OK)),
-            ("password_change", "get", "/profile/password/", None, (OK, OK, OK, OK, OK)),
+            ("profile", "get", "/profile/", None, (OK, OK, OK, OK, OK, OK)),
+            ("password_change", "get", "/profile/password/", None, (OK, OK, OK, OK, OK, OK)),
             # The language switch (Stage 17c): everybody may change their own language (it only sets their own choice)
             ("set_language", "post", "/language/", {"language": "fr", "next": "/projects/"},
-             (MOVED, MOVED, MOVED, MOVED, MOVED)),
+             (MOVED, MOVED, MOVED, MOVED, MOVED, MOVED)),
             # Notifications (Stage 19): each person has their own; other people's don't exist (not even for admins)
-            ("notification_list", "get", "/notifications/", None, (OK, OK, OK, OK, OK)),
-            ("notification_read_all", "post", "/notifications/read-all/", None, (MOVED, MOVED, MOVED, MOVED, MOVED)),
+            ("notification_list", "get", "/notifications/", None, (OK, OK, OK, OK, OK, OK)),
+            ("notification_read_all", "post", "/notifications/read-all/", None, (MOVED, MOVED, MOVED, MOVED, MOVED, MOVED)),
             ("notification_open", "get", f"/notifications/{self.note.pk}/", None,
-             (HIDDEN, HIDDEN, MOVED, HIDDEN, HIDDEN)),
-            ("person_detail", "get", f"/people/{self.sara.pk}/", None, (OK, OK, OK, OK, HIDDEN)),
-            ("person_picture", "get", f"/people/{self.sara.pk}/picture/", None, (OK, OK, OK, OK, HIDDEN)),
+             (HIDDEN, HIDDEN, MOVED, HIDDEN, HIDDEN, HIDDEN)),
+            ("person_detail", "get", f"/people/{self.sara.pk}/", None, (OK, OK, OK, OK, HIDDEN, OK)),
+            ("person_picture", "get", f"/people/{self.sara.pk}/picture/", None, (OK, OK, OK, OK, HIDDEN, OK)),
             # Deleting a project: admins only. Like the other project pages, outsiders get "Page not found".
-            ("project_delete", "get", f"/projects/{p}/delete/", None, (OK, FORBIDDEN, FORBIDDEN, FORBIDDEN, HIDDEN)),
+            ("project_delete", "get", f"/projects/{p}/delete/", None, (OK, FORBIDDEN, FORBIDDEN, FORBIDDEN, HIDDEN, FORBIDDEN)),
             # The Administration section (Stage 17b): admins only, everyone else gets "No access"
             ("admin_home", "get", "/administration/", None, ADMINS_ONLY_PAGE),
             ("admin_users", "get", "/administration/users/", None, ADMINS_ONLY_PAGE),
@@ -178,16 +180,19 @@ class EveryAddressTests(TeamTestCase):
              {"project": p}, ADMINS_ONLY_ACTION),
             ("admin_user_remove_project", "post", f"/administration/users/{self.lina.pk}/projects/{p}/remove/", None,
              ADMINS_ONLY_ACTION),
-            ("admin_people", "get", "/administration/people/", None, ADMINS_ONLY_PAGE),
+            # The People overview moved out of Administration (release 1.2): the old address leads to it
+            ("admin_people", "get", "/administration/people/", None, (MOVED,) * 6),
+            # Admins and executives (release 1.2) read everyone's figures there; nobody else may
+            ("people_overview", "get", "/people/overview/", None, (OK, FORBIDDEN, FORBIDDEN, FORBIDDEN, FORBIDDEN, OK)),
             ("admin_projects", "get", "/administration/projects/", None, ADMINS_ONLY_PAGE),
             ("admin_tasks", "get", "/administration/tasks/", None, ADMINS_ONLY_PAGE),
             ("admin_logins", "get", "/administration/logins/", None, ADMINS_ONLY_PAGE),
             ("admin_feedback", "get", "/administration/feedback/", None, ADMINS_ONLY_PAGE),
             ("admin_feedback_review", "post", f"/administration/feedback/{self.feedback.pk}/review/", None,
              ADMINS_ONLY_ACTION),
-            ("feedback", "get", "/feedback/", None, (OK, OK, OK, OK, OK)),
+            ("feedback", "get", "/feedback/", None, (OK, OK, OK, OK, OK, OK)),
             ("notification_settings", "post", "/profile/notifications/", {"email_reminder": "on"},
-             (MOVED, MOVED, MOVED, MOVED, MOVED)),
+             (MOVED, MOVED, MOVED, MOVED, MOVED, MOVED)),
             ("admin_emails", "get", "/administration/emails/", None, ADMINS_ONLY_PAGE),
             ("admin_emails_retry", "post", "/administration/emails/retry/", None, ADMINS_ONLY_ACTION),
             ("admin_unlock", "post", "/administration/logins/unlock/", {"username": "sara"}, ADMINS_ONLY_ACTION),
@@ -210,8 +215,9 @@ class EveryAddressTests(TeamTestCase):
         self.assertEqual(checked - all_names, set(), "These rules are about addresses that don't exist")
 
     def test_what_each_person_gets(self):
-        people = [self.amina, self.omar, self.sara, self.lina, self.karim]
+        people = [self.amina, self.omar, self.sara, self.lina, self.karim, self.eva]
         for name, method, address, data, expected in self.rules():
+            self.assertEqual(len(expected), len(people), name)
             for person, status in zip(people, expected):
                 with self.subTest(address=name, person=person.username):
                     self.login(person)

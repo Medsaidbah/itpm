@@ -1,14 +1,16 @@
-{% extends "administration/base.html" %}
+{% extends "base.html" %}
 {% load i18n people %}
 
-{% block title %}{% translate "People overview" %} · {% translate "Administration" %} · {% translate "Mchariee" %}{% endblock %}
-{% block page_title %}{% translate "People overview" %}{% endblock %}
+{% block title %}{% translate "People overview" %} · {% translate "Mchariee" %}{% endblock %}
+{% block nav_people %}active{% endblock %}
 
-{% block section_content %}
+{% block content %}
 {% comment %}
-  Every active person's contribution in figures (projects/contributions.py), for admins only. Sorted by name, with
-  neutral colours: an overview of the work, not a ranking.
+  Every active person's contribution in figures (projects/contributions.py), for admins and executives (release 1.2;
+  it used to be in Administration, whose old address now leads here). Executives aren't listed: they do no project
+  work. Sorted by name, with neutral colours: an overview of the work, not a ranking.
 {% endcomment %}
+<h2 class="page-title mb-3">{% translate "People overview" %}</h2>
 <p class="text-secondary">{% translate "Active people, sorted by name. Done: tasks assigned to them and finished in the period. Open and overdue: their unfinished tasks in open projects. On time: the share of the tasks with a due date that they finished in the last 90 days on or before that date. A dash means there is nothing to measure." %}</p>
 
 <div class="card">

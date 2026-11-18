@@ -1,5 +1,27 @@
 # Mchariee – changelog
 
+## 1.2.0 (in preparation, on branch v1.2)
+
+### What changes for the people who use Mchariee
+
+- **A read-only "Executive" role.** An admin can give it in Administration > Users. An executive sees every project,
+  task, team, person page, contribution figure and activity, and can open every report and export, but changes
+  nothing: no edits, no status changes, no comments, no files. They are never a manager or a team member and are
+  never given tasks.
+- **People overview** moved out of Administration to its own page (`/people/overview/`), in the menu of admins and
+  executives. The old address still leads there.
+
+### What MTNIMA needs to know
+
+- **No new settings.**
+- **One database migration, `accounts/0008`.** It only adds the new role to the list of roles: it sends no SQL to
+  PostgreSQL and changes no data; every account keeps its role. It is rehearsed on a copy of the live database
+  before the release.
+- **Update as before:** backup first (database and `itpm_media`), keep the 1.1.0 image, start 1.2.0 with the same
+  settings and volumes.
+- **Going back to 1.1.0** works on the same database. Before that, give the executives another role: 1.1.0 doesn't
+  know the role, so an executive would see nothing there.
+
 ## 1.1.0 (prepared on 2026-11-18)
 
 ### What changes for the people who use Mchariee

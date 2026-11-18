@@ -17,7 +17,7 @@ from django.utils.translation import gettext_lazy as _
 
 from projects.forms import BootstrapFormMixin
 
-from .models import NO_ADMIN_LEFT, Feedback, User, leaves_no_active_admin
+from .models import NO_ADMIN_LEFT, Feedback, User, executive_role_error, leaves_no_active_admin
 from .pictures import MAX_PICTURE_MB, make_profile_picture
 
 logger = logging.getLogger(__name__)
@@ -166,6 +166,9 @@ class UserAdminChangeForm(PictureFormMixin, UserChangeForm):
         is_active = cleaned_data.get("is_active", self.instance.is_active)
         if leaves_no_active_admin(self.instance, role, is_active):
             raise forms.ValidationError(NO_ADMIN_LEFT)
+        refused = executive_role_error(self.instance, cleaned_data.get("role", self.instance.role), superuser)
+        if refused:
+            raise forms.ValidationError(refused)
         return cleaned_data
 
 

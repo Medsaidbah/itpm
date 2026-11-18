@@ -1,6 +1,7 @@
 """The addresses of the Administration section. They all start with /administration/ (see config/urls.py)."""
 
 from django.urls import path
+from django.views.generic import RedirectView
 
 from . import views
 
@@ -16,7 +17,8 @@ urlpatterns = [
     path("users/<int:pk>/projects/add/", views.user_add_project, name="admin_user_add_project"),
     path("users/<int:pk>/projects/<int:project_pk>/remove/", views.user_remove_project,
          name="admin_user_remove_project"),
-    path("people/", views.people_overview, name="admin_people"),
+    # The People overview moved to /people/overview/ (release 1.2), for admins and executives; the old address leads there
+    path("people/", RedirectView.as_view(pattern_name="people_overview"), name="admin_people"),
     path("projects/", views.project_list, name="admin_projects"),
     path("tasks/", views.task_list, name="admin_tasks"),
     path("feedback/", views.feedback_list, name="admin_feedback"),

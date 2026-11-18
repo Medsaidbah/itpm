@@ -6,6 +6,7 @@ The browser's own language isn't used: the app stays in English until people cho
 """
 
 from django.conf import settings
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import redirect
 from django.urls import Resolver404, resolve
 from django.utils import translation
@@ -80,6 +81,36 @@ class PasswordChangeRequiredMiddleware:
         user = getattr(request, "user", None)
         if user is not None and user.is_authenticated and user.must_change_password and not self.allowed(request):
             return redirect("password_change")
+        return self.get_response(request)
+
+    def allowed(self, request):
+        try:
+            return resolve(request.path_info).view_name in self.ALLOWED
+        except Resolver404:
+            return False
+
+
+class ReadOnlyRoleMiddleware:
+    """Release 1.2: an executive reads everything and changes nothing. Every request that could change something
+    (anything but GET, HEAD and OPTIONS) is refused with "No access", whatever the page, except the few below,
+    which only concern their own account. The pages also hide the buttons, but this is the rule that counts:
+    a forgotten button can't become a change. Placed after the password middleware in settings.py."""
+
+    # Logging out, their language, their own profile, password and email choices, feedback, and their own bell
+    ALLOWED = {
+        "logout", "set_language", "profile", "notification_settings", "password_change", "feedback",
+        "notification_read_all", "password_reset", "password_reset_confirm",
+    }
+    SAFE_METHODS = {"GET", "HEAD", "OPTIONS"}
+
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        user = getattr(request, "user", None)
+        if (user is not None and user.is_authenticated and user.is_read_only
+                and request.method not in self.SAFE_METHODS and not self.allowed(request)):
+            raise PermissionDenied(translation.gettext("Your role can only read: nothing was changed."))
         return self.get_response(request)
 
     def allowed(self, request):

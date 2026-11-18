@@ -11,7 +11,9 @@ port 8001, emails only written to the log), never touching the normal stack:
   3. counts the rows of every table, lists the migrations still to apply, applies them, and checks:
      migrate --check, the Django system check, the same row counts afterwards;
   4. starts the app on http://localhost:8001, checks /healthz/ and the login page, and opens the main pages
-     as an admin and a user of the copy: each must answer 200 (a redirect is a failure, shown with its path).
+     as an admin and a user of the copy: each must answer 200 (a redirect is a failure, shown with its path);
+     from release 1.2, an executive made for the check opens the read pages (200), every change it tries must be
+     refused (403), and nothing may change.
 The report (counts, migration names and status codes only, never names or emails) is shown and saved in
 %TEMP%\itpm-rehearsal. The dump is copied into the database container only, never into the project folder.
 The stack keeps running for a look; stop it with the "down" command printed at the end (it keeps the volumes).
@@ -225,16 +227,20 @@ Check "app answers on /healthz/" ($healthz -eq "ok") $healthz
 try { $login = (Invoke-WebRequest "http://127.0.0.1:$Port/login/" -UseBasicParsing -TimeoutSec 10).StatusCode } catch { $login = "no answer" }
 Check "login page" ("$login" -eq "200") "$login"
 
-Say "Pages opened as an admin and a user of the copy (status codes):"
+Say "Pages opened as an admin, a user and an executive (status codes; write-... must be refused):"
 $pages = Compose exec -T web python scripts/rehearsal_checks.py pages 2>$null
-# Every page of the list must answer 200: a redirect (like "302 /profile/password/") or an error is a failure
+# Every page of the list must answer 200: a redirect (like "302 /profile/password/") or an error is a failure.
+# The executive's "write-..." lines must be refused (403), and "nothing-changed" must say "ok".
 foreach ($line in $pages) {
     $parts = @("$line".Trim() -split " ")
     if ($parts.Count -lt 3) { continue }
-    if ($parts[1] -eq "note") { Say ("  {0,-6} note: {1}" -f $parts[0], $parts[2]) "Yellow"; continue }
+    if ($parts[1] -eq "note") { Say ("  {0,-9} note: {1}" -f $parts[0], $parts[2]) "Yellow"; continue }
+    $expected = "200"
+    if ($parts[1] -like "write-*") { $expected = "403" }
+    if ($parts[1] -eq "nothing-changed") { $expected = "ok" }
     $result = ($parts[2..($parts.Count - 1)] -join " ")
-    if ($parts[2] -eq "200") { Say ("  {0,-6} {1,-16} {2}" -f $parts[0], $parts[1], $result) }
-    else { Check ($parts[0] + " " + $parts[1]) $false $result }
+    if ($result -eq $expected) { Say ("  {0,-9} {1,-24} {2}" -f $parts[0], $parts[1], $result) }
+    else { Check ($parts[0] + " " + $parts[1]) $false ($result + " (expected " + $expected + ")") }
 }
 Check "pages opened" (@($pages).Count -gt 0)
 

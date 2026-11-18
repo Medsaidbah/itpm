@@ -72,6 +72,23 @@ For item 7, also agreed: co-managers see the same limited figures as the project
 existing "Open tasks" card on a person's page stays as it is; a manager's figures include past work in the
 projects they manage, while the person is in one of their teams.
 
+## Release 1.2 decisions (executive role)
+
+Status: built on branch `v1.2`, not released yet. Before release: the migration rehearsal on the live copy, and
+the product owner's look at the result.
+
+- The role is called "Executive (read-only)" (`executive`); `accounts/0008` only adds that choice (no SQL).
+- An executive sees every project, task, team, person page, contribution figure and activity (also of deleted
+  projects), reads every export and report, and changes nothing: a middleware refuses every change except their
+  own account (logout, language, profile, password, email choices, feedback, their bell).
+- Never a project manager, co-manager or team member, never given tasks: they are in none of the lists of people
+  (app, Administration, admin panel). Becoming an executive is refused while someone manages or co-manages a
+  project or has open tasks; a superuser always stays an admin.
+- No Administration page. The People overview moved to `/people/overview/`, for admins and executives (the old
+  address leads there); executives aren't listed in it, and their own page has no figures.
+- No comments or files; only the account emails (password); no bell notifications; Django's admin panel stays
+  closed to them.
+
 ## Later decisions
 
 - Activity page: any teammate can see a person's actions in shared projects; decide whether to restrict it.

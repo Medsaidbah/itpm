@@ -55,6 +55,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "accounts.middleware.LanguageMiddleware",  # the language of each page (needs to know who is logged in)
     "accounts.middleware.PasswordChangeRequiredMiddleware",  # a temporary password must be replaced first
+    "accounts.middleware.ReadOnlyRoleMiddleware",  # an executive (release 1.2) changes nothing
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "simple_history.middleware.HistoryRequestMiddleware",

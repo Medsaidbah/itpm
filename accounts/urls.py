@@ -1,11 +1,14 @@
 from django.urls import path
 
+from administration.views import people_overview
+
 from . import views
 
 urlpatterns = [
     path("profile/", views.profile, name="profile"),
     path("profile/notifications/", views.notification_settings, name="notification_settings"),
     path("profile/password/", views.PasswordChangeView.as_view(), name="password_change"),
+    path("people/overview/", people_overview, name="people_overview"),  # admins and executives (release 1.2)
     path("people/<int:pk>/", views.person_detail, name="person_detail"),
     path("people/<int:pk>/picture/", views.person_picture, name="person_picture"),
     path("feedback/", views.feedback, name="feedback"),

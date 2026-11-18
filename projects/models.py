@@ -69,7 +69,7 @@ class ProjectQuerySet(models.QuerySet):
         This is the only place the rule is written: every page, export and download uses it."""
         if not user.is_authenticated:
             return self.none()  # nobody logged in: nothing (the pages ask to log in first anyway)
-        if user.is_admin:
+        if user.sees_everything:  # admins and executives (release 1.2)
             return self
         in_team = ProjectMember.objects.filter(user=user).values("project")
         return self.filter(Q(manager=user) | Q(pk__in=in_team))
@@ -308,7 +308,7 @@ def people_visible_to(user):
     User = get_user_model()
     if not user.is_authenticated:
         return User.objects.none()
-    if user.is_admin:
+    if user.sees_everything:
         return User.objects.all()
     teammates = Project.objects.visible_to(user).people().values("pk")
     return User.objects.filter(Q(pk=user.pk) | Q(pk__in=teammates))
@@ -317,7 +317,7 @@ def people_visible_to(user):
 class TaskQuerySet(models.QuerySet):
     def visible_to(self, user):
         """The tasks of the projects this person can see (see ProjectQuerySet.visible_to)."""
-        if user.is_authenticated and user.is_admin:
+        if user.is_authenticated and user.sees_everything:
             return self
         return self.filter(project__in=Project.objects.visible_to(user))
 
@@ -383,6 +383,11 @@ class Task(models.Model):
     def can_edit(self, user):
         """Who may create, edit and delete tasks: the people who can edit the project."""
         return self.project.can_edit(user)
+
+    def can_contribute(self, user):
+        """Who may comment on the task and add files: everyone who can see it, except an executive (release 1.2),
+        who reads everything and changes nothing."""
+        return not user.is_read_only
 
     def can_update_status(self, user):
         """Who may change the status: the same people, plus the person the task is assigned to."""

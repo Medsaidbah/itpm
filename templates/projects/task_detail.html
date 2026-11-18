@@ -227,6 +227,7 @@
         <p class="text-secondary">{% translate "No comments yet." %}</p>
         {% endfor %}
 
+        {% if can_contribute %}
         <form method="post" action="{% url 'comment_add' task.pk %}">
           {% csrf_token %}
           <label class="visually-hidden" for="{{ comment_form.body.id_for_label }}">{% translate "Comment" %}</label>
@@ -235,6 +236,7 @@
             <button type="submit" class="btn btn-primary"><i class="ti ti-message me-2"></i>{% translate "Add comment" %}</button>
           </div>
         </form>
+        {% endif %}
       </div>
     </div>
   </div>
@@ -285,6 +287,7 @@
         {% endfor %}
       </div>
       {% endif %}
+      {% if can_contribute %}
       <div class="card-body">
         {# enctype="multipart/form-data" is required, or the browser sends only the file's name #}
         <form method="post" action="{% url 'attachment_add' task.pk %}" enctype="multipart/form-data">
@@ -297,6 +300,7 @@
           <div class="form-hint">{% blocktranslate with size=max_upload_mb %}Up to {{ size }} MB per file.{% endblocktranslate %}</div>
         </form>
       </div>
+      {% endif %}
     </div>
   </div>
 </div>

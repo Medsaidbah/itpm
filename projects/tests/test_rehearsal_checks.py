@@ -9,7 +9,8 @@ from pathlib import Path
 
 from django.conf import settings
 
-from projects.models import Comment
+from accounts.models import User
+from projects.models import Attachment, Comment
 
 from .base import TeamTestCase
 
@@ -45,13 +46,41 @@ class RehearsalCheckTests(RehearsalTestCase):
     def test_pages_are_labels_and_status_codes_only(self):
         output = self.run_check("pages")
         for line in output.splitlines():
-            self.assertRegex(line, r"^(admin|user) [a-z-]+ (\d{3}( /[^\s?]*)?|-|password-flag-cleared-in-the-copy)$")
+            self.assertRegex(line, r"^(admin|user|executive) [a-z-]+ (\d{3}( /[^\s?]*)?|-|ok|changed|"
+                                   r"password-flag-cleared-in-the-copy)$")
         self.assertIn("admin administration 200", output)
         self.assertIn("user project 200", output)
         self.assertIn("user task 200", output)
-        # Every page of the list answers 200 (the rehearsal counts anything else as a failure)
-        statuses = [line.split()[2] for line in output.splitlines() if line.split()[1] != "note"]
-        self.assertEqual(set(statuses), {"200"})
+        # What the rehearsal expects: 200 for every page, 403 for every change an executive tries, and nothing changed
+        for line in output.splitlines():
+            who, label, result = line.split(maxsplit=2)
+            if label == "note":
+                continue
+            expected = "403" if label.startswith("write-") else "ok" if label == "nothing-changed" else "200"
+            self.assertEqual(result, expected, line)
+
+
+class ExecutiveCheckTests(RehearsalTestCase):
+    """Release 1.2: the rehearsal logs in as an executive made for the check, in the rehearsal database only."""
+
+    def test_the_executive_reads_everything_and_changes_nothing(self):
+        Attachment.objects.create(task=self.task, uploaded_by=self.sara, file="attachments/plan.pdf")
+        output = self.run_check("pages")
+        lines = [line for line in output.splitlines() if line.startswith("executive ")]
+        reads = {line.split()[1]: line.split()[2] for line in lines if "write-" not in line and "nothing" not in line}
+        writes = {line.split()[1]: line.split(maxsplit=2)[2] for line in lines if " write-" in line}
+        self.assertEqual(set(reads.values()), {"200"})
+        self.assertLessEqual({"project", "board", "task", "people-overview", "person-page", "dashboard"}, set(reads))
+        self.assertEqual(set(writes.values()), {"403"})
+        self.assertLessEqual({"write-task-status", "write-task-move", "write-comment-add", "write-file-add",
+                              "write-project-edit", "write-team-add", "write-comment-delete", "write-file-delete"},
+                             set(writes))
+        self.assertIn("executive nothing-changed ok", output)
+
+    def test_the_executive_is_removed_afterwards(self):
+        self.run_check("pages")
+        self.assertFalse(User.objects.filter(username="rehearsal-executive").exists())
+        self.assertFalse(User.objects.filter(role=User.Role.EXECUTIVE).exists())
 
 
 class RedirectRuleTests(RehearsalTestCase):

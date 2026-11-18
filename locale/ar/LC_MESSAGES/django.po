@@ -3160,3 +3160,39 @@ msgstr "ذكر سبب توقف"
 #, python-format
 msgid "A comment can't start with \"%(marker)s\": the app uses it to mark the reasons for blocking."
 msgstr "لا يمكن أن يبدأ التعليق بـ «%(marker)s»: يستخدمه التطبيق لتمييز أسباب التوقف."
+
+#: accounts/models.py
+msgid "Executive (read-only)"
+msgstr "الإدارة العليا (قراءة فقط)"
+
+#: accounts/middleware.py projects/views.py
+msgid "Your role can only read: nothing was changed."
+msgstr "دورك يسمح بالقراءة فقط: لم يتغير شيء."
+
+#: accounts/models.py
+#, python-format
+msgid "they manage %(count)s project(s)"
+msgstr "يدير مشاريع: %(count)s"
+
+#: accounts/models.py
+#, python-format
+msgid "they co-manage %(count)s project(s)"
+msgstr "يشارك في إدارة مشاريع: %(count)s"
+
+#: accounts/models.py
+#, python-format
+msgid "they have %(count)s open task(s)"
+msgstr "لديه مهام مفتوحة: %(count)s"
+
+#: accounts/models.py
+#, python-format
+msgid "%(person)s can't become an executive yet: %(reasons)s. Give them to someone else first."
+msgstr "لا يمكن لـ %(person)s الانضمام إلى الإدارة العليا بعد: %(reasons)s. أسند ذلك إلى شخص آخر أولاً."
+
+#: administration/forms.py
+msgid "An executive reads every project but is in no team."
+msgstr "يطّلع عضو الإدارة العليا على كل المشاريع لكنه لا ينتمي إلى أي فريق."
+
+#: administration/views.py
+msgid "Only admins and executives can open this page."
+msgstr "لا يمكن فتح هذه الصفحة إلا للمسؤولين والإدارة العليا."

@@ -6,8 +6,22 @@ from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy
 from simple_history.admin import SimpleHistoryAdmin
 
+from accounts.models import User, people_who_can_work
+
 from .blocking import BlockingReasonForm, record_reason
 from .models import Attachment, Comment, Project, ProjectMember, Task
+
+
+class NoExecutivesMixin:
+    """Release 1.2: the lists of people of the admin panel (a project's manager, its team, a task's person) never
+    offer an executive, who reads everything and is given nothing to do. Like everywhere: active accounts only."""
+
+    PEOPLE_FIELDS = {"manager", "assignee", "user"}
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name in self.PEOPLE_FIELDS and db_field.related_model is User:
+            kwargs["queryset"] = people_who_can_work().order_by("first_name", "last_name", "username")
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
 class TaskInlineForm(BlockingReasonForm):
@@ -17,7 +31,7 @@ class TaskInlineForm(BlockingReasonForm):
                                      widget=forms.TextInput)
 
 
-class TaskInline(admin.TabularInline):
+class TaskInline(NoExecutivesMixin, admin.TabularInline):
     model = Task
     form = TaskInlineForm
     extra = 0
@@ -53,7 +67,7 @@ class TeamFormSet(BaseInlineFormSet):
                 )
 
 
-class ProjectMemberInline(admin.TabularInline):
+class ProjectMemberInline(NoExecutivesMixin, admin.TabularInline):
     """The project's team, below the project in the admin panel. The manager is chosen above
     (Manager field) and is always part of the team, so there's no need to add them here."""
 
@@ -69,7 +83,7 @@ class ProjectMemberInline(admin.TabularInline):
 
 
 @admin.register(Project)
-class ProjectAdmin(SimpleHistoryAdmin):
+class ProjectAdmin(NoExecutivesMixin, SimpleHistoryAdmin):
     list_display = [
         "name", "status", "priority", "manager", "start_date", "end_date", "progress_display",
     ]
@@ -137,7 +151,7 @@ class AttachmentInline(admin.TabularInline):
 
 
 @admin.register(Task)
-class TaskAdmin(SimpleHistoryAdmin):
+class TaskAdmin(NoExecutivesMixin, SimpleHistoryAdmin):
     list_display = [
         "title", "project", "status", "priority", "assignee", "due_date", "is_milestone", "overdue",
     ]

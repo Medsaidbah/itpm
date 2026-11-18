@@ -218,16 +218,16 @@ class VisibilityTests(ContributionTestCase):
 class OverviewTests(ContributionTestCase):
     def overview(self):
         self.login(self.amina)
-        return self.client.get("/administration/people/")
+        return self.client.get("/people/overview/")
 
     def test_only_admins(self):
         for person in (self.omar, self.sara, self.lina, self.karim):
             with self.subTest(person=person.username):
                 self.login(person)
-                self.assertEqual(self.client.get("/administration/people/").status_code, 403)
+                self.assertEqual(self.client.get("/people/overview/").status_code, 403)
         self.client.logout()
-        response = self.client.get("/administration/people/")
-        self.assertRedirects(response, "/login/?next=/administration/people/", fetch_redirect_response=False)
+        response = self.client.get("/people/overview/")
+        self.assertRedirects(response, "/login/?next=/people/overview/", fetch_redirect_response=False)
 
     def test_one_row_per_active_person_sorted_by_name_not_by_figures(self):
         User.objects.filter(pk=self.karim.pk).update(is_active=False)
@@ -255,7 +255,7 @@ class OverviewTests(ContributionTestCase):
 
         def queries():
             with CaptureQueriesContext(connection) as captured:
-                self.assertEqual(self.client.get("/administration/people/").status_code, 200)
+                self.assertEqual(self.client.get("/people/overview/").status_code, 200)
             return len(captured)
 
         before = queries()
@@ -288,6 +288,6 @@ class LanguageTests(ContributionTestCase):
         self.amina.language = "ar"
         self.amina.save()
         self.login(self.amina)
-        response = self.client.get("/administration/people/")
+        response = self.client.get("/people/overview/")
         self.assertContains(response, "نظرة عامة على الأشخاص")
         self.assertContains(response, 'dir="rtl"')

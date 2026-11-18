@@ -4,6 +4,8 @@ from django.db.models import Q
 from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
+from accounts.models import User, people_who_can_work
+
 from .blocking import BlockingReasonForm
 from .models import Attachment, Comment, Project, Task
 
@@ -65,7 +67,9 @@ class ProjectForm(BootstrapFormMixin, forms.ModelForm):
         """user: the person filling in the form."""
         super().__init__(*args, **kwargs)
         manager = self.fields["manager"]
-        manager.queryset = manager.queryset.order_by("first_name", "last_name", "username")
+        # Never an executive (release 1.2): they change nothing, so they can't manage a project
+        manager.queryset = manager.queryset.exclude(role=User.Role.EXECUTIVE).order_by(
+            "first_name", "last_name", "username")
         if not self.instance.can_change_manager(user):
             # Shown, but it can't be changed (Django ignores any other value sent for it).
             # So the list only holds the current manager: there is nothing else to choose.
@@ -159,7 +163,8 @@ class TaskForm(BootstrapFormMixin, BlockingReasonForm):
         - admins can choose anyone: a person outside the team joins it when the task is saved."""
         field = self.fields["assignee"]
         field.empty_label = _("Unassigned")
-        people = get_user_model().objects.filter(is_active=True).order_by("first_name", "last_name", "username")
+        # Active people, never executives (release 1.2): they read everything and are given nothing to do
+        people = people_who_can_work().order_by("first_name", "last_name", "username")
 
         if not user.is_admin:
             allowed = Q(pk__in=project.team_queryset().values("pk"))
@@ -212,9 +217,9 @@ class TeamMemberForm(BootstrapFormMixin, forms.Form):
 
     def __init__(self, *args, project, **kwargs):
         super().__init__(*args, **kwargs)
-        # People whose account is active and who aren't in the team yet
+        # People whose account is active and who aren't in the team yet; never executives (release 1.2)
         self.fields["person"].queryset = (
-            get_user_model().objects.filter(is_active=True)
+            people_who_can_work()
             .exclude(pk__in=project.team_queryset().values("pk"))
             .order_by("first_name", "last_name", "username")
         )
