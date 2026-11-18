@@ -17,7 +17,8 @@ The report (counts, migration names and status codes only, never names or emails
 The stack keeps running for a look; stop it with the "down" command printed at the end (it keeps the volumes).
 #>
 param(
-    [Parameter(Mandatory = $true)][string]$DumpPath
+    [string]$DumpPath = "",
+    [switch]$SelfTest  # only checks the error filter below, without Docker (used by the app's tests)
 )
 
 $ProjectName = "itpm-rehearsal"
@@ -60,9 +61,51 @@ function Read-Counts([string[]]$lines) {
     return $table
 }
 
+
+# Runs docker compose and keeps what it printed: Out (normal output), Err (error output), Ok (exit code 0)
+function Invoke-Captured {
+    $all = Compose @args 2>&1
+    $code = $LASTEXITCODE
+    $out = @($all | Where-Object { $_ -isnot [System.Management.Automation.ErrorRecord] } | ForEach-Object { "$_" })
+    $err = @($all | Where-Object { $_ -is [System.Management.Automation.ErrorRecord] } | ForEach-Object { "$_" })
+    return @{ Out = $out; Err = $err; Ok = ($code -eq 0) }
+}
+# The last error lines of a failed step, for the report. Only the exception lines are kept: never the "DETAIL:" or
+# "Key (...)=(...)" lines of a database error, which can repeat row values; emails and passwords are masked.
+function Select-ErrorLines([string[]]$lines, [int]$last = 3) {
+    $picked = @($lines | Where-Object {
+            $_ -match '(Error|Exception|FATAL)\b' -and $_ -notmatch '^\s*(DETAIL|HINT|Key \()' -and $_ -notmatch '^\s*File "'
+        } | ForEach-Object {
+            $text = $_.Trim() -replace 'Key \(.*?\)=\(.*?\)', 'Key (<hidden>)'
+            $text = $text -replace '[^\s"''<>()]+@[^\s"''<>()]+', '<email hidden>'
+            $text = $text -replace '(?i)(password\s*[=:]\s*)\S+', '$1<hidden>'
+            if ($text.Length -gt 300) { $text.Substring(0, 300) + "..." } else { $text }
+        })
+    return @($picked | Select-Object -Last $last)
+}
+function Show-Errors($result) {
+    $lines = Select-ErrorLines (@($result.Err) + @($result.Out))
+    if ($lines.Count -eq 0) { Say "    (no error line found in the output)" "Red" }
+    foreach ($line in $lines) { Say ("    error: " + $line) "Red" }
+}
+
+if ($SelfTest) {
+    $sample = @(
+        'Traceback (most recent call last):',
+        '  File "/app/manage.py", line 22, in <module>',
+        'psycopg.OperationalError: connection failed: FATAL:  password authentication failed for user "itpm_user"',
+        'django.db.utils.IntegrityError: duplicate key value violates unique constraint "accounts_user_email_key"',
+        'DETAIL:  Key (email)=(sara@example.com) already exists.',
+        'ValueError: bad value from sara@example.com with password=abc123 and Key (email)=(omar@example.com)',
+        'Applying accounts.0008... OK')
+    Select-ErrorLines $sample 10 | ForEach-Object { Write-Output $_ }
+    exit 0
+}
+
 Say ("Migration rehearsal - " + (Get-Date -Format "yyyy-MM-dd HH:mm") + " - branch " + (& git -C $Repo rev-parse --abbrev-ref HEAD) + " at " + (& git -C $Repo rev-parse --short HEAD)) "Cyan"
 
 # ---------- 0. Safety checks ----------
+if (-not $DumpPath) { Stop-Here "-DumpPath is given (the path of the dump)" }
 if (-not (Test-Path -LiteralPath $DumpPath -PathType Leaf)) { Stop-Here ("the dump file exists (" + $DumpPath + ")") }
 $Dump = (Resolve-Path -LiteralPath $DumpPath).Path
 Check "the dump is outside the project folder" (-not $Dump.StartsWith($Repo + "\", [StringComparison]::OrdinalIgnoreCase))
@@ -113,6 +156,12 @@ for ($i = 0; $i -lt 30 -and $health -ne "healthy"; $i++) {
 Check "rehearsal database ready" ($health -eq "healthy") $health
 if ($script:Failed) { Stop-Here "the rehearsal database didn't start" }
 
+# The volume keeps the password of the run that created it (PostgreSQL reads POSTGRES_PASSWORD only then), and each
+# run makes a new one: give itpm_user this run's password, through the container's local socket, so the app connects
+Compose exec -T db psql -U itpm_user -d itpm -v ON_ERROR_STOP=1 -q -c "ALTER USER itpm_user WITH PASSWORD '$dbPassword';" | Out-Null
+Check "database password set to this run's settings" ($LASTEXITCODE -eq 0)
+if ($script:Failed) { Stop-Here "the rehearsal database password could not be set" }
+
 # The dump has \restrict lines (PostgreSQL 16.10 and newer): an older psql can't read it
 $psql = "$(Compose exec -T db psql --version)"
 $psqlOk = $false
@@ -131,24 +180,29 @@ Check "dump restored with psql" $restored
 if ($script:Failed) { Stop-Here "the dump could not be restored" }
 
 # ---------- 3. Before, migrate, after ----------
-$before = Read-Counts (Compose run --rm --no-deps web python scripts/rehearsal_checks.py counts 2>$null)
-Check "rows counted before migrating" ($before.Count -gt 0) ("(" + $before.Count + " tables)")
+$counting = Invoke-Captured run --rm --no-deps web python scripts/rehearsal_checks.py counts
+$before = Read-Counts $counting.Out
+Check "rows counted before migrating" ($counting.Ok -and $before.Count -gt 0) ("(" + $before.Count + " tables)")
+if (-not $counting.Ok -or $before.Count -eq 0) { Show-Errors $counting; Stop-Here "the app can't read the restored database" }
 $plan = Compose run --rm --no-deps web python manage.py showmigrations --plan 2>$null
 $pending = @($plan | Where-Object { "$_" -match '^\[ \]' } | ForEach-Object { ("$_" -replace '^\[ \]\s*', '').Trim() })
 Say ("Migrations to apply: " + $(if ($pending.Count) { $pending -join ", " } else { "none" }))
 
-$migrate = Compose run --rm --no-deps web python manage.py migrate --noinput 2>&1
-$migrated = ($LASTEXITCODE -eq 0)
-foreach ($line in $migrate) { if ("$line" -match "Applying|No migrations to apply") { Say ("  " + "$line".Trim()) } }
-Check "migrate" $migrated
-if (-not $migrated) { Stop-Here "the migrations failed on the copy of the live database" }
+$migrate = Invoke-Captured run --rm --no-deps web python manage.py migrate --noinput
+foreach ($line in $migrate.Out) { if ($line -match "Applying|No migrations to apply") { Say ("  " + $line.Trim()) } }
+Check "migrate" $migrate.Ok
+if (-not $migrate.Ok) { Show-Errors $migrate; Stop-Here "the migrations failed on the copy of the live database" }
 
-Compose run --rm --no-deps web python manage.py migrate --check 2>$null | Out-Null
-Check "migrate --check (nothing left to apply)" ($LASTEXITCODE -eq 0)
-Compose run --rm --no-deps web python manage.py check 2>$null | Out-Null
-Check "Django system check" ($LASTEXITCODE -eq 0)
+$migrateCheck = Invoke-Captured run --rm --no-deps web python manage.py migrate --check
+Check "migrate --check (nothing left to apply)" $migrateCheck.Ok
+if (-not $migrateCheck.Ok) { Show-Errors $migrateCheck }
+$systemCheck = Invoke-Captured run --rm --no-deps web python manage.py check
+Check "Django system check" $systemCheck.Ok
+if (-not $systemCheck.Ok) { Show-Errors $systemCheck }
 
-$after = Read-Counts (Compose run --rm --no-deps web python scripts/rehearsal_checks.py counts 2>$null)
+$counting = Invoke-Captured run --rm --no-deps web python scripts/rehearsal_checks.py counts
+$after = Read-Counts $counting.Out
+if (-not $counting.Ok -or $after.Count -eq 0) { Check "rows counted after migrating" $false; Show-Errors $counting }
 # Django's own bookkeeping grows with new migrations and models; every other table must keep its rows
 $bookkeeping = @("django_migrations", "django_content_type", "auth_permission")
 Say "Rows per table (before -> after):"
