@@ -228,6 +228,16 @@ class Project(models.Model):
         return schedule_of(self)
 
     @property
+    def delay(self):
+        """What the lists highlight: "late" (red), "behind" (behind schedule, orange) or None.
+        Late is the stronger signal: a project that is both is only shown as late."""
+        if self.is_overdue:
+            return "late"
+        if self.schedule and self.schedule.is_behind:
+            return "behind"
+        return None
+
+    @property
     def is_overdue(self):
         """The end date has passed, but the project isn't finished."""
         return (

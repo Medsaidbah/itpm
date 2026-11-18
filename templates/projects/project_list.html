@@ -54,8 +54,9 @@
       </thead>
       <tbody>
         {% for project in projects %}
-        <tr>
-          <td><a href="{{ project.get_absolute_url }}"><bdi>{{ project.name }}</bdi></a></td>
+        {# A late or behind-schedule row gets a coloured edge on its start side (theme.css) and its badge #}
+        <tr{% if project.delay %} class="project-{{ project.delay }}"{% endif %}>
+          <td><a href="{{ project.get_absolute_url }}"><bdi>{{ project.name }}</bdi></a>{% if project.delay %} {% include "includes/project_delay_badge.html" %}{% endif %}</td>
           <td><span class="badge bg-{{ project.status_color }}-lt">{{ project.get_status_display }}</span></td>
           <td class="d-none d-md-table-cell"><span class="badge bg-{{ project.priority_color }}-lt">{{ project.get_priority_display }}</span></td>
           <td class="d-none d-md-table-cell">

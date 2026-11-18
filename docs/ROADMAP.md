@@ -25,7 +25,7 @@ One feature per commit, each with its tests, the full test suite passing, and th
 | 1 | Clickable web addresses in comments and descriptions | 4 | Done (513c22a) |
 | 2 | Team pictures in the project list | 10 | Done (9e69d6c) |
 | 3 | Delay detection: expected vs actual progress | 7 | Done |
-| 4 | Highlight late (red) and behind-schedule (amber) projects | 8 | To do |
+| 4 | Highlight late (red) and behind-schedule (amber) projects | 8 | Done |
 | 5 | Project count cards on the home page | 1 | To do |
 | 6 | Preview attachments (PDF and images) | 3 | To do |
 | 7 | Contribution summary on people's pages | 11 | To do |

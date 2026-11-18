@@ -831,15 +831,16 @@ def dashboard(request):
     weeks = [first_monday + timedelta(weeks=i) for i in range(8)]
     done_per_week = [{"week": date_format(week, _("d M")), "count": per_week.get(week, 0)} for week in weeks]
 
-    # Active projects that are late or have overdue tasks, worst first
+    # Active projects that are late, behind schedule (see projects/schedule.py) or have overdue tasks.
+    # Worst first: the most overdue tasks, then late before behind schedule.
     needs_attention = [
         project
         for project in projects.with_task_counts()
         .filter(status__in=Project.ACTIVE_STATUSES)
         .select_related("manager")
-        if project.is_overdue or project.task_overdue
+        if project.delay or project.task_overdue
     ]
-    needs_attention.sort(key=lambda project: -project.task_overdue)
+    needs_attention.sort(key=lambda project: (-project.task_overdue, project.delay != "late"))
 
     oldest_overdue = list(overdue_tasks.select_related("project", "assignee").order_by("due_date", "id")[:10])
     for task in oldest_overdue:

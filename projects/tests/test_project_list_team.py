@@ -15,7 +15,7 @@ from .base import TeamTestCase
 def team_cell(response, project):
     """The Team cell of this project's row in the list (the cell after the manager's)."""
     html = response.content.decode()
-    row = re.search(rf'<tr>\s*<td><a href="/projects/{project.pk}/">.*?</tr>', html, re.S).group(0)
+    row = re.search(rf'<tr[^>]*>\s*<td><a href="/projects/{project.pk}/">.*?</tr>', html, re.S).group(0)
     cells = re.findall(r"<td[^>]*>(.*?)</td>", row, re.S)
     return cells[4]  # project, status, priority, manager, team
 
