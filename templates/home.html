@@ -38,8 +38,10 @@
   </div>
 </div>
 
-{# Projects at a glance: the projects the person can see, by status, and the ones that need attention.
-   Each card opens the project list showing exactly those projects (views.project_cards). #}
+{% comment %}
+  Projects at a glance: the projects the person can see, by status, and the ones that need attention.
+  Each card opens the project list showing exactly those projects (views.project_cards).
+{% endcomment %}
 <section class="mb-4" aria-labelledby="glance-title">
   <div class="d-flex flex-wrap align-items-baseline gap-2 mb-2">
     <h3 class="mb-0 me-auto" id="glance-title">{% translate "Projects at a glance" %}</h3>
