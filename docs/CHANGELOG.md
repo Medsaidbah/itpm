@@ -1,25 +1,36 @@
 # Mchariee – changelog
 
-## 1.4.0 (in preparation, on branch v1.4)
+## 1.4.0 (2026-11-24)
 
 ### What changes for the people who use Mchariee
 
 - **Task weights.** A task can weigh 1 (small), 2, 3 or 5 (very large). The project's managers and admins set it
   in the task form; everyone who sees the task sees it, also in the task export. A project's progress and the
   progress expected by today now take the weights into account, so a large task counts more than a small one.
-  Every existing task weighs 1, so every project shows exactly the same progress as before until someone changes
-  a weight.
 
 ### What MTNIMA needs to know
 
-- **No new settings.**
-- **One database migration, `projects/0011`.** It only adds one column to the tasks (and to their history): the
-  weight. Nothing is deleted, renamed or rewritten; every existing task gets the weight 1, so every progress figure
-  stays the same. It applies by itself when the new version starts.
-- **How to update:** back up the database and the `itpm_media` volume first, keep the 1.3.0 image, then start the new
-  image with the same `docker.env` and volumes.
-- **Going back to 1.3.0** works on the same database: 1.3.0 ignores the new column, and the database gives the
-  weight 1 to the tasks 1.3.0 creates. Weights entered meanwhile stay in the database and come back with 1.4.0.
+- **No new settings.** `docker.env` stays exactly as it is.
+- **Database migrations, by the version you run now.** They apply by themselves when the new version starts, in
+  this order. Nothing is deleted, renamed or rewritten.
+  - **From 1.3.0:** only `projects/0011`. It adds two columns, the weight of the tasks and of their history, with
+    the default 1 for every existing task.
+  - **From 1.2.0:** also `projects/0010` first (three new columns on the projects and their history: type,
+    partner, budget).
+  - **From 1.1.0:** also `accounts/0008` first (it only adds the "Executive" role to the list of roles: no SQL,
+    no data changed).
+- **Progress stays the same.** Every existing task gets the weight 1, and with every weight at 1 every progress and
+  expected-progress figure is exactly what it was before. Figures only change when someone gives a task another
+  weight.
+- **How to update.**
+  1. Make a backup first: the PostgreSQL database (`pg_dump`) and the `itpm_media` volume.
+  2. Keep the previous image (do not delete it) so that you can go back to it.
+  3. Start the 1.4.0 image with the same `docker.env` and the same volumes.
+- **Going back one version works on the same database.** 1.3.0 keeps working after `projects/0011`: it ignores the
+  new column, and the database gives the weight 1 to the tasks 1.3.0 creates. Weights entered meanwhile stay in the
+  database and come back with 1.4.0.
+- **Configuration files.** Only the image tag changed in `docker-compose.yml` and `delivery/manifest.yml` (now
+  `registry-mtnima.gov.mr/ddirepo/mchariee:1.4.0`).
 
 ## 1.3.0 (2026-11-24)
 

@@ -50,7 +50,7 @@ services:
   # --- L'application (un seul conteneur, port 8000, HTTP ; le HTTPS est géré par le reverse proxy du MTNIMA) ---
   web:
     # À REMPLACER par le nom réel : registry-mtnima.gov.mr/[NOM_INSTITUTION]/[NOM_APP]:[VERSION]
-    image: registry-mtnima.gov.mr/ddirepo/mchariee:1.3.0
+    image: registry-mtnima.gov.mr/ddirepo/mchariee:1.4.0
     restart: unless-stopped
     environment: *app-environment
     ports:
@@ -71,7 +71,7 @@ services:
   # --- Tâches planifiées (même image, même environnement). Elles ne tournent pas en continu : le planificateur du
   # --- MTNIMA les lance avec :  docker compose -f manifest.yml --profile jobs run --rm rappels
   rappels:                   # 1 fois par jour (par exemple à 07:00) : e-mail de rappel des tâches en retard / proches
-    image: registry-mtnima.gov.mr/ddirepo/mchariee:1.3.0
+    image: registry-mtnima.gov.mr/ddirepo/mchariee:1.4.0
     profiles: ["jobs"]
     environment: *app-environment
     command: ["python", "manage.py", "send_reminders"]
@@ -80,7 +80,7 @@ services:
         limits: {cpus: "0.5", memory: 512M}
 
   boite-d-envoi:             # toutes les 10 minutes : renvoie les e-mails qui ont échoué et nettoie la boîte d'envoi
-    image: registry-mtnima.gov.mr/ddirepo/mchariee:1.3.0
+    image: registry-mtnima.gov.mr/ddirepo/mchariee:1.4.0
     profiles: ["jobs"]
     environment: *app-environment
     command: ["python", "manage.py", "send_outbox"]

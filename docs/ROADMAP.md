@@ -37,7 +37,7 @@ One feature per commit, each with its tests, the full test suite passing, and th
 |---|---|---|
 | 1.2 | Read-only executive role: sees every project, indicator, team, activity, delay and blocker; edits nothing (**Done, 1.2.0**) | 14 |
 | 1.3 | Project type (internal / external / not specified), external partner and budget (**Done, 1.3.0**) | 12 |
-| 1.4 | Task weights (default 1, so today's progress figures don't change) (built on `v1.4`, not released) | 6 |
+| 1.4 | Task weights (default 1, so today's progress figures don't change) (**Done, 1.4.0**) | 6 |
 | 1.5 | Archive instead of delete for projects and tasks; block records (reason, start, expected end) | 5 |
 | 1.6 | Manager approval before a task is done, as an option per project, off by default | 9 |
 | 1.7 | Task contributors besides the responsible person | 2 |
@@ -109,8 +109,8 @@ owner's look at the result.
 
 ## Release 1.4 decisions (task weights)
 
-Status: built on branch `v1.4`, not released yet. Before release: the migration rehearsal on the live copy, and
-the product owner's look at the result.
+Status: **Done**, release 1.4.0 (2026-11-24), after the migration rehearsal on the live copy and the product
+owner's look at the result.
 
 - A task has a weight: 1, 2, 3 or 5 ("Small (1)", "Medium (2)", "Large (3)", "Very large (5)"), default 1, no 0.
   `projects/0011` only adds that column (on the tasks and their history), default 1 kept in the database, so every
