@@ -8,7 +8,8 @@ from simple_history.admin import SimpleHistoryAdmin
 
 from accounts.models import User, people_who_can_work
 
-from .blocking import BlockingReasonForm, record_reason
+from .blocking import BlockingReasonForm
+from .status import change_status, take_new_status
 from .models import Attachment, Comment, Project, ProjectMember, Task
 
 
@@ -103,24 +104,26 @@ class ProjectAdmin(NoExecutivesMixin, SimpleHistoryAdmin):
 
     def save_formset(self, request, form, formset, change):
         instances = formset.save(commit=False)
+        forms_by_instance = {id(line.instance): line for line in formset.forms}
         for obj in instances:
             if isinstance(obj, ProjectMember) and obj.pk is None:
                 # Already in the team: the previous manager, kept in the team just before
                 if ProjectMember.objects.filter(project=obj.project, user=obj.user).exists():
                     continue
                 obj.added_by = request.user  # remember who added each new team member
-            # A task given to someone outside the team: saving it puts that person in the team,
-            # and they are remembered as added by this admin (see Task.save)
+            # A task of the table (path 7 of projects/status.py): change_status gives its status and saves it, with
+            # the reason it was just blocked, as a comment by this admin; a task given to someone outside the team
+            # puts that person in the team, remembered as added by this admin (see Task.save). No "unblocked"
+            # notification from the admin panel (as before).
             if isinstance(obj, Task):
-                obj.saved_by = request.user
+                task_form = forms_by_instance.get(id(obj))
+                reason = getattr(task_form, "blocking_reason", None) or ""
+                change_status(obj, take_new_status(obj), by=request.user, reason=reason)
+                continue
             obj.save()
         for obj in formset.deleted_objects:
             obj.delete()
         formset.save_m2m()
-        # Tasks of the table that were just blocked: their reason, as a comment by this admin
-        for task_form in formset.forms:
-            if getattr(task_form, "blocking_reason", None) and task_form.instance.pk:
-                record_reason(task_form.instance, request.user, task_form.blocking_reason)
 
 
 class TaskAdminForm(BlockingReasonForm):
@@ -173,12 +176,12 @@ class TaskAdmin(NoExecutivesMixin, SimpleHistoryAdmin):
         return fields + ["project"] if obj else fields
 
     def save_model(self, request, obj, form, change):
-        # Given to someone outside the team: saving the task puts that person in the team,
-        # remembered as added by this admin (see Task.save)
-        obj.saved_by = request.user
-        super().save_model(request, obj, form, change)
-        if form.blocking_reason:  # just blocked: the reason, as a comment by this admin
-            record_reason(obj, request.user, form.blocking_reason)
+        # A task's page and its "Revert" (paths 5 and 6 of projects/status.py): change_status gives the status and
+        # saves the task, with the reason it was just blocked as a comment by this admin, and this admin in the
+        # history (what SimpleHistoryAdmin.save_model did). Given to someone outside the team, the task puts that
+        # person in the team, remembered as added by this admin (see Task.save). No "unblocked" notification from
+        # here (as before).
+        change_status(obj, take_new_status(obj), by=request.user, reason=form.blocking_reason or "")
 
     def save_formset(self, request, form, formset, change):
         # Fill in the comment author and the file uploader automatically

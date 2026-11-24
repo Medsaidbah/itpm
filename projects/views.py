@@ -4,7 +4,6 @@ from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
-from django.db import transaction
 from django.db.models import Count, F, Prefetch, Q, Sum
 from django.db.models.functions import TruncWeek
 from django.http import FileResponse, Http404, JsonResponse
@@ -18,7 +17,7 @@ from django.utils.translation import ngettext, pgettext
 from django.views.decorators.http import require_POST
 
 from .activity import get_events
-from .blocking import REASON_FIELD, becomes_blocked, clean_reason, missing_reason_message, record_reason
+from .blocking import REASON_FIELD
 from .emails import email_new_assignee
 from .forms import (
     MAX_UPLOAD_MB,
@@ -30,10 +29,11 @@ from .forms import (
     TeamMemberForm,
 )
 from .models import Attachment, Comment, Notification, Project, ProjectMember, Task
-from .notifications import notify_assigned, tell_project_event, tell_unblocked
+from .notifications import notify_assigned, tell_project_event
 from .money import format_mru
 from .previews import HEAD_SIZE, PREVIEW_HEADERS, preview_type
 from .schedule import BEHIND_SCHEDULE_MARGIN
+from .status import StatusRefused, change_status, take_new_status
 
 # ---------- Who sees what ----------
 # People only see the projects they manage or whose team they are in; admins see all of them
@@ -467,11 +467,11 @@ def task_create(request, project_pk):
     if request.method == "POST":
         form = TaskForm(request.POST, project=project, user=request.user)
         if form.is_valid():
-            form.instance.saved_by = request.user
-            with transaction.atomic():  # the task and the reason it is blocked are saved together, or not at all
-                task = form.save()
-                if form.blocking_reason:
-                    record_reason(task, request.user, form.blocking_reason)
+            task = form.save(commit=False)
+            # The status is given by change_status (projects/status.py): it saves the task, its links and the reason
+            # it is blocked, together or not at all
+            change_status(task, take_new_status(task), by=request.user, reason=form.blocking_reason or "",
+                          save_related=form.save_m2m)
             messages.success(request, _('Task "%(title)s" created.') % {"title": task.title})
             tell_if_joined_team(request, task)
             tell_new_assignee(request, task, previous_assignee_id=None)
@@ -491,19 +491,18 @@ def task_edit(request, pk):
 
     if request.method == "POST":
         previous_assignee_id = task.assignee_id  # read it now: checking the form changes the task
-        previous_status = task.status
         form = TaskForm(request.POST, instance=task, project=task.project, user=request.user)
         if form.is_valid():
-            task.saved_by = request.user
-            with transaction.atomic():  # the task and the reason it is blocked are saved together, or not at all
-                form.save()
-                if form.blocking_reason:  # only when the status was just changed to Blocked
-                    record_reason(task, request.user, form.blocking_reason)
-            messages.success(request, _("Changes saved."))
-            tell_if_joined_team(request, task)
-            tell_new_assignee(request, task, previous_assignee_id)
-            if task.status == Task.Status.DONE and previous_status != Task.Status.DONE:
-                tell_unblocked(request, task)
+            def tell_people():  # this page's messages and emails, before any "unblocked" warning (as before)
+                messages.success(request, _("Changes saved."))
+                tell_if_joined_team(request, task)
+                tell_new_assignee(request, task, previous_assignee_id)
+
+            form.save(commit=False)
+            # The status is given by change_status (projects/status.py): it saves the task, its links and the reason
+            # it is blocked together, then tells the people whose task was waiting for this one when it becomes Done
+            change_status(task, take_new_status(task), by=request.user, reason=form.blocking_reason or "",
+                          request=request, notify=True, save_related=form.save_m2m, after_save=tell_people)
             return redirect(task)
     else:
         form = TaskForm(instance=task, project=task.project, user=request.user)
@@ -523,24 +522,21 @@ def task_status(request, pk):
         )
 
     new_status = request.POST.get("status")
-    reason = clean_reason(request.POST.get(REASON_FIELD))
     if new_status not in Task.Status.values:
         messages.error(request, _("Unknown status."))
-    elif new_status != task.status and becomes_blocked(task, new_status) and not reason:
-        messages.error(request, missing_reason_message())  # nothing is changed
     elif new_status != task.status:
-        with transaction.atomic():  # the status and the reason it is blocked are saved together, or not at all
-            task.status = new_status
-            task.saved_by = request.user
-            task.save()
-            if new_status == Task.Status.BLOCKED:
-                record_reason(task, request.user, reason)
-        messages.success(
-            request, _('"%(title)s" is now %(status)s.') % {"title": task.title, "status": task.get_status_display()}
-        )
-        tell_if_joined_team(request, task)
-        if new_status == Task.Status.DONE:  # (the status did change: this branch is only for changes)
-            tell_unblocked(request, task)
+        def tell_people():  # this page's messages, before any "unblocked" warning (as before)
+            messages.success(
+                request, _('"%(title)s" is now %(status)s.') % {"title": task.title, "status": task.get_status_display()}
+            )
+            tell_if_joined_team(request, task)
+
+        try:
+            # projects/status.py: the reason rule, the save, the reason as a comment, the "unblocked" notification
+            change_status(task, new_status, by=request.user, reason=request.POST.get(REASON_FIELD), request=request,
+                          notify=True, after_save=tell_people)
+        except StatusRefused as refused:
+            messages.error(request, refused.message)  # nothing is changed
 
     # A button can ask to come back to its own page (like My tasks) with a "next" field.
     # Only addresses on this site are accepted, so a link can't send people elsewhere.
@@ -707,19 +703,14 @@ def task_move(request, pk):
         return JsonResponse({"error": _("Unknown status.")}, status=400)
 
     if new_status != task.status:
-        reason = clean_reason(request.POST.get(REASON_FIELD))
-        if becomes_blocked(task, new_status) and not reason:
+        try:
+            # projects/status.py: the reason rule, the save (recorded in the history), the reason as a comment, and
+            # the "unblocked" notification without a warning on the next page (the board stays on its page)
+            change_status(task, new_status, by=request.user, reason=request.POST.get(REASON_FIELD), request=request,
+                          notify=True, warn=False)
+        except StatusRefused as refused:
             # Nothing is changed, not even the order of the cards: the board puts the card back
-            return JsonResponse({"error": missing_reason_message()}, status=400)
-        was_done = task.status == Task.Status.DONE
-        with transaction.atomic():  # the status and the reason it is blocked are saved together, or not at all
-            task.status = new_status
-            task.saved_by = request.user
-            task.save()  # a status change is recorded in the history
-            if new_status == Task.Status.BLOCKED:
-                record_reason(task, request.user, reason)
-        if new_status == Task.Status.DONE and not was_done:
-            tell_unblocked(request, task, warn=False)
+            return JsonResponse({"error": refused.message}, status=400)
 
     # Save each card's place in the column (0 = top). Only cards of this project and column count.
     order = [int(task_id) for task_id in request.POST.getlist("order") if task_id.isdigit()]
