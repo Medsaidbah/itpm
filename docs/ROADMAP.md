@@ -35,7 +35,7 @@ One feature per commit, each with its tests, the full test suite passing, and th
 
 | Release | Feature | Idea |
 |---|---|---|
-| 1.2 | Read-only executive role: sees every project, indicator, team, activity, delay and blocker; edits nothing | 14 |
+| 1.2 | Read-only executive role: sees every project, indicator, team, activity, delay and blocker; edits nothing (**Done, 1.2.0**) | 14 |
 | 1.3 | Project type (internal / external / not specified), external partner, budget and cost so far | 12 |
 | 1.4 | Task weights (default 1, so today's progress figures don't change) | 6 |
 | 1.5 | Archive instead of delete for projects and tasks; block records (reason, start, expected end) | 5 |
@@ -74,8 +74,8 @@ projects they manage, while the person is in one of their teams.
 
 ## Release 1.2 decisions (executive role)
 
-Status: built on branch `v1.2`, not released yet. Before release: the migration rehearsal on the live copy, and
-the product owner's look at the result.
+Status: **Done**, release 1.2.0 (2026-11-24), after the migration rehearsal on the live copy and the product
+owner's look at the result.
 
 - The role is called "Executive (read-only)" (`executive`); `accounts/0008` only adds that choice (no SQL).
 - An executive sees every project, task, team, person page, contribution figure and activity (also of deleted

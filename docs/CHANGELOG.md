@@ -1,6 +1,6 @@
 # Mchariee – changelog
 
-## 1.2.0 (in preparation, on branch v1.2)
+## 1.2.0 (2026-11-24)
 
 ### What changes for the people who use Mchariee
 
@@ -14,13 +14,17 @@
 ### What MTNIMA needs to know
 
 - **No new settings.**
-- **One database migration, `accounts/0008`.** It only adds the new role to the list of roles: it sends no SQL to
-  PostgreSQL and changes no data; every account keeps its role. It is rehearsed on a copy of the live database
-  before the release.
-- **Update as before:** backup first (database and `itpm_media`), keep the 1.1.0 image, start 1.2.0 with the same
-  settings and volumes.
-- **Going back to 1.1.0** works on the same database. Before that, give the executives another role: 1.1.0 doesn't
-  know the role, so an executive would see nothing there.
+- **One database migration, `accounts/0008`.** It only adds the new role to the list of choices of a user's role:
+  it sends no SQL to PostgreSQL (`sqlmigrate` shows "no-op") and changes no data; every account keeps its role.
+  It applies by itself when the new version starts, and it was rehearsed on a copy of the live database.
+- **How to update.**
+  1. Make a backup first: the PostgreSQL database (`pg_dump`) and the `itpm_media` volume.
+  2. Keep the 1.1.0 image (do not delete it) so that you can go back to it.
+  3. Start the 1.2.0 image with the same `docker.env` and the same volumes.
+- **Going back to 1.1.0** works on the same database, but first give every executive another role (Administration >
+  Users): 1.1.0 doesn't know the "Executive" role, so an executive would see nothing there.
+- **Configuration files.** Only the image tag changed in `docker-compose.yml` and `delivery/manifest.yml` (now
+  `registry-mtnima.gov.mr/ddirepo/mchariee:1.2.0`).
 
 ## 1.1.0 (prepared on 2026-11-18)
 
