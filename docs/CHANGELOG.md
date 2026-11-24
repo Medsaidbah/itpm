@@ -1,6 +1,6 @@
 # Mchariee – changelog
 
-## 1.3.0 (in preparation, on branch v1.3)
+## 1.3.0 (2026-11-24)
 
 ### What changes for the people who use Mchariee
 
@@ -14,15 +14,25 @@
 
 ### What MTNIMA needs to know
 
-- **No new settings.**
-- **One database migration, `projects/0010`.** It only adds three columns to the projects (and to their history):
-  type, partner and budget. Nothing is deleted, renamed or rewritten; existing projects get the type
-  "Not specified", no partner and no budget. It applies by itself when the new version starts.
-- **How to update:** back up the database and the `itpm_media` volume first, keep the 1.2.0 image, then start the new
-  image with the same `docker.env` and volumes.
-- **Going back to 1.2.0** works on the same database: 1.2.0 ignores the three new columns, and the database fills in
-  their defaults when 1.2.0 creates or saves a project. The types, partners and budgets entered meanwhile stay in
-  the database (1.2.0 doesn't show them) and come back with 1.3.0.
+- **No new settings.** `docker.env` stays exactly as it is.
+- **Database migrations.** They apply by themselves when the new version starts.
+  - **Updating from 1.2.0:** one migration, `projects/0010`. It adds three columns to the projects and to their
+    history (type, partner, budget). Nothing is deleted, renamed or rewritten; existing projects get the type
+    "Not specified", no partner and no budget.
+  - **Updating from 1.1.0:** two migrations, `accounts/0008` first (it only adds the "Executive" role to the list
+    of roles: no SQL, no data changed), then `projects/0010` as above.
+- **How to update.**
+  1. Make a backup first: the PostgreSQL database (`pg_dump`) and the `itpm_media` volume.
+  2. Keep the previous image (do not delete it) so that you can go back to it.
+  3. Start the 1.3.0 image with the same `docker.env` and the same volumes.
+- **Going back one version works on the same database.**
+  - **To 1.2.0:** it keeps working after `projects/0010`. It ignores the three new columns, and the database fills
+    in their defaults when 1.2.0 creates or saves a project. The types, partners and budgets entered meanwhile stay
+    in the database (1.2.0 doesn't show them) and come back with 1.3.0.
+  - **To 1.1.0:** first give every executive another role (Administration > Users): 1.1.0 doesn't know the
+    "Executive" role, so an executive would see nothing there.
+- **Configuration files.** Only the image tag changed in `docker-compose.yml` and `delivery/manifest.yml` (now
+  `registry-mtnima.gov.mr/ddirepo/mchariee:1.3.0`).
 
 ## 1.2.0 (2026-11-24)
 

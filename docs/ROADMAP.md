@@ -36,7 +36,7 @@ One feature per commit, each with its tests, the full test suite passing, and th
 | Release | Feature | Idea |
 |---|---|---|
 | 1.2 | Read-only executive role: sees every project, indicator, team, activity, delay and blocker; edits nothing (**Done, 1.2.0**) | 14 |
-| 1.3 | Project type (internal / external / not specified), external partner and budget (built on `v1.3`, not released) | 12 |
+| 1.3 | Project type (internal / external / not specified), external partner and budget (**Done, 1.3.0**) | 12 |
 | 1.4 | Task weights (default 1, so today's progress figures don't change) | 6 |
 | 1.5 | Archive instead of delete for projects and tasks; block records (reason, start, expected end) | 5 |
 | 1.6 | Manager approval before a task is done, as an option per project, off by default | 9 |
@@ -91,8 +91,8 @@ owner's look at the result.
 
 ## Release 1.3 decisions (project type and budget)
 
-Status: built on branch `v1.3`, not released yet. Before release: the migration rehearsal on the live copy, and
-the product owner's look at the result.
+Status: **Done**, release 1.3.0 (2026-11-24), after the migration rehearsal on the live copy and the product
+owner's look at the result.
 
 - A project has a type (Internal / External / Not specified, default "Not specified"), an external partner (only for
   an external project: saving another type empties it) and a budget (whole MRU, never negative, optional).
