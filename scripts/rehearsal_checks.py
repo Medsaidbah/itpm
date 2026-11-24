@@ -78,15 +78,15 @@ def fingerprint_of(specs):
 
 
 def defaults():
-    """Release 1.3: right after the migration, every project and history row is "not specified", without partner,
-    budget or cost. Prints nothing before release 1.3."""
+    """Release 1.3: right after the migration, every project and history row is "not specified", without partner or
+    budget. Prints nothing before release 1.3."""
     with connection.cursor() as cursor:
         if "kind" not in {c.name for c in connection.introspection.get_table_description(cursor, "projects_project")}:
             return
         wrong = 0
         for table in ("projects_project", "projects_historicalproject"):
             cursor.execute(f"SELECT COUNT(*) FROM {table} WHERE kind <> 'unspecified' OR partner <> '' "
-                           f"OR budget IS NOT NULL OR cost IS NOT NULL")
+                           f"OR budget IS NOT NULL")
             wrong += cursor.fetchone()[0]
     print("projects-defaults", "ok" if wrong == 0 else f"{wrong}-rows-differ")
 
@@ -235,17 +235,17 @@ def executive_pages():
 
 
 
-BUDGET, COST = 987654321, 123456789  # numbers that appear nowhere else
+BUDGET = 987654321  # a number that appears nowhere else
 
 
 def marker_forms():
-    """Every way the markers could be written: plain digits, and as each language of the app formats them."""
+    """Every way the marker could be written: plain digits, and as each language of the app formats it."""
     from django.utils import translation
 
     from projects.money import format_mru
 
     forms = set()
-    for amount in (BUDGET, COST):
+    for amount in (BUDGET,):
         forms |= {str(amount), f"{amount:,}", f"{amount:,}".replace(",", " "), f"{amount:,}".replace(",", "\u00a0"),
                   f"{amount:,}".replace(",", ".")}
         for language in ("en", "fr", "ar"):
@@ -267,9 +267,9 @@ def as_text(response):
 
 
 def budget_pages(admin):
-    """Release 1.3: a marker budget and cost are put on one project, in the rehearsal database only. An ordinary member
-    of its team must not find them on any page, export or Activity; its manager, an admin and an executive (made for
-    the check) must see them on the project's page. Everything is put back afterwards.
+    """Release 1.3: a marker budget is put on one project, in the rehearsal database only. An ordinary member
+    of its team must not find it on any page, export or Activity; its manager, an admin and an executive (made for
+    the check) must see it on the project's page. Everything is put back afterwards.
     Lines: "member budget-hidden-<page> ok|LEAK" and "<who> budget-shown ok|missing"."""
     from django.db.models import F
 
@@ -288,12 +288,12 @@ def budget_pages(admin):
         if person.must_change_password:  # in the rehearsal copy only, like for the pages above
             User.objects.filter(pk=person.pk).update(must_change_password=False, temporary_password_until=None)
             print(who, "note", "password-flag-cleared-in-the-copy")
-    saved = Project.objects.filter(pk=project.pk).values("budget", "cost", "status", "updated_at").get()
+    saved = Project.objects.filter(pk=project.pk).values("budget", "status", "updated_at").get()
     last_version = Project.history.order_by("-history_id").values_list("history_id", flat=True).first() or 0
     executive = User.objects.create_user("rehearsal-executive-budget", role=User.Role.EXECUTIVE)
     clients = []
     try:
-        project.budget, project.cost = BUDGET, COST
+        project.budget = BUDGET
         project.save()  # a change in the history too, for the Activity
         forms = marker_forms()
 

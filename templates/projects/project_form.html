@@ -36,11 +36,10 @@
           <div class="col-md-6">{% include "includes/form_field.html" with field=form.kind %}</div>
           <div class="col-md-6" id="partner-field">{% include "includes/form_field.html" with field=form.partner %}</div>
         </div>
-        {# The money: only in the form of the people who may see it (Project.can_see_budget) #}
+        {# The budget: only in the form of the people who may see it (Project.can_see_budget) #}
         {% if form.budget %}
         <div class="row">
           <div class="col-md-6">{% include "includes/form_field.html" with field=form.budget %}</div>
-          <div class="col-md-6">{% include "includes/form_field.html" with field=form.cost %}</div>
         </div>
         {% endif %}
       </div>

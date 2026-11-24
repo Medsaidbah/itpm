@@ -6,23 +6,23 @@
 
 - **Project type and partner.** A project can be marked Internal or External (existing projects are "Not specified"),
   and an external project can name its partner. Everyone who sees the project sees them.
-- **Budget and cost so far** (in MRU). The project's manager and admins enter them; co-managers, executives and
-  admins see them too. Ordinary team members never see them. The project page shows the share of the budget spent
-  and "Over budget" when the cost is higher than the budget.
-- **For admins and executives:** budget and cost columns in the project list and its export, and the totals of the
-  active projects on the Dashboard. The project export also gets a "Type" column for everyone.
+- **Budget** (in MRU). The project's manager and admins enter it; co-managers, executives and admins see it too.
+  Ordinary team members never see it.
+- **For admins and executives:** a budget column in the project list and its export, and the total budget of the
+  active projects on the Dashboard, with how many of them have a budget. The project export also gets a "Type"
+  column for everyone.
 
 ### What MTNIMA needs to know
 
 - **No new settings.**
-- **One database migration, `projects/0010`.** It only adds four columns to the projects (and to their history):
-  type, partner, budget and cost. Nothing is deleted, renamed or rewritten; existing projects get the type
-  "Not specified", no partner and no amounts. It applies by itself when the new version starts.
+- **One database migration, `projects/0010`.** It only adds three columns to the projects (and to their history):
+  type, partner and budget. Nothing is deleted, renamed or rewritten; existing projects get the type
+  "Not specified", no partner and no budget. It applies by itself when the new version starts.
 - **How to update:** back up the database and the `itpm_media` volume first, keep the 1.2.0 image, then start the new
   image with the same `docker.env` and volumes.
-- **Going back to 1.2.0** works on the same database: 1.2.0 ignores the four new columns, and the database fills in
-  their defaults when 1.2.0 creates or saves a project. The types, partners and amounts entered meanwhile stay in the
-  database (1.2.0 doesn't show them) and come back with 1.3.0.
+- **Going back to 1.2.0** works on the same database: 1.2.0 ignores the three new columns, and the database fills in
+  their defaults when 1.2.0 creates or saves a project. The types, partners and budgets entered meanwhile stay in
+  the database (1.2.0 doesn't show them) and come back with 1.3.0.
 
 ## 1.2.0 (2026-11-24)
 

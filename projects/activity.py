@@ -42,11 +42,10 @@ PROJECT_FIELDS = {
     "kind": gettext_lazy("Type"),
     "partner": gettext_lazy("External partner"),
 }
-# Release 1.3: the money, only in the feed of the people who may see that project's budget (Project.can_see_budget).
-# For everyone else, a save that only changed the money is no event at all.
+# Release 1.3: the budget, only in the feed of the people who may see it (Project.can_see_budget).
+# For everyone else, a save that only changed the budget is no event at all.
 BUDGET_FIELDS = {
     "budget": gettext_lazy("Budget"),
-    "cost": gettext_lazy("Cost so far"),
 }
 TASK_FIELDS = {
     "title": gettext_lazy("Title"),
@@ -148,7 +147,7 @@ def changes_between(old, new, fields, people, tasks):
 
 
 def project_event(version, projects, people, sees_money=False):
-    """sees_money: the viewer may see this project's budget and cost (then their changes are shown too)."""
+    """sees_money: the viewer may see this project's budget (then its changes are shown too)."""
     project = projects.get(version.id)  # None if the project has been deleted since
     event = Event(
         when=version.history_date,

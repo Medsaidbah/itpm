@@ -56,10 +56,9 @@
           <th class="d-none d-lg-table-cell">{% translate "Team" %}</th>
           <th class="d-none d-sm-table-cell">{% translate "End date" %}</th>
           <th class="w-25">{% translate "Progress" %}</th>
-          {# Release 1.3: the money, for admins and executives only (managers see it on their project's page) #}
+          {# Release 1.3: the budget, for admins and executives only (managers see it on their project's page) #}
           {% if user.sees_everything %}
           <th class="d-none d-lg-table-cell text-end">{% translate "Budget" %}</th>
-          <th class="d-none d-lg-table-cell text-end">{% translate "Cost so far" %}</th>
           {% endif %}
         </tr>
       </thead>
@@ -88,7 +87,6 @@
           </td>
           {% if user.sees_everything %}
           <td class="d-none d-lg-table-cell text-end">{{ project.budget|mru|default:"—" }}</td>
-          <td class="d-none d-lg-table-cell text-end">{{ project.cost|mru|default:"—" }}</td>
           {% endif %}
         </tr>
         {% endfor %}

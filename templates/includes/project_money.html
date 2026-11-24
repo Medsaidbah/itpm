@@ -1,6 +1,6 @@
 {% load i18n money %}{% comment %}
-  Release 1.3: a project's type and partner (everyone who sees the project), then its budget, cost so far and share
-  spent, only when can_see_budget (Project.can_see_budget: admins, executives, the manager and the co-managers).
+  Release 1.3: a project's type and partner (everyone who sees the project), then its budget, only when
+  can_see_budget (Project.can_see_budget: admins, executives, the manager and the co-managers).
   Datagrid items, for the project's page and its printed report.
   Use: {% include "includes/project_money.html" with project=project can_see_budget=can_see_budget %}
 {% endcomment %}
@@ -19,18 +19,4 @@
   <div class="datagrid-title">{% translate "Budget" %}</div>
   <div class="datagrid-content">{% if project.budget is None %}<span class="text-secondary">{% translate "Not set" %}</span>{% else %}{{ project.budget|mru }}{% endif %}</div>
 </div>
-<div class="datagrid-item" id="cost">
-  <div class="datagrid-title">{% translate "Cost so far" %}</div>
-  <div class="datagrid-content">
-    {% if project.cost is None %}<span class="text-secondary">{% translate "Not set" %}</span>{% else %}{{ project.cost|mru }}
-    {% with updated=project.cost_updated_at %}{% if updated %}<div class="text-secondary small">{% blocktranslate with date=updated|date:_("d M Y") %}updated on {{ date }}{% endblocktranslate %}</div>{% endif %}{% endwith %}
-    {% endif %}
-  </div>
-</div>
-{% if project.budget_spent is not None %}
-<div class="datagrid-item" id="spent">
-  <div class="datagrid-title">{% translate "Budget spent" %}</div>
-  <div class="datagrid-content">{{ project.budget_spent }}%{% if project.is_over_budget %} <span class="badge bg-orange-lt">{% translate "Over budget" %}</span>{% endif %}</div>
-</div>
-{% endif %}
 {% endif %}

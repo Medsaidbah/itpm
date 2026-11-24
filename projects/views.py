@@ -209,7 +209,7 @@ def project_detail(request, pk):
         # False when everyone is in the team already
         "people_to_add": team_form is not None and team_form.fields["person"].queryset.exists(),
         "can_edit": project.can_edit(request.user),
-        # Release 1.3: the budget and the cost, only for the people of Project.can_see_budget
+        # Release 1.3: the budget, only for the people of Project.can_see_budget
         "can_see_budget": project.can_see_budget(request.user),
         "recent_activity": recent_activity,
     }
@@ -959,15 +959,14 @@ def dashboard(request):
         {"label": _("Done in the last 30 days"),
          "value": tasks.filter(completed_at__gte=timezone.now() - timedelta(days=30)).count()},
     ]
-    # Release 1.3: the money of the active projects, for admins and executives only (who may see every budget)
+    # Release 1.3: the budget of the active projects, for admins and executives only (who may see every budget)
     if request.user.sees_everything:
-        money = active_projects.aggregate(total_budget=Sum("budget"), total_cost=Sum("cost"),
+        money = active_projects.aggregate(total_budget=Sum("budget"),
                                           with_budget=Count("id", filter=Q(budget__isnull=False)), total=Count("id"))
         note = ngettext("%(with_budget)s of %(total)s active project has a budget",
                         "%(with_budget)s of %(total)s active projects have a budget", money["total"]) % money
         kpis += [
             {"label": _("Budget of the active projects"), "value": format_mru(money["total_budget"] or 0), "note": note},
-            {"label": _("Cost so far of the active projects"), "value": format_mru(money["total_cost"] or 0), "note": note},
         ]
     context = {
         # The headline numbers; "warn" adds a warning icon when the number isn't zero

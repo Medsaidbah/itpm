@@ -124,7 +124,7 @@ class BudgetCheckTests(RehearsalTestCase):
     def test_hidden_from_the_member_shown_to_the_others_and_put_back(self):
         lina = User.objects.create_user("lina", "lina@example.com", first_name="Lina")
         ProjectMember.objects.create(project=self.project, user=lina)
-        before = (Project.objects.filter(pk=self.project.pk).values("budget", "cost", "updated_at").get(),
+        before = (Project.objects.filter(pk=self.project.pk).values("budget", "updated_at").get(),
                   Project.history.count())
         output = self.run_check("pages")
         budget_lines = [line for line in output.splitlines() if " budget-" in line]
@@ -135,7 +135,7 @@ class BudgetCheckTests(RehearsalTestCase):
         self.assertIn("admin budget-shown ok", budget_lines)
         self.assertIn("executive budget-shown ok", budget_lines)
         self.assertEqual({line.split()[2] for line in budget_lines}, {"ok"})
-        after = (Project.objects.filter(pk=self.project.pk).values("budget", "cost", "updated_at").get(),
+        after = (Project.objects.filter(pk=self.project.pk).values("budget", "updated_at").get(),
                  Project.history.count())
         self.assertEqual(after, before)
         self.assertFalse(User.objects.filter(username__startswith="rehearsal-executive").exists())
