@@ -10,7 +10,7 @@ from pathlib import Path
 from django.conf import settings
 
 from accounts.models import User
-from projects.models import Attachment, Comment, Project, ProjectMember
+from projects.models import Attachment, Comment, Project, ProjectMember, Task
 
 from .base import TeamTestCase
 
@@ -116,6 +116,26 @@ class MigrationFingerprintTests(RehearsalTestCase):
         self.assertEqual(self.run_check("defaults").strip(), "projects-defaults ok")
         Project.objects.filter(pk=self.project.pk).update(budget=10)
         self.assertEqual(self.run_check("defaults").strip(), "projects-defaults 1-rows-differ")
+
+
+class ProgressCheckTests(RehearsalTestCase):
+    """Release 1.4: every project's progress and expected progress, the same before and after migrating."""
+
+    def test_the_same_figures_say_ok_and_a_change_is_counted(self):
+        before = self.run_check("progress").split()
+        self.assertTrue(before)
+        for line in before:
+            self.assertRegex(line, r"^\d+:\d+:(\d+|None)$")  # numbers only
+        output = io.StringIO()
+        with redirect_stdout(output):
+            self.checks.progress_compare(before)
+        self.assertEqual(output.getvalue().strip(), "progress-same ok")
+
+        Task.objects.create(project=self.project, title="Heavy and done", weight=5, status="done")
+        output = io.StringIO()
+        with redirect_stdout(output):
+            self.checks.progress_compare(before)
+        self.assertEqual(output.getvalue().strip(), "progress-same 1-projects-differ")
 
 
 class BudgetCheckTests(RehearsalTestCase):

@@ -3075,3 +3075,27 @@ msgstr[1] "Projets actifs avec un budget : %(with_budget)s sur %(total)s"
 #: projects/forms.py
 msgid "Only the project's manager and admins can change the budget."
 msgstr "Seuls le chef de projet et les administrateurs peuvent modifier le budget."
+
+#: projects/models.py
+msgid "Small (1)"
+msgstr "Petit (1)"
+
+#: projects/models.py
+msgid "Medium (2)"
+msgstr "Moyen (2)"
+
+#: projects/models.py
+msgid "Large (3)"
+msgstr "Grand (3)"
+
+#: projects/models.py
+msgid "Very large (5)"
+msgstr "Très grand (5)"
+
+#: projects/forms.py templates/projects/task_detail.html projects/activity.py projects/reports.py
+msgid "Weight"
+msgstr "Poids"
+
+#: projects/forms.py
+msgid "How much this task counts in the project's progress."
+msgstr "Ce que cette tâche compte dans l'avancement du projet."

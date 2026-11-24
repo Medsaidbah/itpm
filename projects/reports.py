@@ -114,7 +114,7 @@ def project_tasks_excel(request, pk):
     sheet = add_table_sheet(
         workbook, _("Tasks"),
         [_("Task"), _("Main task"), _("Status"), _("Priority"), _("Assigned to"), _("Start date"), _("Due date"),
-         _("Done on"), _("Milestone"), _("Waits for"), _("Late")],
+         _("Done on"), _("Milestone"), _("Waits for"), _("Late"), _("Weight")],
         [[
             task.title,
             task.parent.title if task.parent else "",
@@ -127,8 +127,9 @@ def project_tasks_excel(request, pk):
             _("Yes") if task.is_milestone else "",
             ", ".join(other.title for other in task.depends_on.all()),
             _("Yes") if task.is_overdue else "",
+            task.weight,  # release 1.4: a number, so it can be added up in Excel
         ] for task in tasks],
-        widths=[40, 28, 13, 11, 20, 13, 13, 13, 10, 35, 7],
+        widths=[40, 28, 13, 11, 20, 13, 13, 13, 10, 35, 7, 8],
     )
     link_first_column(sheet, request, tasks)
 

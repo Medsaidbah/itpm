@@ -37,7 +37,7 @@ One feature per commit, each with its tests, the full test suite passing, and th
 |---|---|---|
 | 1.2 | Read-only executive role: sees every project, indicator, team, activity, delay and blocker; edits nothing (**Done, 1.2.0**) | 14 |
 | 1.3 | Project type (internal / external / not specified), external partner and budget (**Done, 1.3.0**) | 12 |
-| 1.4 | Task weights (default 1, so today's progress figures don't change) | 6 |
+| 1.4 | Task weights (default 1, so today's progress figures don't change) (built on `v1.4`, not released) | 6 |
 | 1.5 | Archive instead of delete for projects and tasks; block records (reason, start, expected end) | 5 |
 | 1.6 | Manager approval before a task is done, as an option per project, off by default | 9 |
 | 1.7 | Task contributors besides the responsible person | 2 |
@@ -106,6 +106,25 @@ owner's look at the result.
 - Admins and executives get a budget column in the project list and export, and the total budget of the active
   projects on the Dashboard, with how many of them have one. Everyone gets a "Type" column in the project export.
 - Amounts use the app's Western digits: 1,250,000 MRU in English, 1 250 000 MRU in French and Arabic.
+
+## Release 1.4 decisions (task weights)
+
+Status: built on branch `v1.4`, not released yet. Before release: the migration rehearsal on the live copy, and
+the product owner's look at the result.
+
+- A task has a weight: 1, 2, 3 or 5 ("Small (1)", "Medium (2)", "Large (3)", "Very large (5)"), default 1, no 0.
+  `projects/0011` only adds that column (on the tasks and their history), default 1 kept in the database, so every
+  existing task weighs 1 and release 1.3 can still create tasks after the migration.
+- A project's progress is weighted: the weights of the done tasks over the weights of all its tasks. The expected
+  progress (when tasks have due dates) is weighted the same way: the weights of the tasks due before today over all
+  the weights. The time-based expectation (no due dates) doesn't change. The delay flag, home cards, filters and
+  Dashboard follow. With every weight at 1, every figure is what it was in 1.3.
+- Subtasks carry their own weight; main tasks and subtasks are counted as before (both count).
+- The project's editors (admins, manager, co-managers) set the weight in the task form; everyone who sees the task
+  sees it, in the task export too, and weight changes appear in the Activity.
+- The "N of M tasks done" line stays a count of tasks; only the percentage is weighted.
+- No database check limits the weight to 1, 2, 3 or 5 (the forms and the admin panel do), so a later change of
+  scale needs no migration.
 
 ## Later decisions
 

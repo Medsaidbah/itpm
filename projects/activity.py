@@ -56,6 +56,7 @@ TASK_FIELDS = {
     "due_date": gettext_lazy("Due date"),
     "parent": gettext_lazy("Main task"),
     "is_milestone": gettext_lazy("Milestone"),
+    "weight": gettext_lazy("Weight"),  # release 1.4
     "description": gettext_lazy("Description"),
 }
 
@@ -119,6 +120,8 @@ def readable(version, name, people, tasks):
         return tasks[value].title if value in tasks else _("A deleted task")
     if name == "is_milestone":
         return _("Yes") if value else _("No")
+    if name == "weight":
+        return version.get_weight_display()
     if name == "kind":
         return version.get_kind_display()
     if name in BUDGET_FIELDS:

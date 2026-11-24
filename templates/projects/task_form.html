@@ -37,6 +37,10 @@
           <div class="col-md-6">{% include "includes/form_field.html" with field=form.due_date %}</div>
         </div>
         {% include "includes/form_field.html" with field=form.parent %}
+        {# Release 1.4: how much the task counts in the project's progress #}
+        <div class="row">
+          <div class="col-md-4">{% include "includes/form_field.html" with field=form.weight %}</div>
+        </div>
         {% include "includes/form_field.html" with field=form.is_milestone %}
         {% include "includes/form_field.html" with field=form.depends_on %}
       </div>

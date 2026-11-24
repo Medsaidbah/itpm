@@ -3247,3 +3247,27 @@ msgstr[5] "مشاريع نشطة لها ميزانية: %(with_budget)s من %(t
 #: projects/forms.py
 msgid "Only the project's manager and admins can change the budget."
 msgstr "لا يمكن تغيير الميزانية إلا لمدير المشروع والمسؤولين."
+
+#: projects/models.py
+msgid "Small (1)"
+msgstr "صغير (1)"
+
+#: projects/models.py
+msgid "Medium (2)"
+msgstr "متوسط (2)"
+
+#: projects/models.py
+msgid "Large (3)"
+msgstr "كبير (3)"
+
+#: projects/models.py
+msgid "Very large (5)"
+msgstr "كبير جدًا (5)"
+
+#: projects/forms.py templates/projects/task_detail.html projects/activity.py projects/reports.py
+msgid "Weight"
+msgstr "الوزن"
+
+#: projects/forms.py
+msgid "How much this task counts in the project's progress."
+msgstr "مقدار ما تحتسبه هذه المهمة في تقدم المشروع."

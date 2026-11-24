@@ -197,6 +197,11 @@ foreach ($line in $fingerprint.Out) {
 }
 Check "fingerprints taken before migrating" ($fingerprint.Ok -and $printsBefore.Count -gt 0) ("(" + $printsBefore.Count + " tables)")
 if (-not $fingerprint.Ok) { Show-Errors $fingerprint }
+# Every project's progress and expected progress, kept to compare after migrating (release 1.4: they must not move)
+$progressBefore = Invoke-Captured run --rm --no-deps web python scripts/rehearsal_checks.py progress
+$progressLines = @($progressBefore.Out | Where-Object { "$_" -match '^\d+:\d+:(\d+|None)$' } | ForEach-Object { "$_".Trim() })
+Check "progress worked out before migrating" $progressBefore.Ok ("(" + $progressLines.Count + " projects)")
+if (-not $progressBefore.Ok) { Show-Errors $progressBefore }
 $plan = Compose run --rm --no-deps web python manage.py showmigrations --plan 2>$null
 $pending = @($plan | Where-Object { "$_" -match '^\[ \]' } | ForEach-Object { ("$_" -replace '^\[ \]\s*', '').Trim() })
 Say ("Migrations to apply: " + $(if ($pending.Count) { $pending -join ", " } else { "none" }))
@@ -224,6 +229,13 @@ foreach ($line in $fingerprintAfter.Out) {
 }
 Check "old data untouched (fingerprints before = after)" ($fingerprintAfter.Ok -and $changed -eq 0) ("(" + $printsBefore.Count + " tables)")
 if (-not $fingerprintAfter.Ok) { Show-Errors $fingerprintAfter }
+
+# Every project's progress and expected progress, the same as before migrating
+$progressAfter = Invoke-Captured run --rm --no-deps web python scripts/rehearsal_checks.py progress-compare @progressLines
+foreach ($line in $progressAfter.Out) {
+    if ("$line" -match '^progress-same (\S+)') { Check "every project keeps its progress and expected progress" ($Matches[1] -eq "ok") $Matches[1] }
+}
+if (-not $progressAfter.Ok) { Check "progress compared" $false; Show-Errors $progressAfter }
 
 # Release 1.3 and later: every old project and history row got the defaults (not specified, no partner, no money)
 $defaults = Invoke-Captured run --rm --no-deps web python scripts/rehearsal_checks.py defaults

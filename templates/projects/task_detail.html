@@ -63,6 +63,11 @@
             <div class="datagrid-title">{% translate "Due date" %}</div>
             <div class="datagrid-content {% if task.is_overdue %}text-danger{% endif %}">{{ task.due_date|date:_("d M Y")|default:_("Not set") }}</div>
           </div>
+          {# Release 1.4: seen by everyone who sees the task #}
+          <div class="datagrid-item" id="weight">
+            <div class="datagrid-title">{% translate "Weight" %}</div>
+            <div class="datagrid-content">{{ task.get_weight_display }}</div>
+          </div>
           {% if task.completed_at %}
           <div class="datagrid-item">
             <div class="datagrid-title">{% translate "Done on" %}</div>

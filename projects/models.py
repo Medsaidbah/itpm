@@ -5,7 +5,8 @@ from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.exceptions import ValidationError
 from django.db import models, transaction
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Sum
+from django.db.models.functions import Coalesce
 from django.db.models.signals import post_delete
 from django.dispatch import receiver
 from django.urls import reverse
@@ -43,6 +44,11 @@ class ProjectQuerySet(models.QuerySet):
             # For the schedule (projects/schedule.py): tasks with a due date, and tasks due before today
             task_dated=Count("tasks", filter=Q(tasks__due_date__isnull=False)),
             task_due=Count("tasks", filter=due),
+            # Release 1.4: the weights behind the progress and the expected progress (with every weight at 1,
+            # these are the counts above, so nothing changes until someone gives a task another weight)
+            weight_total=Coalesce(Sum("tasks__weight"), 0),
+            weight_done=Coalesce(Sum("tasks__weight", filter=done), 0),
+            weight_due=Coalesce(Sum("tasks__weight", filter=due), 0),
         )
 
     # ----- The project list's extra filters, also counted by the home page's cards (release 1.1) -----
@@ -255,13 +261,15 @@ class Project(models.Model):
 
     @property
     def progress(self):
-        """Percentage of this project's tasks that are done (0 to 100)."""
-        if hasattr(self, "task_total"):
-            # The counts were already fetched by with_task_counts()
-            total, done = self.task_total, self.task_done
+        """Percentage of this project's work that is done (0 to 100), weighted (release 1.4): the weights of the
+        done tasks over the weights of all its tasks. With every weight at 1, it is the share of done tasks."""
+        if hasattr(self, "weight_total"):
+            # The weights were already added up by with_task_counts()
+            total, done = self.weight_total, self.weight_done
         else:
-            total = self.tasks.count()
-            done = self.tasks.filter(status=Task.Status.DONE).count()
+            weights = self.tasks.aggregate(total=Coalesce(Sum("weight"), 0),
+                                           done=Coalesce(Sum("weight", filter=Q(status=Task.Status.DONE)), 0))
+            total, done = weights["total"], weights["done"]
         if total == 0:
             return 0
         return round(done * 100 / total)
@@ -356,6 +364,12 @@ class Task(models.Model):
 
     STATUS_COLORS = {"todo": "secondary", "in_progress": "blue", "blocked": "red", "done": "green"}
 
+    class Weight(models.IntegerChoices):  # release 1.4
+        SMALL = 1, gettext_lazy("Small (1)")
+        MEDIUM = 2, gettext_lazy("Medium (2)")
+        LARGE = 3, gettext_lazy("Large (3)")
+        VERY_LARGE = 5, gettext_lazy("Very large (5)")
+
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name="tasks")
     # Filled in only for subtasks: points to the main task
     parent = models.ForeignKey(
@@ -376,6 +390,9 @@ class Task(models.Model):
     start_date = models.DateField(null=True, blank=True)
     due_date = models.DateField(null=True, blank=True)
     is_milestone = models.BooleanField(default=False)
+    # Release 1.4: how much this task counts in its project's progress. db_default: an older version of the app,
+    # which doesn't know the column, can still create tasks if MTNIMA ever goes back to it.
+    weight = models.PositiveSmallIntegerField(choices=Weight.choices, default=Weight.SMALL, db_default=Weight.SMALL)
     # Tasks that must be finished before this one can start
     depends_on = models.ManyToManyField(
         "self", symmetrical=False, blank=True, related_name="blocking"

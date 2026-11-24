@@ -5,6 +5,8 @@
     python scripts/rehearsal_checks.py fingerprint            ->  "<table> <hash> <columns>" for every table
     python scripts/rehearsal_checks.py fingerprint-of T=a,b   ->  "<table> <hash>", over those columns only
     python scripts/rehearsal_checks.py defaults               ->  "projects-defaults ok" (release 1.3 and later)
+    python scripts/rehearsal_checks.py progress               ->  "<project>:<progress>:<expected>" (kept, not shown)
+    python scripts/rehearsal_checks.py progress-compare ...   ->  "progress-same ok" or "progress-same <n>-projects-differ"
 
 A fingerprint is a hash of every row of a table, over the given columns: the same hash before and after the
 migrations proves that no old value changed, without printing any value.
@@ -326,9 +328,66 @@ def budget_pages(admin):
         executive.delete()
 
 
+def progress_figures():
+    """{project id: (progress, expected progress or None)}, worked out from the tables themselves, the way the app
+    does (Project.progress and projects/schedule.py): weighted when the tasks have a weight, every task counting 1
+    before that column exists. It reads the tables directly, so it works before the migrations too (the models of
+    the branch would ask for columns the copy doesn't have yet)."""
+    from django.utils import timezone
+
+    from projects.schedule import time_elapsed
+
+    today = timezone.localdate()
+    with connection.cursor() as cursor:
+        task_columns = {c.name for c in connection.introspection.get_table_description(cursor, "projects_task")}
+        weight = "weight" if "weight" in task_columns else "1"
+        cursor.execute(f"SELECT project_id, status, due_date, {weight} FROM projects_task")
+        tasks = cursor.fetchall()
+        cursor.execute("SELECT id, status, start_date, end_date FROM projects_project")
+        projects = cursor.fetchall()
+    per_project = {}
+    for project_id, status, due, task_weight in tasks:
+        per_project.setdefault(project_id, []).append((status, due, task_weight))
+    figures = {}
+    for pk, status, start, end in projects:
+        rows = per_project.get(pk, [])
+        total = sum(row[2] for row in rows)
+        done = sum(row[2] for row in rows if row[0] == "done")
+        progress = round(done * 100 / total) if total else 0
+        expected = None
+        if status in ("planned", "in_progress") and rows:
+            if any(row[1] for row in rows):  # at least one task has a due date
+                due = sum(row[2] for row in rows if row[1] and row[1] < today)
+                expected = round(due * 100 / total)
+            elif start and end:
+                expected = time_elapsed(start, end, today)
+        figures[pk] = (progress, expected)
+    return figures
+
+
+def progress():
+    """One line per project, kept by the rehearsal script to compare after migrating (not put in the report)."""
+    for pk, (done, expected) in sorted(progress_figures().items()):
+        print(f"{pk}:{done}:{expected}")
+
+
+def progress_compare(before):
+    """Release 1.4: every project's progress and expected progress must be the same after migrating."""
+    old = {}
+    for item in before:
+        pk, done, expected = item.split(":")
+        old[int(pk)] = (int(done), None if expected == "None" else int(expected))
+    now = progress_figures()
+    differ = sum(1 for pk in set(old) | set(now) if old.get(pk) != now.get(pk))
+    print("progress-same", "ok" if differ == 0 else f"{differ}-projects-differ")
+
+
 if __name__ == "__main__":
     command = sys.argv[1]
     if command == "fingerprint-of":
         fingerprint_of(sys.argv[2:])
+    elif command == "progress-compare":
+        progress_compare(sys.argv[2:])
     else:
-        {"counts": counts, "pages": pages, "fingerprint": fingerprint, "defaults": defaults}[command]()
+        {"counts": counts, "pages": pages, "fingerprint": fingerprint, "defaults": defaults,
+         "progress": progress}[command]()

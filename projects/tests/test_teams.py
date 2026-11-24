@@ -347,7 +347,7 @@ class AdminPanelTests(TeamTestCase):
         lina = User.objects.create_user("lina", "lina@example.com")
         response = self.client.post(f"/admin/projects/task/{self.task.pk}/change/", {
             "project": self.project.pk, "title": self.task.title, "status": "todo", "priority": "medium",
-            "assignee": lina.pk, "due_date": self.task.due_date, "position": 0,
+            "assignee": lina.pk, "due_date": self.task.due_date, "position": 0, "weight": 1,  # weight: release 1.4
             "comments-TOTAL_FORMS": 0, "comments-INITIAL_FORMS": 0,
             "attachments-TOTAL_FORMS": 0, "attachments-INITIAL_FORMS": 0,
         })
@@ -359,7 +359,7 @@ class AdminPanelTests(TeamTestCase):
         other = Task.objects.create(project=wifi, title="Order access points")
         url = f"/admin/projects/task/{self.task.pk}/change/"
         data = {"project": wifi.pk, "title": self.task.title, "status": "todo", "priority": "medium",
-                "assignee": self.sara.pk, "due_date": self.task.due_date, "position": 0,
+                "assignee": self.sara.pk, "due_date": self.task.due_date, "position": 0, "weight": 1,
                 "comments-TOTAL_FORMS": 0, "comments-INITIAL_FORMS": 0,
                 "attachments-TOTAL_FORMS": 0, "attachments-INITIAL_FORMS": 0}
         self.login(self.amina)

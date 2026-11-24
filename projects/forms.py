@@ -128,7 +128,7 @@ class TaskForm(BootstrapFormMixin, BlockingReasonForm):
         model = Task
         fields = [
             "title", "description", "status", "priority", "assignee",
-            "start_date", "due_date", "parent", "is_milestone", "depends_on",
+            "start_date", "due_date", "parent", "is_milestone", "depends_on", "weight",
         ]
         widgets = {
             "description": forms.Textarea(attrs={"rows": 4}),
@@ -147,11 +147,13 @@ class TaskForm(BootstrapFormMixin, BlockingReasonForm):
             "due_date": _("Due date"),
             "parent": _("Main task"),
             "is_milestone": _("This task is a milestone"),
+            "weight": _("Weight"),
             "depends_on": _("Waits for"),
         }
         help_texts = {
             "parent": _("Pick a main task to make this a subtask of it."),
             "depends_on": _("Tick the tasks that must be done before this one can start."),
+            "weight": _("How much this task counts in the project's progress."),
         }
 
     def __init__(self, *args, project, user, **kwargs):
@@ -162,6 +164,8 @@ class TaskForm(BootstrapFormMixin, BlockingReasonForm):
         # For the page only: the reason field is shown when the status is changed to Blocked
         # (the rule itself is checked on the server, see BlockingReasonForm)
         self.status_before = self.instance.status if self.instance.pk else ""
+        # The weight (release 1.4) may be left out by a form opened before the update: the task keeps its weight
+        self.fields["weight"].required = False
 
         # Only this project's tasks can be chosen, and never the task itself
         others = project.tasks.select_related("parent")
@@ -176,6 +180,9 @@ class TaskForm(BootstrapFormMixin, BlockingReasonForm):
             lambda task: f"{task.parent} › {task}" if task.parent_id else str(task)
         )
         self.set_assignee_choices(project, user)
+
+    def clean_weight(self):
+        return self.cleaned_data.get("weight") or self.instance.weight or Task.Weight.SMALL
 
     def set_assignee_choices(self, project, user):
         """Who the task can be given to (only people whose account is active):
