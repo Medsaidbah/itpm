@@ -29,6 +29,14 @@ The approved release plan and the product owner's decisions are in `docs/ROADMAP
 - Ask before any change to how people use the app today.
 - Mark a feature "Done" in `docs/ROADMAP.md` once it is committed.
 
+## Decisions
+
+- When something isn't specified, choose the simplest sensible option and don't stop to ask. Say in the report
+  which default you chose and why.
+- Build the simple case first; keep complex cases for later, once the simple one works.
+- Stop and ask only when a choice changes who can see or do something, changes a business rule, or can't be undone
+  (deleting data, a destructive migration).
+
 ## Migration rehearsal
 
 Before sending a release that has a migration, rehearse it on a copy of the live database (a plain SQL `pg_dump`,
