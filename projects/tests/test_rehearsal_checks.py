@@ -10,7 +10,7 @@ from pathlib import Path
 from django.conf import settings
 
 from accounts.models import User
-from projects.models import Attachment, Comment
+from projects.models import Attachment, Comment, Project, ProjectMember
 
 from .base import TeamTestCase
 
@@ -46,8 +46,8 @@ class RehearsalCheckTests(RehearsalTestCase):
     def test_pages_are_labels_and_status_codes_only(self):
         output = self.run_check("pages")
         for line in output.splitlines():
-            self.assertRegex(line, r"^(admin|user|executive) [a-z-]+ (\d{3}( /[^\s?]*)?|-|ok|changed|"
-                                   r"password-flag-cleared-in-the-copy)$")
+            self.assertRegex(line, r"^(admin|user|executive|member|manager) [a-z-]+ (\d{3}( /[^\s?]*)?|-|ok|changed|"
+                                   r"LEAK|missing|password-flag-cleared-in-the-copy)$")
         self.assertIn("admin administration 200", output)
         self.assertIn("user project 200", output)
         self.assertIn("user task 200", output)
@@ -56,7 +56,8 @@ class RehearsalCheckTests(RehearsalTestCase):
             who, label, result = line.split(maxsplit=2)
             if label == "note":
                 continue
-            expected = "403" if label.startswith("write-") else "ok" if label == "nothing-changed" else "200"
+            expected = ("403" if label.startswith("write-") else
+                        "ok" if label == "nothing-changed" or label.startswith("budget-") else "200")
             self.assertEqual(result, expected, line)
 
 
@@ -67,7 +68,8 @@ class ExecutiveCheckTests(RehearsalTestCase):
         Attachment.objects.create(task=self.task, uploaded_by=self.sara, file="attachments/plan.pdf")
         output = self.run_check("pages")
         lines = [line for line in output.splitlines() if line.startswith("executive ")]
-        reads = {line.split()[1]: line.split()[2] for line in lines if "write-" not in line and "nothing" not in line}
+        reads = {line.split()[1]: line.split()[2] for line in lines
+                 if "write-" not in line and "nothing" not in line and "budget-" not in line}
         writes = {line.split()[1]: line.split(maxsplit=2)[2] for line in lines if " write-" in line}
         self.assertEqual(set(reads.values()), {"200"})
         self.assertLessEqual({"project", "board", "task", "people-overview", "person-page", "dashboard"}, set(reads))
@@ -83,6 +85,62 @@ class ExecutiveCheckTests(RehearsalTestCase):
         self.assertFalse(User.objects.filter(role=User.Role.EXECUTIVE).exists())
 
 
+class MigrationFingerprintTests(RehearsalTestCase):
+    """Release 1.3: a hash per table, over given columns, proves that no old value changed (and prints none)."""
+
+    def prints(self):
+        rows = [line.split() for line in self.run_check("fingerprint").splitlines()]
+        return {table: (digest, columns) for table, digest, columns in rows}
+
+    def test_the_same_data_gives_the_same_fingerprint(self):
+        before = self.prints()
+        self.assertIn("projects_project", before)
+        self.assertNotIn("django_migrations", before)  # Django's bookkeeping grows with every migration
+        specs = [f"{table}={columns}" for table, (_, columns) in before.items()]
+        output = io.StringIO()
+        with redirect_stdout(output):
+            self.checks.fingerprint_of(specs)
+        after = dict(line.split() for line in output.getvalue().splitlines())
+        self.assertEqual(after, {table: digest for table, (digest, _) in before.items()})
+
+    def test_one_changed_value_changes_the_fingerprint(self):
+        before = self.prints()["projects_project"]
+        Project.objects.filter(pk=self.project.pk).update(description="Changed")
+        output = io.StringIO()
+        with redirect_stdout(output):
+            self.checks.fingerprint_of([f"projects_project={before[1]}"])
+        self.assertNotEqual(output.getvalue().split()[1], before[0])
+        self.assertNotIn("Changed", output.getvalue())
+
+    def test_the_defaults_after_the_migration(self):
+        self.assertEqual(self.run_check("defaults").strip(), "projects-defaults ok")
+        Project.objects.filter(pk=self.project.pk).update(budget=10)
+        self.assertEqual(self.run_check("defaults").strip(), "projects-defaults 1-rows-differ")
+
+
+class BudgetCheckTests(RehearsalTestCase):
+    """Release 1.3: the marker budget is hidden from an ordinary member, shown to the others, and removed afterwards."""
+
+    def test_hidden_from_the_member_shown_to_the_others_and_put_back(self):
+        lina = User.objects.create_user("lina", "lina@example.com", first_name="Lina")
+        ProjectMember.objects.create(project=self.project, user=lina)
+        before = (Project.objects.filter(pk=self.project.pk).values("budget", "cost", "updated_at").get(),
+                  Project.history.count())
+        output = self.run_check("pages")
+        budget_lines = [line for line in output.splitlines() if " budget-" in line]
+        self.assertIn("member budget-hidden-project ok", budget_lines)
+        self.assertIn("member budget-hidden-activity ok", budget_lines)
+        self.assertIn("member budget-hidden-projects-excel ok", budget_lines)
+        self.assertIn("manager budget-shown ok", budget_lines)
+        self.assertIn("admin budget-shown ok", budget_lines)
+        self.assertIn("executive budget-shown ok", budget_lines)
+        self.assertEqual({line.split()[2] for line in budget_lines}, {"ok"})
+        after = (Project.objects.filter(pk=self.project.pk).values("budget", "cost", "updated_at").get(),
+                 Project.history.count())
+        self.assertEqual(after, before)
+        self.assertFalse(User.objects.filter(username__startswith="rehearsal-executive").exists())
+
+
 class RedirectRuleTests(RehearsalTestCase):
     """Someone who still has a temporary password is sent to "change my password" on every page: the check picks
     a person who chose their own, and a redirect is shown as a path (and counted as a failure by the script)."""
@@ -92,7 +150,7 @@ class RedirectRuleTests(RehearsalTestCase):
         self.sara.save()
         self.omar.save()  # Omar chose his own password (the default)
         output = self.run_check("pages")
-        self.assertNotIn("note", output)
+        self.assertNotIn("user note", output)
         self.assertIn("user home 200", output)
         self.sara.refresh_from_db()
         self.assertTrue(self.sara.must_change_password)  # nobody's account was changed

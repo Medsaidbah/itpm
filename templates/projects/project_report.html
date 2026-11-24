@@ -57,6 +57,7 @@
         <div class="datagrid-title">{% translate "Overdue tasks" %}</div>
         <div class="datagrid-content">{{ project.task_overdue }}</div>
       </div>
+      {% include "includes/project_money.html" with project=project can_see_budget=can_see_budget %}
     </div>
     <div class="progress progress-sm mt-3">
       <div class="progress-bar" style="width: {{ project.progress }}%" role="progressbar"

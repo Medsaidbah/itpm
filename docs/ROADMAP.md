@@ -36,7 +36,7 @@ One feature per commit, each with its tests, the full test suite passing, and th
 | Release | Feature | Idea |
 |---|---|---|
 | 1.2 | Read-only executive role: sees every project, indicator, team, activity, delay and blocker; edits nothing (**Done, 1.2.0**) | 14 |
-| 1.3 | Project type (internal / external / not specified), external partner, budget and cost so far | 12 |
+| 1.3 | Project type (internal / external / not specified), external partner, budget and cost so far (built on `v1.3`, not released) | 12 |
 | 1.4 | Task weights (default 1, so today's progress figures don't change) | 6 |
 | 1.5 | Archive instead of delete for projects and tasks; block records (reason, start, expected end) | 5 |
 | 1.6 | Manager approval before a task is done, as an option per project, off by default | 9 |
@@ -88,6 +88,24 @@ owner's look at the result.
   address leads there); executives aren't listed in it, and their own page has no figures.
 - No comments or files; only the account emails (password); no bell notifications; Django's admin panel stays
   closed to them.
+
+## Release 1.3 decisions (project type and budget)
+
+Status: built on branch `v1.3`, not released yet. Before release: the migration rehearsal on the live copy, and
+the product owner's look at the result.
+
+- A project has a type (Internal / External / Not specified, default "Not specified"), an external partner (only for
+  an external project: saving another type empties it), a budget and a cost so far (whole MRU, never negative,
+  optional). `projects/0010` only adds these columns (on the projects and their history), with defaults.
+- The type and the partner are seen by everyone who sees the project. The budget and the cost are seen only by
+  admins, executives, the manager and the co-managers, and changed only by admins and the manager (co-managers see
+  them locked). Ordinary team members never see them: not on any page, export, report or Activity line; a save that
+  only changed the money is no Activity event for them.
+- The cost so far is typed by the manager, with "updated on" read from the history; per-task costs may come later.
+- "Budget spent" (%) and "Over budget" only when a budget above 0 and a cost are set.
+- Admins and executives get budget and cost columns in the project list and export, and the totals of the active
+  projects on the Dashboard. Everyone gets a "Type" column in the project export.
+- Amounts use the app's Western digits: 1,250,000 MRU in English, 1 250 000 MRU in French and Arabic.
 
 ## Later decisions
 

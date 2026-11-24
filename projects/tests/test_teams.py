@@ -286,6 +286,7 @@ class AdminPanelTests(TeamTestCase):
         tasks = list(self.project.tasks.all())
         data = {
             "name": self.project.name, "description": "", "status": self.project.status,
+            "kind": self.project.kind, "partner": self.project.partner,  # release 1.3
             "priority": self.project.priority, "manager": self.project.manager_id,
             "start_date": "", "end_date": "",
             "memberships-TOTAL_FORMS": len(memberships), "memberships-INITIAL_FORMS": len(memberships),

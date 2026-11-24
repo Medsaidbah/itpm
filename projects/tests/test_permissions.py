@@ -75,7 +75,7 @@ class LoginRequiredTests(TeamTestCase):
                 self.assertRedirects(self.client.get(page), f"/login/?next={page}")
 
 
-class EveryAddressTests(TeamTestCase):
+class EveryAddressMixin:
     """Every address of the app, opened by six people:
     Amina (admin), Omar (the project's manager), Sara (in the team, the task is hers),
     Lina (in the team, the task isn't hers), Karim (outside the team) and Eva (an executive, release 1.2:
@@ -197,6 +197,11 @@ class EveryAddressTests(TeamTestCase):
             ("admin_emails_retry", "post", "/administration/emails/retry/", None, ADMINS_ONLY_ACTION),
             ("admin_unlock", "post", "/administration/logins/unlock/", {"username": "sara"}, ADMINS_ONLY_ACTION),
         ]
+
+
+
+class EveryAddressTests(EveryAddressMixin, TeamTestCase):
+    """The table of EveryAddressMixin: every address has a rule, and each person gets what it says."""
 
     def test_every_address_has_a_rule(self):
         def names(patterns):

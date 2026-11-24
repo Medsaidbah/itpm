@@ -22,7 +22,9 @@ from django.utils.timesince import timesince
 from django.utils.translation import gettext as _
 from django.utils.translation import gettext_lazy, ngettext_lazy
 
+from .contributions import managed_by
 from .models import Attachment, Comment, Project, ProjectMember, Task
+from .money import format_mru
 
 PAGE_SIZE = 30  # events per page
 
@@ -36,6 +38,15 @@ PROJECT_FIELDS = {
     "start_date": gettext_lazy("Start date"),
     "end_date": gettext_lazy("End date"),
     "description": gettext_lazy("Description"),
+    # Release 1.3: seen by everyone who sees the project
+    "kind": gettext_lazy("Type"),
+    "partner": gettext_lazy("External partner"),
+}
+# Release 1.3: the money, only in the feed of the people who may see that project's budget (Project.can_see_budget).
+# For everyone else, a save that only changed the money is no event at all.
+BUDGET_FIELDS = {
+    "budget": gettext_lazy("Budget"),
+    "cost": gettext_lazy("Cost so far"),
 }
 TASK_FIELDS = {
     "title": gettext_lazy("Title"),
@@ -109,6 +120,10 @@ def readable(version, name, people, tasks):
         return tasks[value].title if value in tasks else _("A deleted task")
     if name == "is_milestone":
         return _("Yes") if value else _("No")
+    if name == "kind":
+        return version.get_kind_display()
+    if name in BUDGET_FIELDS:
+        return format_mru(value) if value is not None else _("Not set")
     if isinstance(value, date):
         return date_format(value, _("d M Y"))
     return value or _("Not set")
@@ -132,7 +147,8 @@ def changes_between(old, new, fields, people, tasks):
 # "+" = created, "~" = changed, "-" = deleted
 
 
-def project_event(version, projects, people):
+def project_event(version, projects, people, sees_money=False):
+    """sees_money: the viewer may see this project's budget and cost (then their changes are shown too)."""
     project = projects.get(version.id)  # None if the project has been deleted since
     event = Event(
         when=version.history_date,
@@ -149,7 +165,8 @@ def project_event(version, projects, people):
     elif version.history_type == "-":
         event.icon, event.color, event.action, event.url = "ti-trash", "red", _("deleted the project"), ""
     elif version.previous:
-        event.changes = changes_between(version.previous, version, PROJECT_FIELDS, people, {})
+        fields = {**PROJECT_FIELDS, **BUDGET_FIELDS} if sees_money else PROJECT_FIELDS
+        event.changes = changes_between(version.previous, version, fields, people, {})
         if not event.changes:
             return None  # saved without changing anything that the feed shows
     return event
@@ -343,11 +360,17 @@ def get_events(viewer, project=None, task=None, person=None, before=None, limit=
     tasks = Task.objects.in_bulk(task_ids)  # tasks deleted since then are missing
     projects = Project.objects.in_bulk(project_ids)
 
-    # 6. One sentence per event
+    # 6. One sentence per event. The money of a project only for the people who may see its budget (release 1.3):
+    #    admins and executives see every project's; anyone else only the projects they manage or co-manage now.
+    money_projects = set() if viewer.sees_everything else set(managed_by(viewer).values_list("pk", flat=True))
+
+    def sees_money(project_id):
+        return viewer.sees_everything or project_id in money_projects
+
     events = []
     for _when, kind, item in page:
         if kind == "project":
-            event = project_event(item, projects, people)
+            event = project_event(item, projects, people, sees_money=sees_money(item.id))
         elif kind == "task":
             event = task_event(item, tasks, projects, people)
         elif kind == "comment":

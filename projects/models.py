@@ -82,6 +82,11 @@ class ProjectQuerySet(models.QuerySet):
 
 
 class Project(models.Model):
+    class Kind(models.TextChoices):  # release 1.3
+        INTERNAL = "internal", gettext_lazy("Internal")
+        EXTERNAL = "external", gettext_lazy("External")
+        UNSPECIFIED = "unspecified", gettext_lazy("Not specified")
+
     class Status(models.TextChoices):
         PLANNED = "planned", gettext_lazy("Planned")
         IN_PROGRESS = "in_progress", gettext_lazy("In progress")
@@ -121,6 +126,15 @@ class Project(models.Model):
         related_name="member_projects",
         blank=True,
     )
+    # Release 1.3: the type of project, its external partner, and its money (whole MRU, see format_mru).
+    # The type and the partner are seen by everyone who sees the project; the budget and the cost only by the people
+    # of can_see_budget(), and changed by those of can_change_budget().
+    # db_default: the database keeps the default too, so an older version of the app (which doesn't know these
+    # columns) can still create and save projects if MTNIMA ever goes back to it
+    kind = models.CharField(max_length=20, choices=Kind.choices, default=Kind.UNSPECIFIED, db_default=Kind.UNSPECIFIED)
+    partner = models.CharField(max_length=200, blank=True, default="", db_default="")  # only external projects (see clean)
+    budget = models.PositiveBigIntegerField(null=True, blank=True)
+    cost = models.PositiveBigIntegerField(null=True, blank=True)  # the cost so far, typed by the manager
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
@@ -175,6 +189,38 @@ class Project(models.Model):
         """This person is a team member who was given the manager role."""
         return user.pk in self.co_manager_ids()
 
+    def can_see_budget(self, user):
+        """Who sees the budget and the cost so far (release 1.3): admins, executives, the manager and the co-managers.
+        The other people of the team never see them, anywhere. The only place the rule is written."""
+        return user.sees_everything or user.pk == self.manager_id or self.is_co_manager(user)
+
+    def can_change_budget(self, user):
+        """Who changes the budget and the cost so far: admins and the project's manager (co-managers only see them)."""
+        return user.is_admin or user.pk == self.manager_id
+
+    @property
+    def budget_spent(self):
+        """The share of the budget spent so far, in %, or None when it can't be worked out (no budget, a budget of 0,
+        or no cost): nothing is shown then."""
+        if not self.budget or self.cost is None:
+            return None
+        return round(self.cost * 100 / self.budget)
+
+    def cost_updated_at(self):
+        """When the cost so far was last changed, read from the history (no extra field), or None."""
+        versions = list(self.history.order_by("-history_date", "-history_id").values_list("cost", "history_date"))
+        for newer, older in zip(versions, versions[1:]):
+            if newer[0] != older[0]:
+                return newer[1]
+        if versions and versions[-1][0] is not None:  # set when the project was created
+            return versions[-1][1]
+        return None
+
+    @property
+    def is_over_budget(self):
+        """The cost so far is more than the budget (never when either is missing or the budget is 0)."""
+        return bool(self.budget) and self.cost is not None and self.cost > self.budget
+
     def can_edit(self, user):
         """Who may change this project, its tasks and its team: admins, the project's manager
         and the co-managers (team members the manager gave the manager role to).
@@ -227,6 +273,9 @@ class Project(models.Model):
     def clean(self):
         if self.start_date and self.end_date and self.end_date < self.start_date:
             raise ValidationError({"end_date": _("The end date can't be before the start date.")})
+        # Only an external project has a partner: saved as another type, no old name is left behind
+        if self.kind != self.Kind.EXTERNAL:
+            self.partner = ""
 
     @property
     def progress(self):

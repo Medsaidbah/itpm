@@ -143,12 +143,18 @@ def projects_excel(request):
     projects = list(projects)
     today = timezone.localdate()
 
+    # Release 1.3: the type for everyone; the budget and the cost (in MRU) only for admins and executives
+    money = request.user.sees_everything
+    headers = [_("Project"), _("Status"), _("Priority"), _("Manager"), _("Start date"), _("End date"),
+               _("Tasks"), _("Done"), _("Overdue tasks"), _("Progress (%)"), _("Late"), _("Type")]
+    widths = [40, 13, 11, 20, 13, 13, 8, 8, 14, 13, 7, 14]
+    if money:
+        headers += [_("Budget (MRU)"), _("Cost so far (MRU)")]
+        widths += [16, 18]
     workbook = Workbook()
     workbook.remove(workbook.active)
     sheet = add_table_sheet(
-        workbook, _("Projects"),
-        [_("Project"), _("Status"), _("Priority"), _("Manager"), _("Start date"), _("End date"),
-         _("Tasks"), _("Done"), _("Overdue tasks"), _("Progress (%)"), _("Late")],
+        workbook, _("Projects"), headers,
         [[
             project.name,
             project.get_status_display(),
@@ -161,8 +167,9 @@ def projects_excel(request):
             project.task_overdue,
             project.progress,
             _("Yes") if project.is_overdue else "",
-        ] for project in projects],
-        widths=[40, 13, 11, 20, 13, 13, 8, 8, 14, 13, 7],
+            project.get_kind_display(),
+        ] + ([project.budget, project.cost] if money else []) for project in projects],
+        widths=widths,
     )
     link_first_column(sheet, request, projects)
     return excel_response(workbook, f"projects-{today:%Y-%m-%d}.xlsx")
@@ -192,5 +199,7 @@ def project_report(request, pk):
         "milestones": [t for t in tasks if t.is_milestone],
         "overdue": overdue,
         "generated_at": timezone.localtime(),
+        # Release 1.3: the budget and the cost, only for the people of Project.can_see_budget
+        "can_see_budget": project.can_see_budget(request.user),
     }
     return render(request, "projects/project_report.html", context)

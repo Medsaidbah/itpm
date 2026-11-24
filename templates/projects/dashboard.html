@@ -21,7 +21,8 @@
         <div class="subheader">
           {% if kpi.warn and kpi.value %}<i class="ti ti-alert-triangle text-danger me-1"></i>{% endif %}{{ kpi.label }}
         </div>
-        <div class="h1 mb-0">{{ kpi.value }}</div>
+        <div class="h1 mb-0"{% if kpi.note %} dir="ltr"{% endif %}>{{ kpi.value }}</div>
+        {% if kpi.note %}<div class="text-secondary small">{{ kpi.note }}</div>{% endif %}
       </div>
     </div>
   </div>

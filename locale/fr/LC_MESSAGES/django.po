@@ -3028,3 +3028,79 @@ msgstr "Un membre de la direction lit tous les projets mais ne fait partie d'auc
 #: administration/views.py
 msgid "Only admins and executives can open this page."
 msgstr "Seuls les administrateurs et la direction peuvent ouvrir cette page."
+
+#: projects/models.py
+msgid "Internal"
+msgstr "Interne"
+
+#: projects/models.py
+msgid "External"
+msgstr "Externe"
+
+#: projects/models.py
+msgid "Not specified"
+msgstr "Non précisé"
+
+#: projects/forms.py templates/includes/project_money.html projects/reports.py projects/activity.py
+msgid "Type"
+msgstr "Type"
+
+#: projects/forms.py templates/includes/project_money.html projects/activity.py
+msgid "External partner"
+msgstr "Partenaire externe"
+
+#: projects/forms.py projects/reports.py
+msgid "Budget (MRU)"
+msgstr "Budget (MRU)"
+
+#: projects/forms.py projects/reports.py
+msgid "Cost so far (MRU)"
+msgstr "Coût à ce jour (MRU)"
+
+#: projects/forms.py
+msgid "Only for an external project."
+msgstr "Seulement pour un projet externe."
+
+#: projects/forms.py
+msgid "What the project has cost so far. Only the project's manager and admins change it."
+msgstr "Ce que le projet a coûté jusqu'ici. Seuls le chef de projet et les administrateurs le modifient."
+
+#: projects/forms.py
+msgid "Only the project's manager and admins can change the budget and the cost."
+msgstr "Seuls le chef de projet et les administrateurs peuvent modifier le budget et le coût."
+
+#: templates/includes/project_money.html templates/projects/project_list.html projects/activity.py
+msgid "Budget"
+msgstr "Budget"
+
+#: templates/includes/project_money.html templates/projects/project_list.html projects/activity.py
+msgid "Cost so far"
+msgstr "Coût à ce jour"
+
+#: templates/includes/project_money.html
+#, python-format
+msgid "updated on %(date)s"
+msgstr "mis à jour le %(date)s"
+
+#: templates/includes/project_money.html
+msgid "Budget spent"
+msgstr "Budget dépensé"
+
+#: templates/includes/project_money.html
+msgid "Over budget"
+msgstr "Budget dépassé"
+
+#: projects/views.py
+msgid "Budget of the active projects"
+msgstr "Budget des projets actifs"
+
+#: projects/views.py
+msgid "Cost so far of the active projects"
+msgstr "Coût à ce jour des projets actifs"
+
+#: projects/views.py
+#, python-format
+msgid "%(with_budget)s of %(total)s active project has a budget"
+msgid_plural "%(with_budget)s of %(total)s active projects have a budget"
+msgstr[0] "Projets actifs avec un budget : %(with_budget)s sur %(total)s"
+msgstr[1] "Projets actifs avec un budget : %(with_budget)s sur %(total)s"

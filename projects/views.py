@@ -5,7 +5,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied, ValidationError
 from django.db import transaction
-from django.db.models import Count, F, Prefetch, Q
+from django.db.models import Count, F, Prefetch, Q, Sum
 from django.db.models.functions import TruncWeek
 from django.http import FileResponse, Http404, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
@@ -31,6 +31,7 @@ from .forms import (
 )
 from .models import Attachment, Comment, Notification, Project, ProjectMember, Task
 from .notifications import notify_assigned, tell_project_event, tell_unblocked
+from .money import format_mru
 from .previews import HEAD_SIZE, PREVIEW_HEADERS, preview_type
 from .schedule import BEHIND_SCHEDULE_MARGIN
 
@@ -208,6 +209,8 @@ def project_detail(request, pk):
         # False when everyone is in the team already
         "people_to_add": team_form is not None and team_form.fields["person"].queryset.exists(),
         "can_edit": project.can_edit(request.user),
+        # Release 1.3: the budget and the cost, only for the people of Project.can_see_budget
+        "can_see_budget": project.can_see_budget(request.user),
         "recent_activity": recent_activity,
     }
     return render(request, "projects/project_detail.html", context)
@@ -946,18 +949,29 @@ def dashboard(request):
     for task in oldest_overdue:
         task.days_late = (today - task.due_date).days
 
+    kpis = [
+        {"label": _("Active projects"), "value": active_projects.count()},
+        {"label": _("Late projects"), "value": active_projects.filter(end_date__lt=today).count(), "warn": True},
+        # Behind schedule and not late (the same rule as the project list and the home page)
+        {"label": _("Behind schedule"), "value": projects.behind_schedule().count(), "warn": True},
+        {"label": _("Open tasks"), "value": open_tasks.count()},
+        {"label": _("Overdue tasks"), "value": overdue_tasks.count(), "warn": True},
+        {"label": _("Done in the last 30 days"),
+         "value": tasks.filter(completed_at__gte=timezone.now() - timedelta(days=30)).count()},
+    ]
+    # Release 1.3: the money of the active projects, for admins and executives only (who may see every budget)
+    if request.user.sees_everything:
+        money = active_projects.aggregate(total_budget=Sum("budget"), total_cost=Sum("cost"),
+                                          with_budget=Count("id", filter=Q(budget__isnull=False)), total=Count("id"))
+        note = ngettext("%(with_budget)s of %(total)s active project has a budget",
+                        "%(with_budget)s of %(total)s active projects have a budget", money["total"]) % money
+        kpis += [
+            {"label": _("Budget of the active projects"), "value": format_mru(money["total_budget"] or 0), "note": note},
+            {"label": _("Cost so far of the active projects"), "value": format_mru(money["total_cost"] or 0), "note": note},
+        ]
     context = {
         # The headline numbers; "warn" adds a warning icon when the number isn't zero
-        "kpis": [
-            {"label": _("Active projects"), "value": active_projects.count()},
-            {"label": _("Late projects"), "value": active_projects.filter(end_date__lt=today).count(), "warn": True},
-            # Behind schedule and not late (the same rule as the project list and the home page)
-            {"label": _("Behind schedule"), "value": projects.behind_schedule().count(), "warn": True},
-            {"label": _("Open tasks"), "value": open_tasks.count()},
-            {"label": _("Overdue tasks"), "value": overdue_tasks.count(), "warn": True},
-            {"label": _("Done in the last 30 days"),
-             "value": tasks.filter(completed_at__gte=timezone.now() - timedelta(days=30)).count()},
-        ],
+        "kpis": kpis,
         "workload": workload,
         "done_per_week": done_per_week,
         "needs_attention": needs_attention,

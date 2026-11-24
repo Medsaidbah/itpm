@@ -31,6 +31,18 @@
           <div class="col-md-6">{% include "includes/form_field.html" with field=form.start_date %}</div>
           <div class="col-md-6">{% include "includes/form_field.html" with field=form.end_date %}</div>
         </div>
+        {# Release 1.3: the type, and the partner of an external project (the script below shows it only then) #}
+        <div class="row">
+          <div class="col-md-6">{% include "includes/form_field.html" with field=form.kind %}</div>
+          <div class="col-md-6" id="partner-field">{% include "includes/form_field.html" with field=form.partner %}</div>
+        </div>
+        {# The money: only in the form of the people who may see it (Project.can_see_budget) #}
+        {% if form.budget %}
+        <div class="row">
+          <div class="col-md-6">{% include "includes/form_field.html" with field=form.budget %}</div>
+          <div class="col-md-6">{% include "includes/form_field.html" with field=form.cost %}</div>
+        </div>
+        {% endif %}
       </div>
       <div class="card-footer d-flex flex-wrap justify-content-end gap-2">
         {# Only admins delete projects: the next page asks to type the project's name first #}
@@ -43,4 +55,15 @@
     </form>
   </div>
 </div>
+<script>
+  // The partner only matters for an external project: shown when the type is External (or when it has an error)
+  (function () {
+    var kind = document.getElementById("{{ form.kind.id_for_label }}");
+    var box = document.getElementById("partner-field");
+    var asked = {{ form.partner.errors|yesno:"true,false" }};
+    function update() { box.hidden = !asked && kind.value !== "external"; }
+    kind.addEventListener("change", update);
+    update();
+  })();
+</script>
 {% endblock %}

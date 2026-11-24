@@ -13,7 +13,9 @@ port 8001, emails only written to the log), never touching the normal stack:
   4. starts the app on http://localhost:8001, checks /healthz/ and the login page, and opens the main pages
      as an admin and a user of the copy: each must answer 200 (a redirect is a failure, shown with its path);
      from release 1.2, an executive made for the check opens the read pages (200), every change it tries must be
-     refused (403), and nothing may change.
+     refused (403), and nothing may change; from release 1.3, a marker budget on one project (removed afterwards)
+     must be hidden from an ordinary member of its team and shown to its manager, an admin and an executive.
+  Every old value is checked with a fingerprint (a hash per table) before and after migrating.
 The report (counts, migration names and status codes only, never names or emails) is shown and saved in
 %TEMP%\itpm-rehearsal. The dump is copied into the database container only, never into the project folder.
 The stack keeps running for a look; stop it with the "down" command printed at the end (it keeps the volumes).
@@ -186,6 +188,15 @@ $counting = Invoke-Captured run --rm --no-deps web python scripts/rehearsal_chec
 $before = Read-Counts $counting.Out
 Check "rows counted before migrating" ($counting.Ok -and $before.Count -gt 0) ("(" + $before.Count + " tables)")
 if (-not $counting.Ok -or $before.Count -eq 0) { Show-Errors $counting; Stop-Here "the app can't read the restored database" }
+# A fingerprint of every table over its present columns: compared after migrating, it proves no old value changed
+$fingerprint = Invoke-Captured run --rm --no-deps web python scripts/rehearsal_checks.py fingerprint
+$printsBefore = @{}
+foreach ($line in $fingerprint.Out) {
+    $parts = @("$line".Trim() -split " ")
+    if ($parts.Count -eq 3) { $printsBefore[$parts[0]] = @($parts[1], $parts[2]) }
+}
+Check "fingerprints taken before migrating" ($fingerprint.Ok -and $printsBefore.Count -gt 0) ("(" + $printsBefore.Count + " tables)")
+if (-not $fingerprint.Ok) { Show-Errors $fingerprint }
 $plan = Compose run --rm --no-deps web python manage.py showmigrations --plan 2>$null
 $pending = @($plan | Where-Object { "$_" -match '^\[ \]' } | ForEach-Object { ("$_" -replace '^\[ \]\s*', '').Trim() })
 Say ("Migrations to apply: " + $(if ($pending.Count) { $pending -join ", " } else { "none" }))
@@ -201,6 +212,25 @@ if (-not $migrateCheck.Ok) { Show-Errors $migrateCheck }
 $systemCheck = Invoke-Captured run --rm --no-deps web python manage.py check
 Check "Django system check" $systemCheck.Ok
 if (-not $systemCheck.Ok) { Show-Errors $systemCheck }
+
+# The same fingerprints after migrating, over the columns that existed before: every old value must be the same
+$specs = @($printsBefore.Keys | Sort-Object | ForEach-Object { $_ + "=" + $printsBefore[$_][1] })
+$fingerprintAfter = Invoke-Captured run --rm --no-deps web python scripts/rehearsal_checks.py fingerprint-of @specs
+$changed = 0
+foreach ($line in $fingerprintAfter.Out) {
+    $parts = @("$line".Trim() -split " ")
+    if ($parts.Count -ne 2 -or -not $printsBefore.ContainsKey($parts[0])) { continue }
+    if ($parts[1] -ne $printsBefore[$parts[0]][0]) { Check ("old data untouched in " + $parts[0]) $false $parts[1]; $changed++ }
+}
+Check "old data untouched (fingerprints before = after)" ($fingerprintAfter.Ok -and $changed -eq 0) ("(" + $printsBefore.Count + " tables)")
+if (-not $fingerprintAfter.Ok) { Show-Errors $fingerprintAfter }
+
+# Release 1.3 and later: every old project and history row got the defaults (not specified, no partner, no money)
+$defaults = Invoke-Captured run --rm --no-deps web python scripts/rehearsal_checks.py defaults
+foreach ($line in $defaults.Out) {
+    if ("$line" -match '^projects-defaults (\S+)') { Check "old projects got the defaults (type not specified, no money)" ($Matches[1] -eq "ok") $Matches[1] }
+}
+if (-not $defaults.Ok) { Check "defaults checked" $false; Show-Errors $defaults }
 
 $counting = Invoke-Captured run --rm --no-deps web python scripts/rehearsal_checks.py counts
 $after = Read-Counts $counting.Out
@@ -237,6 +267,7 @@ foreach ($line in $pages) {
     if ($parts[1] -eq "note") { Say ("  {0,-9} note: {1}" -f $parts[0], $parts[2]) "Yellow"; continue }
     $expected = "200"
     if ($parts[1] -like "write-*") { $expected = "403" }
+    if ($parts[1] -like "budget-*") { $expected = "ok" }  # release 1.3: hidden from the member, shown to the others
     if ($parts[1] -eq "nothing-changed") { $expected = "ok" }
     $result = ($parts[2..($parts.Count - 1)] -join " ")
     if ($result -eq $expected) { Say ("  {0,-9} {1,-24} {2}" -f $parts[0], $parts[1], $result) }

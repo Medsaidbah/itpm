@@ -46,8 +46,13 @@ class BootstrapFormMixin:
 class ProjectForm(BootstrapFormMixin, forms.ModelForm):
     class Meta:
         model = Project
-        fields = ["name", "description", "status", "priority", "manager", "start_date", "end_date"]
+        fields = ["name", "description", "status", "priority", "manager", "start_date", "end_date",
+                  "kind", "partner", "budget", "cost"]
         labels = {
+            "kind": _("Type"),
+            "partner": _("External partner"),
+            "budget": _("Budget (MRU)"),
+            "cost": _("Cost so far (MRU)"),
             "name": _("Name"),
             "description": _("Description"),
             "status": _("Status"),
@@ -61,11 +66,28 @@ class ProjectForm(BootstrapFormMixin, forms.ModelForm):
             # type="date" shows the browser's date picker, which needs dates as year-month-day
             "start_date": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
             "end_date": forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
+            # Whole MRU, never negative; a number reads left to right, even in Arabic
+            "budget": forms.NumberInput(attrs={"min": 0, "step": 1, "dir": "ltr"}),
+            "cost": forms.NumberInput(attrs={"min": 0, "step": 1, "dir": "ltr"}),
+        }
+        help_texts = {
+            "partner": _("Only for an external project."),
+            "cost": _("What the project has cost so far. Only the project's manager and admins change it."),
         }
 
     def __init__(self, *args, user, **kwargs):
         """user: the person filling in the form."""
         super().__init__(*args, **kwargs)
+        # The type (release 1.3) may be left out by a form opened before the update: the project then keeps its type
+        self.fields["kind"].required = False
+        # The budget and the cost (release 1.3): changed by admins and the manager; a co-manager sees them locked
+        # (a locked field ignores any value sent). Nobody else edits a project, but the rule is checked anyway.
+        if not self.instance.can_see_budget(user):
+            del self.fields["budget"], self.fields["cost"]
+        elif not self.instance.can_change_budget(user):
+            for name in ("budget", "cost"):
+                self.fields[name].disabled = True
+                self.fields[name].help_text = _("Only the project's manager and admins can change the budget and the cost.")
         manager = self.fields["manager"]
         # Never an executive (release 1.2): they change nothing, so they can't manage a project
         manager.queryset = manager.queryset.exclude(role=User.Role.EXECUTIVE).order_by(
@@ -78,6 +100,10 @@ class ProjectForm(BootstrapFormMixin, forms.ModelForm):
             manager.help_text = _("Only admins can change the manager.")
         else:
             manager.help_text = _("The manager can edit the project, its tasks and its team.")
+
+
+    def clean_kind(self):
+        return self.cleaned_data.get("kind") or self.instance.kind or Project.Kind.UNSPECIFIED
 
 
 class ProjectDeleteForm(BootstrapFormMixin, forms.Form):
