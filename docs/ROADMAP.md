@@ -38,7 +38,7 @@ One feature per commit, each with its tests, the full test suite passing, and th
 | 1.2 | Read-only executive role: sees every project, indicator, team, activity, delay and blocker; edits nothing (**Done, 1.2.0**) | 14 |
 | 1.3 | Project type (internal / external / not specified), external partner and budget (**Done, 1.3.0**) | 12 |
 | 1.4 | Task weights (default 1, so today's progress figures don't change) (**Done, 1.4.0**) | 6 |
-| 1.5 | Archive instead of delete for projects and tasks; block records (reason, start, expected end) (block records built on `v1.5`, not released; archiving not started) | 5 |
+| 1.5 | Archive instead of delete for projects and tasks; block records (reason, start, expected end) (**block records Done, 1.5.0**; archiving not started, still open) | 5 |
 | 1.6 | Manager approval before a task is done, as an option per project, off by default | 9 |
 | 1.7 | Task contributors besides the responsible person | 2 |
 | 1.8+ | Requests / ticketing, once its requirements are settled (who submits, who sorts, how it becomes work) | 13 |
@@ -128,7 +128,8 @@ owner's look at the result.
 
 ## Release 1.5 decisions (status changes and block records)
 
-Status: built on branch `v1.5`, not released yet (archiving, the other half of the roadmap's 1.5, is not started).
+Status: **Done**, release 1.5.0 (2026-11-24), after the migration rehearsal on the live copy and the product
+owner's look at the result. Archiving, the other half of the roadmap's 1.5, is not started and stays open.
 
 - Every change of a task's status goes through one function, `change_status` in `projects/status.py`, used by the
   seven paths that change a status (task page buttons, board, new and edit task forms, the admin panel's task page,

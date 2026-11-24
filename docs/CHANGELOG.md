@@ -1,24 +1,39 @@
 # Mchariee – changelog
 
-## 1.5.0 (in preparation, on branch v1.5)
+## 1.5.0 (2026-11-24)
 
 ### What changes for the people who use Mchariee
 
 - **Block records.** When a task is blocked, the app now keeps a record of it: the reason, since when and by whom,
-  and when it should end (an optional "Expected end" date, asked for next to the reason). The task's page shows
-  "Blocked since … by …", the expected end ("expected end passed" when it is past), and the earlier blocks of the
-  task. The reason is still added to the task's comments, as before. Tasks that were already blocked before this
-  version have no record.
+  and when it should end (an optional "Expected end" date, asked for next to the reason in the blocking window and
+  in the task forms). The task's page shows "Blocked since … by …", the expected end ("expected end passed" when it
+  is past), and the task's earlier blocks (reason, dates, who). The reason is still added to the task's comments,
+  as before. Tasks that were already blocked before this version have no record.
+- **Nothing else changes.** Every change of a task's status now goes through one place in the code (a technical
+  change made for this feature): the buttons, the board, the forms and the admin panel behave exactly as before.
 
 ### What MTNIMA needs to know
 
-- **No new settings.**
-- **One database migration, `projects/0012`.** It only creates a new table for the block records. No existing table
-  is changed, and nothing is converted: the new table starts empty. It applies by itself when the new version starts.
-- **How to update:** back up the database and the `itpm_media` volume first, keep the 1.4.0 image, then start the new
-  image with the same `docker.env` and volumes.
-- **Going back to 1.4.0** works on the same database: 1.4.0 doesn't use the new table. The block records made
-  meanwhile stay in it and come back with 1.5.0 (blocks started or ended under 1.4.0 aren't recorded).
+- **No new settings.** `docker.env` stays exactly as it is.
+- **Database migrations, by the version you run now.** They apply by themselves when the new version starts, in
+  this order. Nothing is deleted, renamed or rewritten.
+  - **From 1.4.0:** only `projects/0012`. It creates one new table for the block records; no existing table is
+    touched. Tasks that are already blocked, and their old comments, are not converted: the new table starts empty.
+  - **From 1.3.0:** also `projects/0011` first (one new column: the weight of the tasks and of their history,
+    default 1).
+  - **From 1.2.0:** also `projects/0010` first (three new columns on the projects and their history: type,
+    partner, budget).
+  - **From 1.1.0:** also `accounts/0008` first (it only adds the "Executive" role to the list of roles: no SQL,
+    no data changed).
+- **How to update.**
+  1. Make a backup first: the PostgreSQL database (`pg_dump`) and the `itpm_media` volume.
+  2. Keep the previous image (do not delete it) so that you can go back to it.
+  3. Start the 1.5.0 image with the same `docker.env` and the same volumes.
+- **Going back one version works on the same database.** 1.4.0 keeps working after `projects/0012`: it doesn't use
+  the new table. The block records made meanwhile stay in it and come back with 1.5.0 (blocks started or ended
+  under 1.4.0 aren't recorded).
+- **Configuration files.** Only the image tag changed in `docker-compose.yml` and `delivery/manifest.yml` (now
+  `registry-mtnima.gov.mr/ddirepo/mchariee:1.5.0`).
 
 ## 1.4.0 (2026-11-24)
 
