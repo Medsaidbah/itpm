@@ -238,9 +238,16 @@ foreach ($line in $progressAfter.Out) {
 if (-not $progressAfter.Ok) { Check "progress compared" $false; Show-Errors $progressAfter }
 
 # Release 1.3 and later: every old project and history row got the defaults (not specified, no partner, no money)
+# Release 1.5 and later: no block record was made from old data (the new table starts empty)
+$defaultLabels = @{
+    "projects-defaults" = "old projects got the defaults (type not specified, no money)";
+    "taskblocks-empty"  = "no block record made from old data (the new table is empty)"
+}
 $defaults = Invoke-Captured run --rm --no-deps web python scripts/rehearsal_checks.py defaults
 foreach ($line in $defaults.Out) {
-    if ("$line" -match '^projects-defaults (\S+)') { Check "old projects got the defaults (type not specified, no money)" ($Matches[1] -eq "ok") $Matches[1] }
+    if ("$line" -match '^([a-z-]+) (\S+)$' -and $defaultLabels.ContainsKey($Matches[1])) {
+        Check $defaultLabels[$Matches[1]] ($Matches[2] -eq "ok") $Matches[2]
+    }
 }
 if (-not $defaults.Ok) { Check "defaults checked" $false; Show-Errors $defaults }
 

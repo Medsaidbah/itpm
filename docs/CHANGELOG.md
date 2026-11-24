@@ -1,5 +1,25 @@
 # Mchariee – changelog
 
+## 1.5.0 (in preparation, on branch v1.5)
+
+### What changes for the people who use Mchariee
+
+- **Block records.** When a task is blocked, the app now keeps a record of it: the reason, since when and by whom,
+  and when it should end (an optional "Expected end" date, asked for next to the reason). The task's page shows
+  "Blocked since … by …", the expected end ("expected end passed" when it is past), and the earlier blocks of the
+  task. The reason is still added to the task's comments, as before. Tasks that were already blocked before this
+  version have no record.
+
+### What MTNIMA needs to know
+
+- **No new settings.**
+- **One database migration, `projects/0012`.** It only creates a new table for the block records. No existing table
+  is changed, and nothing is converted: the new table starts empty. It applies by itself when the new version starts.
+- **How to update:** back up the database and the `itpm_media` volume first, keep the 1.4.0 image, then start the new
+  image with the same `docker.env` and volumes.
+- **Going back to 1.4.0** works on the same database: 1.4.0 doesn't use the new table. The block records made
+  meanwhile stay in it and come back with 1.5.0 (blocks started or ended under 1.4.0 aren't recorded).
+
 ## 1.4.0 (2026-11-24)
 
 ### What changes for the people who use Mchariee

@@ -118,10 +118,11 @@
     });
 
     // Tell the server the card's new column and the order of that column (and the reason, for Blocked)
-    function sendMove(event, reason) {
+    function sendMove(event, reason, expectedEnd) {
       var data = new URLSearchParams();
       data.append("status", event.to.dataset.status);
       if (reason) data.append("blocked_reason", reason);
+      if (expectedEnd) data.append("blocked_expected_end", expectedEnd);  // release 1.5, optional
       event.to.querySelectorAll(".board-card").forEach(function (card) {
         data.append("order", card.dataset.id);
       });
@@ -159,7 +160,8 @@
       var move = waiting;
       waiting = null;  // sent: closing the dialog must not put the card back
       blockDialog.hide();
-      sendMove(move, document.getElementById("block-reason").value.trim());
+      sendMove(move, document.getElementById("block-reason").value.trim(),
+               document.getElementById("block-expected-end").value);
     });
     // Closed without sending (Cancel, Esc, the cross, a click outside): the card goes back where it was
     dialogElement.addEventListener("hidden.bs.modal", function () {

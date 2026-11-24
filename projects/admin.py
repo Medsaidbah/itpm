@@ -36,7 +36,7 @@ class TaskInline(NoExecutivesMixin, admin.TabularInline):
     model = Task
     form = TaskInlineForm
     extra = 0
-    fields = ["title", "status", "blocked_reason", "assignee", "start_date", "due_date"]
+    fields = ["title", "status", "blocked_reason", "blocked_expected_end", "assignee", "start_date", "due_date"]
     show_change_link = True
 
 
@@ -118,7 +118,8 @@ class ProjectAdmin(NoExecutivesMixin, SimpleHistoryAdmin):
             if isinstance(obj, Task):
                 task_form = forms_by_instance.get(id(obj))
                 reason = getattr(task_form, "blocking_reason", None) or ""
-                change_status(obj, take_new_status(obj), by=request.user, reason=reason)
+                change_status(obj, take_new_status(obj), by=request.user, reason=reason,
+                              expected_end=getattr(task_form, "blocking_expected_end", None))
                 continue
             obj.save()
         for obj in formset.deleted_objects:
@@ -181,7 +182,8 @@ class TaskAdmin(NoExecutivesMixin, SimpleHistoryAdmin):
         # history (what SimpleHistoryAdmin.save_model did). Given to someone outside the team, the task puts that
         # person in the team, remembered as added by this admin (see Task.save). No "unblocked" notification from
         # here (as before).
-        change_status(obj, take_new_status(obj), by=request.user, reason=form.blocking_reason or "")
+        change_status(obj, take_new_status(obj), by=request.user, reason=form.blocking_reason or "",
+                      expected_end=form.blocking_expected_end)
 
     def save_formset(self, request, form, formset, change):
         # Fill in the comment author and the file uploader automatically

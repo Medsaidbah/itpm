@@ -17,6 +17,7 @@ from django.utils.translation import gettext_lazy
 from .models import Comment, Task
 
 REASON_FIELD = "blocked_reason"  # the name of the reason in every form and request
+EXPECTED_END_FIELD = "blocked_expected_end"  # release 1.5: when the block should end (optional)
 
 
 def becomes_blocked(task, new_status):
@@ -53,15 +54,24 @@ class BlockingReasonForm(forms.ModelForm):
         widget=forms.Textarea(attrs={"rows": 2}),
         help_text=gettext_lazy("Needed when the task becomes Blocked. It is added to the task's comments, with your name."),
     )
+    # Release 1.5: when the block should end, optional (it goes into the block's record, projects/status.py)
+    blocked_expected_end = forms.DateField(
+        label=gettext_lazy("Expected end"),
+        required=False,
+        widget=forms.DateInput(attrs={"type": "date"}, format="%Y-%m-%d"),
+        help_text=gettext_lazy("Optional: when the task should be able to go on."),
+    )
     blocking_reason = None  # filled in by clean() when the task becomes Blocked
+    blocking_expected_end = None
 
     def clean(self):
         cleaned_data = super().clean()
-        self.blocking_reason = None
+        self.blocking_reason = self.blocking_expected_end = None
         if becomes_blocked(self.instance, cleaned_data.get("status")):
             reason = clean_reason(cleaned_data.get(REASON_FIELD))
             if reason:
                 self.blocking_reason = reason
+                self.blocking_expected_end = cleaned_data.get("blocked_expected_end")
             else:
                 self.add_error(REASON_FIELD, missing_reason_message())
         return cleaned_data

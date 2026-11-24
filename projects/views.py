@@ -17,7 +17,7 @@ from django.utils.translation import ngettext, pgettext
 from django.views.decorators.http import require_POST
 
 from .activity import get_events
-from .blocking import REASON_FIELD
+from .blocking import EXPECTED_END_FIELD, REASON_FIELD
 from .emails import email_new_assignee
 from .forms import (
     MAX_UPLOAD_MB,
@@ -33,7 +33,7 @@ from .notifications import notify_assigned, tell_project_event
 from .money import format_mru
 from .previews import HEAD_SIZE, PREVIEW_HEADERS, preview_type
 from .schedule import BEHIND_SCHEDULE_MARGIN
-from .status import StatusRefused, change_status, take_new_status
+from .status import StatusRefused, change_status, read_expected_end, take_new_status
 
 # ---------- Who sees what ----------
 # People only see the projects they manage or whose team they are in; admins see all of them
@@ -429,6 +429,9 @@ def task_detail(request, pk):
         "can_edit": task.can_edit(request.user),
         "can_update_status": task.can_update_status(request.user),
         "can_contribute": task.can_contribute(request.user),
+        # Release 1.5: the open block (empty for a task blocked before 1.5, or not blocked) and the earlier ones
+        "open_block": task.blocks.filter(ended_at__isnull=True).select_related("started_by").first(),
+        "earlier_blocks": list(task.blocks.filter(ended_at__isnull=False).select_related("started_by", "ended_by")[:5]),
         "task_status_url": reverse("task_status", args=[task.pk]),  # where the blocking dialog sends its reason
         "comments": comments,
         "attachments": attachments,
@@ -471,7 +474,7 @@ def task_create(request, project_pk):
             # The status is given by change_status (projects/status.py): it saves the task, its links and the reason
             # it is blocked, together or not at all
             change_status(task, take_new_status(task), by=request.user, reason=form.blocking_reason or "",
-                          save_related=form.save_m2m)
+                          expected_end=form.blocking_expected_end, save_related=form.save_m2m)
             messages.success(request, _('Task "%(title)s" created.') % {"title": task.title})
             tell_if_joined_team(request, task)
             tell_new_assignee(request, task, previous_assignee_id=None)
@@ -502,7 +505,8 @@ def task_edit(request, pk):
             # The status is given by change_status (projects/status.py): it saves the task, its links and the reason
             # it is blocked together, then tells the people whose task was waiting for this one when it becomes Done
             change_status(task, take_new_status(task), by=request.user, reason=form.blocking_reason or "",
-                          request=request, notify=True, save_related=form.save_m2m, after_save=tell_people)
+                          expected_end=form.blocking_expected_end, request=request, notify=True,
+                          save_related=form.save_m2m, after_save=tell_people)
             return redirect(task)
     else:
         form = TaskForm(instance=task, project=task.project, user=request.user)
@@ -534,6 +538,7 @@ def task_status(request, pk):
         try:
             # projects/status.py: the reason rule, the save, the reason as a comment, the "unblocked" notification
             change_status(task, new_status, by=request.user, reason=request.POST.get(REASON_FIELD), request=request,
+                          expected_end=read_expected_end(request.POST.get(EXPECTED_END_FIELD)),
                           notify=True, after_save=tell_people)
         except StatusRefused as refused:
             messages.error(request, refused.message)  # nothing is changed
@@ -707,7 +712,7 @@ def task_move(request, pk):
             # projects/status.py: the reason rule, the save (recorded in the history), the reason as a comment, and
             # the "unblocked" notification without a warning on the next page (the board stays on its page)
             change_status(task, new_status, by=request.user, reason=request.POST.get(REASON_FIELD), request=request,
-                          notify=True, warn=False)
+                          expected_end=read_expected_end(request.POST.get(EXPECTED_END_FIELD)), notify=True, warn=False)
         except StatusRefused as refused:
             # Nothing is changed, not even the order of the cards: the board puts the card back
             return JsonResponse({"error": refused.message}, status=400)

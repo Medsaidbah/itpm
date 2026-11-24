@@ -31,6 +31,8 @@
         {# shows it only then; without the script it is always there. #}
         <div id="blocked-reason-field" data-status-before="{{ form.status_before }}">
           {% include "includes/form_field.html" with field=form.blocked_reason %}
+          {# Release 1.5: when the block should end, optional #}
+          <div class="row"><div class="col-md-4">{% include "includes/form_field.html" with field=form.blocked_expected_end %}</div></div>
         </div>
         <div class="row">
           <div class="col-md-6">{% include "includes/form_field.html" with field=form.start_date %}</div>

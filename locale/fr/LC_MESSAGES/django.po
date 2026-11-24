@@ -3099,3 +3099,38 @@ msgstr "Poids"
 #: projects/forms.py
 msgid "How much this task counts in the project's progress."
 msgstr "Ce que cette tâche compte dans l'avancement du projet."
+
+#: projects/blocking.py templates/includes/block_dialog.html
+msgid "Expected end"
+msgstr "Fin prévue"
+
+#: projects/blocking.py templates/includes/block_dialog.html
+msgid "Optional: when the task should be able to go on."
+msgstr "Facultatif : quand la tâche devrait pouvoir reprendre."
+
+#: projects/status.py
+msgid "The expected end isn't a valid date."
+msgstr "La fin prévue n'est pas une date valide."
+
+#: templates/projects/task_detail.html
+#, python-format
+msgid "Blocked since %(date)s by %(person)s"
+msgstr "Bloquée depuis le %(date)s par %(person)s"
+
+#: templates/projects/task_detail.html
+#, python-format
+msgid "Expected end: %(date)s"
+msgstr "Fin prévue : %(date)s"
+
+#: templates/projects/task_detail.html
+msgid "expected end passed"
+msgstr "échéance prévue dépassée"
+
+#: templates/projects/task_detail.html
+msgid "Earlier blocks"
+msgstr "Blocages précédents"
+
+#: templates/projects/task_detail.html
+#, python-format
+msgid "Blocked on %(start)s by %(started_by)s, unblocked on %(end)s by %(ended_by)s"
+msgstr "Bloquée le %(start)s par %(started_by)s, débloquée le %(end)s par %(ended_by)s"

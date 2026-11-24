@@ -80,17 +80,23 @@ def fingerprint_of(specs):
 
 
 def defaults():
-    """Release 1.3: right after the migration, every project and history row is "not specified", without partner or
-    budget. Prints nothing before release 1.3."""
+    """Right after the migrations: what the new columns and tables must hold for the old data. One line per check
+    that applies to this branch: "projects-defaults ok" (release 1.3: every project and history row "not specified",
+    without partner or budget) and "taskblocks-empty ok" (release 1.5: no block record was made from old data)."""
     with connection.cursor() as cursor:
-        if "kind" not in {c.name for c in connection.introspection.get_table_description(cursor, "projects_project")}:
-            return
-        wrong = 0
-        for table in ("projects_project", "projects_historicalproject"):
-            cursor.execute(f"SELECT COUNT(*) FROM {table} WHERE kind <> 'unspecified' OR partner <> '' "
-                           f"OR budget IS NOT NULL")
-            wrong += cursor.fetchone()[0]
-    print("projects-defaults", "ok" if wrong == 0 else f"{wrong}-rows-differ")
+        tables = set(connection.introspection.table_names())
+        project_columns = {c.name for c in connection.introspection.get_table_description(cursor, "projects_project")}
+        if "kind" in project_columns:
+            wrong = 0
+            for table in ("projects_project", "projects_historicalproject"):
+                cursor.execute(f"SELECT COUNT(*) FROM {table} WHERE kind <> 'unspecified' OR partner <> '' "
+                               f"OR budget IS NOT NULL")
+                wrong += cursor.fetchone()[0]
+            print("projects-defaults", "ok" if wrong == 0 else f"{wrong}-rows-differ")
+        if "projects_taskblock" in tables:
+            cursor.execute("SELECT COUNT(*) FROM projects_taskblock")
+            rows = cursor.fetchone()[0]
+            print("taskblocks-empty", "ok" if rows == 0 else f"{rows}-rows")
 
 
 def describe(response):

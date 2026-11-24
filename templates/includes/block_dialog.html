@@ -21,6 +21,11 @@
                   aria-describedby="block-reason-hint block-reason-error"></textarea>
         <div class="invalid-feedback" id="block-reason-error" role="alert"></div>
         <div class="form-hint" id="block-reason-hint">{% translate "The reason is added to the task's comments, with your name." %}</div>
+        {# Release 1.5: when the block should end, optional #}
+        <label class="form-label mt-3" for="block-expected-end">{% translate "Expected end" %}</label>
+        <input type="date" class="form-control" id="block-expected-end" name="blocked_expected_end" dir="ltr"
+               aria-describedby="block-expected-end-hint">
+        <div class="form-hint" id="block-expected-end-hint">{% translate "Optional: when the task should be able to go on." %}</div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn" data-bs-dismiss="modal">{% translate "Cancel" %}</button>
@@ -40,7 +45,11 @@
       error.textContent = text;
       reason.classList.toggle("is-invalid", Boolean(text));
     }
-    dialog.addEventListener("show.bs.modal", function () { reason.value = ""; showError(""); });
+    dialog.addEventListener("show.bs.modal", function () {
+      reason.value = "";
+      document.getElementById("block-expected-end").value = "";
+      showError("");
+    });
     dialog.addEventListener("shown.bs.modal", function () { reason.focus(); });
     form.addEventListener("submit", function (event) {
       if (!reason.value.trim()) {

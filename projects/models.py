@@ -503,6 +503,39 @@ class Task(models.Model):
         return PRIORITY_COLORS.get(self.priority, "secondary")
 
 
+class TaskBlock(models.Model):
+    """A time a task was Blocked (release 1.5): why, since when and by whom, when it should end, and when and by whom
+    it ended (empty while the task is still blocked). Written only by projects/status.py change_status(): opened
+    when a task becomes Blocked, closed when it leaves Blocked. Tasks that were blocked before release 1.5 have no
+    record (nothing was converted)."""
+
+    task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="blocks")
+    reason = models.TextField()
+    started_at = models.DateTimeField(default=timezone.now)
+    started_by = models.ForeignKey(  # empty if that account is ever deleted (the app deactivates people instead)
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+    expected_end = models.DateField(null=True, blank=True)
+    ended_at = models.DateTimeField(null=True, blank=True)
+    ended_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name="+"
+    )
+
+    class Meta:
+        ordering = ["-started_at", "-id"]
+        constraints = [  # a task is blocked once at a time
+            models.UniqueConstraint(fields=["task"], condition=Q(ended_at__isnull=True), name="one_open_block_per_task")
+        ]
+
+    def __str__(self):
+        return f"{self.task} · {self.started_at:%Y-%m-%d}"
+
+    @property
+    def expected_end_passed(self):
+        """Still open, and its expected end is before today."""
+        return self.ended_at is None and self.expected_end is not None and self.expected_end < timezone.localdate()
+
+
 class Comment(models.Model):
     task = models.ForeignKey(Task, on_delete=models.CASCADE, related_name="comments")
     author = models.ForeignKey(

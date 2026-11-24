@@ -113,9 +113,10 @@ class MigrationFingerprintTests(RehearsalTestCase):
         self.assertNotIn("Changed", output.getvalue())
 
     def test_the_defaults_after_the_migration(self):
-        self.assertEqual(self.run_check("defaults").strip(), "projects-defaults ok")
+        # One line per check (release 1.5 adds "taskblocks-empty"): this test is about the projects' line
+        self.assertIn("projects-defaults ok", self.run_check("defaults").splitlines())
         Project.objects.filter(pk=self.project.pk).update(budget=10)
-        self.assertEqual(self.run_check("defaults").strip(), "projects-defaults 1-rows-differ")
+        self.assertIn("projects-defaults 1-rows-differ", self.run_check("defaults").splitlines())
 
 
 class ProgressCheckTests(RehearsalTestCase):
